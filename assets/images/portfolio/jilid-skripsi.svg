@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9cf"/><stop offset="1" stop-color="#ffc98f"/></linearGradient>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b1f38" flood-opacity=".28"/></filter>
+</defs>
+<rect width="800" height="600" fill="url(#bg)"/>
+<circle cx="700" cy="80" r="170" fill="#fff" opacity=".07"/>
+<circle cx="90" cy="540" r="120" fill="#fff" opacity=".06"/>
+<g filter="url(#sh)"><rect x="270" y="110" width="330" height="410" rx="10" fill="#fff" transform="rotate(5 435 315)"/>
+<rect x="200" y="100" width="340" height="420" rx="12" fill="#173B63"/>
+<rect x="240" y="150" width="260" height="14" rx="7" fill="#fff" opacity=".9"/>
+<rect x="240" y="180" width="190" height="14" rx="7" fill="#fff" opacity=".6"/>
+<rect x="240" y="400" width="120" height="14" rx="7" fill="#F28C28"/>
+<circle cx="440" cy="330" r="46" fill="#F28C28"/><rect x="418" y="318" width="44" height="6" rx="3" fill="#fff"/><rect x="418" y="332" width="44" height="6" rx="3" fill="#fff"/>
+<rect x="172" y="135" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="175" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="215" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="255" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="295" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="335" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="375" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="415" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="455" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/><rect x="172" y="495" width="34" height="14" rx="7" fill="#d9e2ec" stroke="#173B63" stroke-width="2"/></g>
+</svg>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- SEO (di Laravel: @section('title'), @section('meta_description'), dst. dari tabel seo_metadata) -->
+  <title>Fotocopy, Print &amp; Percetakan Jakarta Timur | Sinar Copy &amp; Printing</title>
+  <meta name="description" content="Fotocopy, print dokumen, cetak banner, jilid skripsi, laminating, dan percetakan lengkap di Jakarta Timur. Harga jelas, hasil rapi, pesan mudah lewat WhatsApp.">
+  <link rel="canonical" href="https://www.sinarcopy.example/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#173B63">
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Sinar Copy &amp; Printing">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:title" content="Fotocopy, Print &amp; Percetakan Jakarta Timur | Sinar Copy &amp; Printing">
+  <meta property="og:description" content="Semua kebutuhan cetak Anda, satu tempat. Fotocopy, print, banner, jilid, dan laminating dengan harga bersahabat.">
+  <meta property="og:url" content="https://www.sinarcopy.example/">
+  <!-- Catatan: ganti dengan gambar JPG/PNG 1200x630 pada versi produksi (SVG tidak didukung semua platform) -->
+  <meta property="og:image" content="https://www.sinarcopy.example/assets/images/general/hero.svg">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo/logo-mark.svg">
+  <link rel="stylesheet" href="assets/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- JSON-LD: LocalBusiness (placeholder; di Laravel diisi dari data tenant) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Sinar Copy & Printing",
+    "description": "Fotocopy, print dokumen, cetak banner, jilid, laminating, dan percetakan lengkap di Jakarta Timur.",
+    "url": "https://www.sinarcopy.example/",
+    "image": "https://www.sinarcopy.example/assets/images/general/hero.svg",
+    "logo": "https://www.sinarcopy.example/assets/images/logo/logo-mark.svg",
+    "telephone": "+6281234567890",
+    "email": "info@example.com",
+    "priceRange": "Rp",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Jl. Raya Bekasi Km 18 No. 27, Pulogadung",
+      "addressLocality": "Jakarta Timur",
+      "addressRegion": "DKI Jakarta",
+      "postalCode": "13920",
+      "addressCountry": "ID"
+    },
+    "geo": { "@type": "GeoCoordinates", "latitude": -6.1844, "longitude": 106.9097 },
+    "openingHoursSpecification": [
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "opens": "08:00", "closes": "21:00" },
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "09:00", "closes": "17:00" }
+    ],
+    "sameAs": ["https://instagram.com/", "https://facebook.com/"]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage (placeholder; sama dengan FAQ yang tampil di halaman) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Bagaimana cara memesan?", "acceptedAnswer": { "@type": "Answer", "text": "Hubungi kami lewat WhatsApp, sebutkan jenis layanan, ukuran, dan jumlah, lalu kirim file Anda. Kami konfirmasi harga dan estimasi selesai sebelum dikerjakan." } },
+      { "@type": "Question", "name": "Apakah bisa kirim file lewat WhatsApp atau email?", "acceptedAnswer": { "@type": "Answer", "text": "Bisa. Format yang kami terima antara lain PDF, DOCX, XLSX, JPG, PNG, CDR, dan AI. Untuk hasil terbaik, kirim dalam PDF." } },
+      { "@type": "Question", "name": "Metode pembayaran apa saja yang tersedia?", "acceptedAnswer": { "@type": "Answer", "text": "Tunai, transfer bank, dan QRIS. Untuk pesanan besar kami meminta uang muka 50%." } },
+      { "@type": "Question", "name": "Berapa lama print dokumen selesai?", "acceptedAnswer": { "@type": "Answer", "text": "Dokumen hingga 50 lembar biasanya selesai dalam 10–30 menit. Jumlah lebih banyak kami informasikan estimasinya." } },
+      { "@type": "Question", "name": "Berapa ukuran file banner yang disarankan?", "acceptedAnswer": { "@type": "Answer", "text": "Gunakan ukuran asli dengan resolusi minimal 100 dpi. Tim kami akan membantu mengecek file sebelum dicetak." } },
+      { "@type": "Question", "name": "Jilid skripsi memakan waktu berapa lama?", "acceptedAnswer": { "@type": "Answer", "text": "Jilid lakban atau spiral bisa selesai dalam 1 jam. Hard cover membutuhkan 1–2 hari kerja." } }
+    ]
+  }
+  </script>
+</head>
+
+<body data-page="home">
+  <a class="skip-link" href="#main">Lewati ke konten utama</a>
+  <noscript><p style="padding:1rem;text-align:center;background:#FFF1E0">Mockup ini memerlukan JavaScript untuk memuat konten dari data tenant (assets/js/data.js).</p></noscript>
+
+  <!-- 1. Header & navigation (komponen: layout/header) -->
+  <header class="site-header" data-component="header"></header>
+
+  <main id="main">
+
+    <!-- 2. Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container">
+        <div class="row align-items-center g-4 g-lg-5">
+          <div class="col-lg-6">
+            <span class="hero-badge"><i data-lucide="map-pin" class="i" aria-hidden="true"></i><span data-bind="tenant.hero.eyebrow">Percetakan &amp; Fotocopy Terpercaya di Jakarta Timur</span></span>
+            <h1 id="hero-title" data-bind="tenant.hero.headline">Semua Kebutuhan Cetak Anda, Satu Tempat.</h1>
+            <p class="hero-sub" data-bind="tenant.hero.subheadline">Melayani fotocopy, print dokumen, cetak ukuran besar, jilid buku, laminating, dan berbagai kebutuhan percetakan lainnya dengan hasil berkualitas dan harga bersahabat.</p>
+            <div class="hero-actions">
+              <a class="btn btn-brand btn-lg" href="services.html"><i data-lucide="layout-grid" class="i" aria-hidden="true"></i> Lihat Layanan</a>
+              <a class="btn btn-wa btn-lg" data-wa data-wa-msg="Halo, saya ingin memesan layanan cetak. Mohon informasi lebih lanjut."><i data-lucide="message-circle" class="i" aria-hidden="true"></i> Pesan Sekarang</a>
+            </div>
+            <ul class="hero-points" data-render="hero-points"></ul>
+          </div>
+          <div class="col-lg-6">
+            <div class="hero-visual" data-component="hero-visual"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Trust indicators -->
+    <section class="trust" aria-labelledby="trust-title">
+      <h2 id="trust-title" class="visually-hidden">Keunggulan kami</h2>
+      <div class="container"><div class="trust-grid" data-render="trust"></div></div>
+    </section>
+
+    <!-- 4. Kategori layanan -->
+    <section class="section" id="kategori" aria-labelledby="kategori-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Kategori Layanan</span>
+          <h2 id="kategori-title">Cari Layanan Sesuai Kebutuhan</h2>
+          <p>Dari lembar tugas sampai spanduk acara, pilih kategori yang Anda butuhkan.</p>
+        </div>
+        <div class="row g-3 g-lg-4" data-render="categories"></div>
+      </div>
+    </section>
+
+    <!-- 5. Layanan unggulan -->
+    <section class="section section-alt" id="layanan" aria-labelledby="layanan-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Layanan Unggulan</span>
+          <h2 id="layanan-title">Layanan yang Paling Sering Dipesan</h2>
+          <p>Harga jelas dan bisa dipesan langsung lewat WhatsApp.</p>
+        </div>
+        <div class="row g-3 g-lg-4" data-render="services" data-featured data-limit="6"></div>
+        <div class="section-foot"><a class="btn btn-outline-brand btn-lg" href="services.html">Lihat Semua Layanan <i data-lucide="arrow-right" class="i" aria-hidden="true"></i></a></div>
+      </div>
+    </section>
+
+    <!-- 6. Tentang usaha singkat -->
+    <section class="section" id="tentang">
+      <div class="container">
+        <div data-component="about-brief"></div>
+        <div class="stats" data-render="stats"></div>
+      </div>
+    </section>
+
+    <!-- 7. Mengapa memilih kami -->
+    <section class="section section-alt" id="keunggulan" aria-labelledby="why-title">
+      <div class="container">
+        <div class="row g-4 g-lg-5 align-items-center">
+          <div class="col-lg-6 order-lg-2">
+            <div class="why-media"><img data-bind-src="tenant.whyMedia.image" data-bind-alt="tenant.whyMedia.alt" src="assets/images/general/ruang-produksi.svg" alt="Dua mesin cetak digital di ruang produksi" width="800" height="600" loading="lazy"></div>
+          </div>
+          <div class="col-lg-6 order-lg-1">
+            <div class="section-head is-left mb-2">
+              <span class="eyebrow">Mengapa Memilih Kami</span>
+              <h2 id="why-title">Hasil Rapi, Harga Jelas, Pengerjaan Cepat</h2>
+            </div>
+            <div data-render="why"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Portofolio -->
+    <section class="section" id="portofolio" aria-labelledby="portfolio-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Portofolio</span>
+          <h2 id="portfolio-title">Hasil Pekerjaan Kami</h2>
+          <p>Beberapa pesanan yang sudah kami selesaikan. Klik gambar untuk memperbesar.</p>
+        </div>
+        <div class="row g-3 g-lg-4" data-lightbox-group data-render="portfolio" data-limit="6"></div>
+        <div class="section-foot"><a class="btn btn-outline-brand btn-lg" href="portfolio.html">Lihat Semua Portofolio <i data-lucide="arrow-right" class="i" aria-hidden="true"></i></a></div>
+      </div>
+    </section>
+
+    <!-- 9. Cara pemesanan -->
+    <section class="section section-alt" id="cara-pesan" aria-labelledby="steps-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Cara Pemesanan</span>
+          <h2 id="steps-title">Pesan Cetak dalam 4 Langkah Mudah</h2>
+          <p>Tidak perlu antre. Cukup kirim kebutuhan Anda lewat WhatsApp.</p>
+        </div>
+        <ol class="steps pt-2" data-render="steps"></ol>
+      </div>
+    </section>
+
+    <!-- 10. Testimoni -->
+    <section class="section" id="testimoni" aria-labelledby="testi-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Testimoni</span>
+          <h2 id="testi-title">Kata Pelanggan Kami</h2>
+          <p>Pelajar, guru, kantor, dan pelaku UMKM sudah mempercayakan kebutuhan cetak mereka kepada kami.</p>
+        </div>
+        <div class="testi-scroll" data-render="testimonials" tabindex="0" aria-label="Daftar testimoni, geser untuk melihat lainnya"></div>
+      </div>
+    </section>
+
+    <!-- 11. FAQ -->
+    <section class="section section-alt" id="faq" aria-labelledby="faq-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">FAQ</span>
+          <h2 id="faq-title">Pertanyaan yang Sering Diajukan</h2>
+        </div>
+        <div class="row justify-content-center"><div class="col-lg-8">
+          <div class="faq-list" data-render="faq" data-featured></div>
+          <div class="section-foot"><a class="link-arrow" href="faq.html">Lihat semua pertanyaan <i data-lucide="arrow-right" class="i" aria-hidden="true"></i></a></div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- 12. Lokasi & Google Maps -->
+    <section class="section" id="lokasi" aria-labelledby="lokasi-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Lokasi</span>
+          <h2 id="lokasi-title">Kunjungi Toko Kami</h2>
+          <p>Datang langsung untuk konsultasi, cek contoh kertas, atau ambil pesanan.</p>
+        </div>
+        <div data-component="location"></div>
+      </div>
+    </section>
+
+    <!-- 13. CTA WhatsApp -->
+    <section class="section pt-0" aria-label="Pesan lewat WhatsApp">
+      <div class="container"><div data-component="cta-wa"></div></div>
+    </section>
+
+  </main>
+
+  <!-- 14. Footer (komponen: layout/footer) -->
+  <footer class="site-footer" data-component="footer"></footer>
+
+  <script src="assets/vendor/lucide.min.js" defer></script>
+  <script src="assets/js/data.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
