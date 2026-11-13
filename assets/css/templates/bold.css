@@ -1,0 +1,101 @@
+/* ==========================================================================
+   templates/bold.css — Template "Bold"
+   Karakter: tegas dan kontras tinggi, sudut tajam, bingkai tebal dengan
+   bayangan keras, hero gelap, judul rata kiri bergaris aksen, tombol kapital.
+   Susunan beranda bawaan: PLATFORM.templates.bold
+   Bingkai & bayangan keras hanya berlaku bila gaya kartu = "outlined"
+   (bawaan Bold). Tenant yang memilih "elevated"/"flat" tetap dihormati.
+   ========================================================================== */
+
+/* Token: bayangan keras (offset tanpa blur) */
+[data-template="bold"] {
+  --r-card: 6px;
+  --r-media: 8px;
+  --shadow-sm: 3px 3px 0 var(--c-primary);
+  --shadow-md: 5px 5px 0 var(--c-primary);
+  --shadow-lg: 8px 8px 0 var(--c-primary);
+  --section-y: 3.5rem;
+}
+@media (min-width: 768px)  { [data-template="bold"] { --section-y: 4.5rem; } }
+@media (min-width: 1200px) { [data-template="bold"] { --section-y: 5.5rem; } }
+
+/* Tipografi */
+[data-template="bold"] h1,
+[data-template="bold"] h2,
+[data-template="bold"] h3 { font-weight: 800; letter-spacing: -.025em; }
+[data-template="bold"] .hero h1 { text-transform: uppercase; line-height: 1.05; letter-spacing: -.02em; }
+[data-template="bold"] .eyebrow {
+  padding: .25rem .65rem; border-radius: 2px; background: var(--c-accent); color: var(--c-on-accent);
+  letter-spacing: .1em; font-weight: 800;
+}
+
+/* Judul section: rata kiri dengan garis aksen */
+[data-template="bold"] .section-head { text-align: left; margin-left: 0; max-width: 760px; }
+[data-template="bold"] .section-head h2 { padding-left: 1rem; border-left: 8px solid var(--c-accent); }
+[data-template="bold"] .section-head p { padding-left: calc(1rem + 8px); }
+[data-template="bold"] .section-foot { text-align: left; }
+[data-template="bold"] .section--faq .row.justify-content-center { justify-content: flex-start; }   /* daftar FAQ sejajar dengan judul rata kiri */
+
+/* Header */
+[data-template="bold"] .site-header { border-bottom: 3px solid var(--c-primary); }
+[data-template="bold"] .site-header.is-scrolled { box-shadow: none; border-color: var(--c-primary); }
+[data-template="bold"] .nav-link-item.is-active,
+[data-template="bold"] .nav-toggle.is-active { box-shadow: inset 0 -4px 0 var(--c-accent); border-radius: 0; }
+[data-template="bold"] .dropdown-panel { border: 2px solid var(--c-primary); border-radius: var(--r-card); }
+
+/* Tombol: kapital, bingkai tebal */
+[data-template="bold"] .btn { text-transform: uppercase; letter-spacing: .05em; font-weight: 800; font-size: .8125rem; }
+[data-template="bold"] .btn-brand { border-color: var(--c-primary-dark); }
+[data-template="bold"] .btn-accent,
+[data-template="bold"] .hero--dark .btn-brand { border-color: var(--c-on-accent); }
+[data-template="bold"] .btn-wa { border-color: var(--c-on-wa); }
+[data-template="bold"] .btn-outline-brand { border-color: var(--c-primary); border-width: 2px; }
+[data-template="bold"] .tag { border-radius: 2px; }
+[data-template="bold"] .hero-badge { border-radius: 2px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; font-size: .75rem; }
+
+/* Hero */
+[data-template="bold"] .hero-visual img { border-radius: var(--r-media); box-shadow: 10px 10px 0 var(--c-accent); }
+[data-template="bold"] .hero--dark .hero-visual img { outline: 0; border: 4px solid var(--c-on-dark); }
+[data-template="bold"] .hero-chip { border-radius: 4px; border: 2px solid var(--c-primary); box-shadow: 4px 4px 0 var(--c-primary); }
+
+/* Trust bar: pita aksen */
+[data-template="bold"] .trust--bar { background: var(--c-accent); color: var(--c-on-accent); border-block: 3px solid var(--c-primary-dark); }
+[data-template="bold"] .trust--bar .trust-item h3 { color: var(--c-on-accent); }
+[data-template="bold"] .trust--bar .trust-item p { color: color-mix(in srgb, var(--c-on-accent) 80%, transparent); }
+[data-template="bold"] .trust--bar .trust-item .ico { background: var(--c-on-accent); color: var(--c-accent); border-radius: 4px; }
+
+/* Kartu "outlined" (bawaan Bold): bingkai tebal + bayangan keras */
+html[data-template="bold"][data-card="outlined"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card) {
+  border: 2px solid var(--c-primary); box-shadow: 4px 4px 0 var(--c-primary);
+}
+html[data-template="bold"][data-card="outlined"] .card-x:hover {
+  border-color: var(--c-primary); box-shadow: 7px 7px 0 var(--c-accent); transform: translate(-3px, -3px);
+}
+html[data-template="bold"][data-card="outlined"] .pf-card { box-shadow: 4px 4px 0 var(--c-primary); border: 2px solid var(--c-primary); }
+
+/* Panel selang-seling: latar hangat bergaris tebal */
+[data-template="bold"] .section-alt { background: var(--c-accent-tint); border-block: 3px solid var(--c-primary); }
+
+/* Ikon & nomor */
+[data-template="bold"] .cat-card .ico,
+[data-template="bold"] .step .ico,
+[data-template="bold"] .info-row .ico,
+[data-template="bold"] .why-item .ico,
+[data-template="bold"] .why-card .ico { border-radius: 4px; }
+[data-template="bold"] .step::before { border-radius: 4px; width: 38px; height: 38px; top: -19px; font-size: 1.05rem; background: var(--c-primary); color: var(--c-on-dark); box-shadow: none; }
+[data-template="bold"] .steps--timeline .step::before { top: 0; }
+[data-template="bold"] .about-since { border-radius: 4px; border: 2px solid var(--c-primary); box-shadow: 4px 4px 0 var(--c-primary); }
+[data-template="bold"] .about-media img,
+[data-template="bold"] .why-media img { border-radius: var(--r-media); box-shadow: 8px 8px 0 var(--c-primary); }
+
+/* Slider */
+[data-template="bold"] .slider-btn { border: 2px solid var(--c-primary); border-radius: 4px; box-shadow: 3px 3px 0 var(--c-primary); }
+
+/* CTA & footer */
+[data-template="bold"] .cta-wa { border-radius: 8px; }
+[data-template="bold"] .cta-wa--gradient { background: var(--c-primary); border: 3px solid var(--c-primary-dark); box-shadow: 10px 10px 0 var(--c-accent); }
+[data-template="bold"] .cta-wa--gradient::before,
+[data-template="bold"] .cta-wa--gradient::after { display: none; }
+[data-template="bold"] .site-footer { border-top: 6px solid var(--c-accent); }
+[data-template="bold"] .social a { border-radius: 4px; }
+[data-template="bold"] .wa-float { border-radius: 4px; }

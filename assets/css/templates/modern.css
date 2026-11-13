@@ -1,0 +1,70 @@
+/* ==========================================================================
+   templates/modern.css — Template "Modern"
+   Karakter: lapang, ringan, sudut membulat besar, bayangan lembut, tombol pill,
+   hero terpusat, panel berlatar membulat. Warna & font tetap milik tenant.
+   Susunan beranda bawaan: PLATFORM.templates.modern
+   ========================================================================== */
+
+/* Token */
+[data-template="modern"] {
+  --r-card: 20px;
+  --r-media: 28px;
+  --shadow-sm: 0 2px 10px color-mix(in srgb, var(--c-primary) 6%, transparent);
+  --shadow-md: 0 10px 30px color-mix(in srgb, var(--c-primary) 8%, transparent);
+  --shadow-lg: 0 24px 60px color-mix(in srgb, var(--c-primary) 14%, transparent);
+  --section-y: 4rem;
+}
+@media (min-width: 768px)  { [data-template="modern"] { --section-y: 5.5rem; } }
+@media (min-width: 1200px) { [data-template="modern"] { --section-y: 7rem; } }
+
+/* Tipografi: lebih ringan dan rapat */
+[data-template="modern"] h1,
+[data-template="modern"] h2,
+[data-template="modern"] h3 { letter-spacing: -.02em; }
+[data-template="modern"] h1 { font-weight: 700; }
+[data-template="modern"] .eyebrow {
+  padding: .3rem .85rem; border-radius: var(--r-pill); background: var(--c-accent-tint); color: var(--c-accent-dark);
+  letter-spacing: .04em;
+}
+
+/* Header: menu aktif berupa pil */
+[data-template="modern"] .nav-link-item,
+[data-template="modern"] .nav-toggle { border-radius: var(--r-pill); }
+[data-template="modern"] .nav-link-item.is-active,
+[data-template="modern"] .nav-toggle.is-active { box-shadow: none; background: var(--c-primary-light); border-radius: var(--r-pill); }
+
+/* Hero: latar lembut berpendar, tanpa pola titik */
+[data-template="modern"] .hero {
+  background:
+    radial-gradient(55% 60% at 12% 0%, color-mix(in srgb, var(--c-accent) 16%, transparent) 0, transparent 70%),
+    radial-gradient(50% 55% at 92% 8%, color-mix(in srgb, var(--c-primary) 11%, transparent) 0, transparent 70%),
+    var(--c-bg);
+}
+[data-template="modern"] .hero::before { display: none; }
+[data-template="modern"] .hero-visual img { border-radius: 28px; }
+[data-template="modern"] .hero-chip { border-radius: 16px; }
+[data-template="modern"] .hero-badge { border-color: transparent; box-shadow: var(--shadow-md); }
+
+/* Kartu: tanpa bingkai, bayangan lembut yang naik saat disorot (kecuali gaya kartu dipilih tenant) */
+[data-template="modern"] .card-x,
+[data-template="modern"] .stat,
+[data-template="modern"] .steps--cards .step,
+[data-template="modern"] .faq-item,
+[data-template="modern"] .loc-card { border-color: transparent; box-shadow: var(--shadow-md); }
+[data-template="modern"] .card-x:hover { box-shadow: var(--shadow-lg); border-color: transparent; }
+[data-template="modern"] .slider .card-x:hover { box-shadow: var(--shadow-sm); }   /* bayangan besar akan terpotong tepi slider */
+[data-template="modern"] .tag { padding: .25rem .75rem; }
+[data-template="modern"] .about-media img,
+[data-template="modern"] .why-media img { border-radius: 28px; }
+[data-template="modern"] .about-since { border-radius: 18px; }
+
+/* Panel selang-seling: bidang membulat yang "melayang", bukan pita penuh */
+[data-template="modern"] .section-alt { margin-inline: .75rem; border-radius: 32px; background: var(--c-surface); }
+@media (min-width: 992px) { [data-template="modern"] .section-alt { margin-inline: 1.5rem; border-radius: 48px; } }
+
+/* Slider: tombol lebih menonjol */
+[data-template="modern"] .slider-btn { border-color: transparent; box-shadow: var(--shadow-md); }
+
+/* CTA & footer */
+[data-template="modern"] .cta-wa { border-radius: 32px; }
+[data-template="modern"] .site-footer { margin-top: 1.5rem; border-radius: 32px 32px 0 0; }

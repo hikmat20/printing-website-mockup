@@ -1,0 +1,154 @@
+/* ==========================================================================
+   variants.css — CSS STRUKTURAL untuk varian komponen & opsi global.
+   Berlaku untuk SEMUA template; tampilan visual (warna, bentuk, tipografi)
+   ada di assets/css/templates/<id>.css.
+   Pemilihan varian lewat atribut <html> / class modifier yang ditulis
+   oleh main.js dan sections.js dari registri platform + data tenant:
+     <html data-template data-header data-card data-buttons>
+     .hero--{split|centered|dark}  .trust--{bar|cards}  .cat-list--{grid|compact}
+     .slider  .why-card  .steps--{cards|timeline}  .faq-list--columns
+     .loc-card--wide  .cta-wa--{gradient|solid}
+   Urutan: 1. Opsi global  2. Header  3. Hero  4. Trust  5. Kategori
+           6. Slider  7. Why  8. Steps  9. FAQ  10. Lokasi  11. CTA
+   ========================================================================== */
+
+/* 1. Opsi global ---------------------------------------------------------- */
+
+/* Bentuk tombol (tenant: site.buttonShape) */
+html[data-buttons="rounded"] { --r-btn: 10px; --r-field: 10px; }
+html[data-buttons="pill"]    { --r-btn: 999px; --r-field: 14px; }
+html[data-buttons="square"]  { --r-btn: 3px;  --r-field: 3px; }
+
+/* Gaya kartu (tenant: site.cardStyle). "elevated" = bawaan style.css.
+   Berlaku untuk semua permukaan kartu agar konsisten. */
+html[data-card="outlined"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table),
+html[data-card="flat"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table) { box-shadow: none; }
+html[data-card="outlined"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table) {
+  border: 1.5px solid color-mix(in srgb, var(--c-primary) 26%, var(--c-border));
+}
+html[data-card="outlined"] .card-x:hover { border-color: var(--c-primary); box-shadow: none; }
+html[data-card="flat"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card) {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--c-primary) 6%, var(--c-card));
+}
+html[data-card="flat"] .card-x:hover { box-shadow: none; border-color: transparent; }
+
+/* 2. Header: varian "topbar" --------------------------------------------- */
+.topbar { display: none; height: var(--topbar-h); background: var(--c-primary-dark); color: var(--c-on-dark-soft); font-size: .8125rem; }
+.topbar-inner { height: var(--topbar-h); display: flex; align-items: center; gap: 1.25rem; }
+.topbar a { color: inherit; }
+.topbar a:hover { color: var(--c-on-dark); }
+.topbar .i { width: 1em; height: 1em; margin-right: .3rem; color: var(--c-accent); vertical-align: -.15em; }
+.topbar-gap { flex: 1; }
+.topbar-social { display: flex; gap: .75rem; }
+.topbar-social .i { margin: 0; color: inherit; }
+@media (min-width: 992px) {
+  html[data-header="topbar"] .topbar { display: block; }
+  /* bar info ikut tergulir keluar; hanya baris menu yang menempel di atas */
+  html[data-header="topbar"] .site-header { top: calc(var(--topbar-h) * -1); }
+}
+
+/* 3. Hero ---------------------------------------------------------------- */
+.hero--centered { padding: 3rem 0 4rem; text-align: center; }
+.hero--centered .hero-copy { max-width: 820px; margin: 0 auto; }
+.hero--centered h1 { font-size: clamp(2.25rem, 1.4rem + 3.6vw, 4rem); }
+.hero--centered .hero-sub { margin-inline: auto; max-width: 640px; }
+.hero--centered .hero-actions { justify-content: center; }
+.hero--centered .hero-points { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.5rem; }
+.hero--centered .hero-visual--wide { max-width: 760px; margin: 2.5rem auto 0; }
+@media (min-width: 992px) { .hero--centered { padding: 5rem 0 6rem; } }
+
+.hero--dark {
+  background:
+    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--c-accent) 22%, transparent) 0, transparent 40%),
+    linear-gradient(135deg, var(--c-primary-dark) 0%, var(--c-primary) 100%);
+  color: var(--c-on-dark);
+}
+.hero--dark::before { opacity: .5; background-image: radial-gradient(rgba(255, 255, 255, .16) 1.2px, transparent 1.2px); }
+.hero--dark h1 { color: var(--c-on-dark); }
+.hero--dark h1 em { color: var(--c-accent); }
+.hero--dark .hero-sub { color: var(--c-on-dark-soft); }
+.hero--dark .hero-badge { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); color: var(--c-on-dark); box-shadow: none; }
+.hero--dark .hero-badge .i { color: var(--c-accent); }
+.hero--dark .hero-points { color: var(--c-on-dark); }
+.hero--dark .btn-brand { background: var(--c-accent); color: var(--c-on-accent); }
+.hero--dark .btn-brand:hover { background: var(--c-accent-dark); color: var(--c-on-dark); }
+.hero--dark .hero-visual img { outline: 4px solid var(--c-accent); outline-offset: -4px; }
+.hero--dark .hero-chip { color: var(--c-text); }                /* chip putih di atas hero gelap: jangan mewarisi teks putih */
+
+/* 4. Trust bar: varian "cards" -------------------------------------------- */
+.trust--cards { position: relative; z-index: 2; margin-top: -2.5rem; padding: 0 0 1.5rem; background: none; color: inherit; }
+.trust--cards .trust-item { background: var(--c-card); border-radius: var(--r-card); padding: 1.15rem 1.2rem; box-shadow: var(--shadow-lg); }
+.trust--cards .trust-item h3 { color: var(--c-primary); }
+.trust--cards .trust-item p { color: var(--c-muted); }
+.trust--cards .trust-item .ico { background: var(--c-primary-light); color: var(--c-primary); }
+
+/* 5. Kategori: varian "compact" (ikon di kiri, tanpa deskripsi) ----------- */
+.cat-list--compact .cat-card { display: grid; grid-template-columns: auto 1fr; column-gap: 1rem; align-items: center; padding: 1rem 1.15rem; }
+.cat-list--compact .cat-card .ico { grid-row: span 2; width: 48px; height: 48px; margin: 0; }
+.cat-list--compact .cat-card h3 { margin: 0 0 .1rem; align-self: end; }
+.cat-list--compact .cat-card p { display: none; }
+.cat-list--compact .cat-card .link-arrow { margin-top: 0; align-self: start; }
+
+/* 6. Slider (layanan, portofolio, testimoni) ------------------------------- */
+.slider { position: relative; }
+.slider-track {
+  display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory;
+  /* ruang di sekeliling agar bayangan & efek hover kartu tidak terpotong area geser;
+     margin negatif mengembalikan posisi kartu sejajar dengan konten lain */
+  padding: 1rem 1rem 2.75rem; margin: -1rem -1rem -1.75rem; scroll-padding-inline: 1rem;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.slider-track::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 86%; min-width: 0; display: flex; scroll-snap-align: start; }
+.slide > * { width: 100%; }
+/* Bayangan kartu di dalam slider dibatasi supaya tidak terpotong tepi area geser */
+.slider .card-x, .slider .card-x:hover { box-shadow: var(--shadow-sm); }
+@media (min-width: 576px) { .slide { flex-basis: calc((100% - 1rem) / 2); } }
+@media (min-width: 992px) { .slide { flex-basis: calc((100% - 2rem) / 3); } }
+.slider-nav { display: flex; justify-content: center; gap: .75rem; margin-top: 1rem; position: relative; }
+.slider-btn {
+  width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0;
+  border: 1.5px solid var(--c-border); border-radius: 50%; background: var(--c-card); color: var(--c-primary); cursor: pointer;
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.slider-btn:hover:not(:disabled) { background: var(--c-primary); border-color: var(--c-primary); color: var(--c-on-dark); }
+.slider-btn:disabled { opacity: .4; cursor: not-allowed; }
+.slider.is-static .slider-nav { display: none; }                   /* semua slide sudah muat */
+
+/* 7. Mengapa kami: varian "grid" ------------------------------------------ */
+.why-card { padding: 1.4rem; align-items: flex-start; }
+.why-card .ico { width: 52px; height: 52px; border-radius: 14px; background: var(--c-accent-tint); color: var(--c-accent-dark); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+.why-card h3 { font-size: 1.0625rem; margin-bottom: .35rem; }
+.why-card p { margin: 0; color: var(--c-muted); font-size: .9375rem; }
+
+/* 8. Cara pemesanan: varian "timeline" ------------------------------------ */
+.steps--timeline { position: relative; }
+.steps--timeline .step { background: none; border: 0; box-shadow: none; padding: 3.4rem .5rem 0; text-align: center; }
+.steps--timeline .step::before { top: 0; left: 50%; transform: translateX(-50%); width: 42px; height: 42px; font-size: 1rem; z-index: 1; }
+.steps--timeline .step .ico { margin: 0 auto .85rem; }
+@media (min-width: 992px) {
+  .steps--timeline::before {                                       /* garis putus-putus yang menyambung nomor langkah */
+    content: ""; position: absolute; top: 21px; left: 12.5%; right: 12.5%; height: 2px;
+    background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--c-primary) 35%, transparent) 0 8px, transparent 8px 16px);
+  }
+}
+
+/* 9. FAQ: varian "columns" ------------------------------------------------- */
+@media (min-width: 992px) { .faq-list--columns { grid-template-columns: 1fr 1fr; gap: .75rem 1.5rem; align-items: start; } }
+
+/* 10. Lokasi: varian "stacked" -------------------------------------------- */
+@media (min-width: 768px) {
+  .loc-card--wide { display: grid; grid-template-columns: 1fr 1fr; column-gap: 2.5rem; }
+  .loc-card--wide .loc-actions { grid-column: 1 / -1; }
+}
+
+/* 11. CTA WhatsApp: varian "solid" ------------------------------------------ */
+.cta-wa--solid { background: var(--c-accent); color: var(--c-on-accent); text-align: left; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem 2.5rem; }
+.cta-wa--solid::before, .cta-wa--solid::after { display: none; }
+.cta-wa--solid .cta-copy { flex: 1 1 360px; }
+.cta-wa--solid h2 { color: var(--c-on-accent); }
+.cta-wa--solid p { margin: 0; max-width: 560px; color: color-mix(in srgb, var(--c-on-accent) 82%, transparent); }
+.cta-wa--solid .cta-actions { justify-content: flex-start; }
+.cta-wa--solid .btn-light-ghost { background: transparent; color: var(--c-on-accent); border-color: color-mix(in srgb, var(--c-on-accent) 45%, transparent); }
+.cta-wa--solid .btn-light-ghost:hover { background: var(--c-on-accent); border-color: var(--c-on-accent); color: var(--c-on-dark); }

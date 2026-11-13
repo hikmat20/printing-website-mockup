@@ -1,11 +1,12 @@
 /*
  * main.js — komponen & interaksi global (Vanilla JS, tanpa framework)
  * ------------------------------------------------------------------
- * Alur:
- *   1. applyTheme()    -> warna brand dari data.js ke CSS variable
- *   2. renderAll()     -> komponen global ([data-component]) & daftar ([data-render])
- *   3. bind()          -> teks sederhana dari data ([data-bind="tenant.name"])
- *   4. init*()         -> interaksi (menu, dropdown, accordion, lightbox, dll)
+ * Alur (boot):
+ *   1. resolveSite()   -> template + opsi tenant, divalidasi terhadap registri platform
+ *   2. applyTheme()    -> warna & font ke CSS variable, template/varian ke atribut <html>
+ *   3. modul           -> PrintSite.use(fn): sections.js (isi <main> beranda), seo.js, dll
+ *   4. renderAll()     -> komponen global ([data-component]) & daftar ([data-render])
+ *   5. init*()         -> interaksi (menu, dropdown, accordion, lightbox, slider)
  *
  * Setiap fungsi di bagian "KOMPONEN" setara satu Blade Component di Laravel
  * (mis. serviceCard -> <x-card.service :service="$service" />).
@@ -13,9 +14,91 @@
 (function () {
   'use strict';
 
-  var D = window.SITE_DATA;
-  if (!D) { console.error('[main.js] data.js belum dimuat.'); return; }
+  var P = window.PLATFORM;
+  var TN = window.TENANTS && window.TENANTS[document.body.getAttribute('data-tenant')];
+  if (!P || !TN) { console.error('[main.js] platform.js / data tenant belum dimuat (cek data-tenant pada <body>).'); return; }
+  /* D = data platform + data tenant (di Laravel: dua sumber terpisah, digabung saat render) */
+  var D = Object.assign({}, TN, { routes: P.routes, nav: P.nav });
   var T = D.tenant;
+
+  /* ------------------------------------------------- konfigurasi tampilan
+     Template + opsi tenant, divalidasi terhadap registri platform (platform.js).
+     Nilai tidak valid diabaikan (peringatan di console) dan kembali ke default template.
+     Parameter URL (?template=modern&font=inter&primary=%23c0392b ...) hanya untuk
+     pratinjau di mockup; di Laravel tidak ada. */
+  var QS = new URLSearchParams(window.location.search);
+  var HEX = /^#?[0-9a-f]{6}$/i;
+  function firstValid(list) {                 /* kandidat pertama yang ada di daftar */
+    for (var i = 1; i < arguments.length; i++) if (arguments[i] != null && list.indexOf(arguments[i]) > -1) return arguments[i];
+    return null;
+  }
+  var hasOwn = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
+  function checkQuery(key, label, list) {     /* parameter URL pratinjau yang tidak valid: beri peringatan */
+    var v = QS.get(key);
+    if (v != null && list.indexOf(v) < 0) console.warn('[main.js] ?' + key + '=' + JSON.stringify(v) + ' bukan ' + label + ' yang valid; diabaikan.');
+  }
+  function checkTenant(label, list, v) {
+    if (v != null && list.indexOf(v) < 0) console.warn('[main.js] ' + label + ' "' + v + '" tidak ada di registri platform; dipakai default template.');
+  }
+
+  function resolveSite() {
+    var ts = TN.site || {}, th = TN.theme || {};
+    var tplId = firstValid(Object.keys(P.templates), QS.get('template'), ts.template, 'classic');
+    var tpl = P.templates[tplId];
+    var fontIds = Object.keys(P.fonts);
+    checkQuery('template', 'template', Object.keys(P.templates)); checkQuery('header', 'header', P.headers); checkQuery('cards', 'gaya kartu', P.cardStyles);
+    checkQuery('buttons', 'bentuk tombol', P.buttonShapes); checkQuery('font', 'font', fontIds); checkQuery('hfont', 'font', fontIds);
+    ['primary', 'accent'].forEach(function (k) { var v = QS.get(k); if (v != null && !HEX.test(v)) console.warn('[main.js] ?' + k + '=' + JSON.stringify(v) + ' bukan warna heksadesimal 6 digit; diabaikan.'); });
+    checkTenant('template', Object.keys(P.templates), ts.template);
+    checkTenant('header', P.headers, ts.header); checkTenant('cardStyle', P.cardStyles, ts.cardStyle); checkTenant('buttonShape', P.buttonShapes, ts.buttonShape);
+    checkTenant('fontBody', fontIds, th.fontBody); checkTenant('fontHeading', fontIds, th.fontHeading);
+
+    var S = {
+      template: tplId, templateName: tpl.name, templateDescription: tpl.description,
+      header:      firstValid(P.headers, QS.get('header'), ts.header, tpl.header),
+      cardStyle:   firstValid(P.cardStyles, QS.get('cards'), ts.cardStyle, tpl.cardStyle),
+      buttonShape: firstValid(P.buttonShapes, QS.get('buttons'), ts.buttonShape, tpl.buttonShape),
+      fontBody:    firstValid(fontIds, QS.get('font'), th.fontBody, tpl.fonts.body),
+      fontHeading: firstValid(fontIds, QS.get('hfont'), th.fontHeading, tpl.fonts.heading)
+    };
+
+    /* Susunan beranda: bawaan template -> urutan tenant -> varian/limit/aktif per section */
+    var base = tpl.home.map(function (x) { return { id: x.id, variant: x.variant, limit: x.limit }; });
+    if (ts.order != null && !Array.isArray(ts.order)) console.warn('[main.js] site.order harus berupa array id section; diabaikan.');
+    if (Array.isArray(ts.order) && ts.order.length) {
+      var movable = base.filter(function (x) { return !P.sections[x.id].locked; }), byId = Object.create(null), ordered = [];
+      movable.forEach(function (x) { byId[x.id] = x; });
+      ts.order.forEach(function (id) {
+        if (byId[id]) { ordered.push(byId[id]); delete byId[id]; }
+        else console.warn('[main.js] site.order: "' + id + '" tidak dikenal / terkunci / sudah disebut.');
+      });
+      movable.forEach(function (x) { if (byId[x.id]) ordered.push(x); });   /* yang tidak disebut tenant menyusul sesuai urutan template */
+      base = base.map(function (x) { return P.sections[x.id].locked ? x : ordered.shift(); });   /* hero & CTA tetap di posisinya */
+    }
+    var over = ts.sections && typeof ts.sections === 'object' && !Array.isArray(ts.sections) ? ts.sections : {};
+    Object.keys(over).forEach(function (id) { if (!hasOwn(P.sections, id)) console.warn('[main.js] site.sections: section "' + id + '" tidak dikenal.'); });
+    S.home = base.filter(function (x) {
+      var o = hasOwn(over, x.id) && over[x.id] && typeof over[x.id] === 'object' ? over[x.id] : {}, reg = P.sections[x.id];
+      if (o.variant != null) {
+        if (reg.variants.indexOf(o.variant) > -1) x.variant = o.variant;
+        else console.warn('[main.js] varian "' + o.variant + '" untuk section "' + x.id + '" tidak ada; dipakai "' + x.variant + '".');
+      }
+      if (o.limit != null) {
+        var n = Number(o.limit);
+        if (Number.isInteger(n) && n > 0) x.limit = n;
+        else console.warn('[main.js] limit "' + o.limit + '" untuk section "' + x.id + '" harus bilangan bulat positif; dipakai bawaan template.');
+      }
+      if (o.enabled != null && typeof o.enabled !== 'boolean') console.warn('[main.js] enabled untuk section "' + x.id + '" harus true/false (bukan "' + o.enabled + '"); diabaikan.');
+      if (o.enabled === false) {
+        if (reg.locked) console.warn('[main.js] section "' + x.id + '" terkunci oleh platform dan tidak bisa dimatikan.');
+        else return false;
+      }
+      return true;
+    });
+    return S;
+  }
+  var S = resolveSite();
+  D.site = S;
 
   /* ---------------------------------------------------------------- util */
   var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -65,10 +148,33 @@
     var map = {
       primary: '--c-primary', primaryDark: '--c-primary-dark', primaryLight: '--c-primary-light',
       accent: '--c-accent', accentDark: '--c-accent-dark', whatsapp: '--c-wa', whatsappDark: '--c-wa-dark',
-      surface: '--c-surface', text: '--c-text', muted: '--c-muted'
+      surface: '--c-surface', text: '--c-text', muted: '--c-muted',
+      primaryTint: '--c-primary-tint', accentTint: '--c-accent-tint', onDarkSoft: '--c-on-dark-soft', onDarkMuted: '--c-on-dark-muted', onDarkFaint: '--c-on-dark-faint', overlay: '--c-overlay'
     };
+    var th = Object.assign({}, D.theme);
+    /* Warna tenant harus #rrggbb. Nilai lain dibuang (peringatan) agar tidak menghasilkan UI tak terlihat. */
+    Object.keys(map).forEach(function (k) {
+      if (th[k] != null && !/^#[0-9a-f]{6}$/i.test(th[k])) { console.warn('[main.js] theme.' + k + ' "' + th[k] + '" bukan warna #rrggbb; dipakai default platform.'); delete th[k]; }
+    });
+    /* Hijau WhatsApp adalah warna merek pihak ketiga dan bagian CTA terkunci: tenant tidak boleh menggantinya */
+    delete th.whatsapp; delete th.whatsappDark;
+    /* Pratinjau: warna dari URL. Turunannya (gelap/terang) dibiarkan dihitung otomatis dari warna baru. */
+    var qp = QS.get('primary'), qa = QS.get('accent');
+    if (qp && HEX.test(qp)) { th.primary = '#' + qp.replace('#', ''); ['primaryDark', 'primaryLight', 'primaryTint', 'onDarkSoft', 'onDarkMuted', 'onDarkFaint', 'overlay'].forEach(function (k) { delete th[k]; }); }
+    if (qa && HEX.test(qa)) { th.accent = '#' + qa.replace('#', ''); ['accentDark', 'accentTint'].forEach(function (k) { delete th[k]; }); }
+
     var root = document.documentElement;
-    Object.keys(map).forEach(function (k) { if (D.theme[k]) root.style.setProperty(map[k], D.theme[k]); });
+    Object.keys(map).forEach(function (k) { if (th[k]) root.style.setProperty(map[k], th[k]); });
+
+    var stack = function (id) { return '"' + P.fonts[id].name + '", ' + P.fontFallback; };
+    root.style.setProperty('--font', stack(S.fontBody));
+    root.style.setProperty('--font-heading', stack(S.fontHeading));
+
+    root.setAttribute('data-template', S.template);
+    root.setAttribute('data-header', S.header);
+    root.setAttribute('data-card', S.cardStyle);
+    root.setAttribute('data-buttons', S.buttonShape);
+    root.__theme = th;
   }
 
   /* ============================================================
@@ -174,9 +280,20 @@
     return '<li><a class="nav-link-item' + (is ? ' is-active' : '') + '"' + (is ? ' aria-current="page"' : '') + ' href="' + url(item.route) + '">' + esc(item.label) + '</a></li>';
   }
 
+  /* Baris info di atas header (varian "topbar"); ikut hilang saat halaman digulir */
+  function topbar() {
+    var social = T.social.map(function (x) {
+      return '<a href="' + esc(x.href) + '" aria-label="' + esc(x.label) + '" target="_blank" rel="noopener noreferrer">' + ico(x.icon) + '</a>';
+    }).join('');
+    return '<div class="topbar"><div class="container topbar-inner">' +
+      '<span>' + ico('clock') + ' Buka ' + esc(T.hoursSummary) + '</span><span>' + ico('map-pin') + ' ' + esc(T.city) + '</span>' +
+      '<span class="topbar-gap"></span><a href="tel:+' + esc(T.phone) + '">' + ico('phone') + ' ' + esc(T.phoneDisplay) + '</a>' +
+      '<span class="topbar-social">' + social + '</span></div></div>';
+  }
+
   function header() {
     var page = activePage();
-    return '<div class="container"><div class="header-inner">' +
+    return (S.header === 'topbar' ? topbar() : '') + '<div class="container"><div class="header-inner">' +
       '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda">' +
       '<img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
       '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>' +
@@ -240,43 +357,10 @@
     return '<img src="' + esc(h.image) + '" alt="' + esc(h.imageAlt) + '" width="800" height="640" fetchpriority="high">' + chips;
   }
 
-  /* --- section/about-brief ----------------------------------------- */
-  function aboutBrief() {
-    var a = T.about;
-    return '<div class="row g-4 g-lg-5 align-items-center">' +
-      '<div class="col-lg-6"><div class="about-media"><img src="' + esc(a.image) + '" alt="' + esc(a.imageAlt) + '" width="800" height="600" loading="lazy">' +
-      '<div class="about-since"><strong>' + T.since + '</strong>Sejak</div></div></div>' +
-      '<div class="col-lg-6"><span class="eyebrow">Tentang Kami</span><h2>' + esc(a.title) + '</h2>' +
-      a.text.map(function (p) { return '<p class="text-muted-x">' + esc(p) + '</p>'; }).join('') +
-      '<ul class="check-list">' + a.highlights.map(function (h) { return '<li>' + ico('circle-check') + '<span>' + esc(h) + '</span></li>'; }).join('') + '</ul>' +
-      '<a class="btn btn-outline-brand" href="' + url('about') + '">Selengkapnya ' + ico('arrow-right') + '</a></div></div>';
-  }
-
-  /* --- section/location -------------------------------------------- */
-  function location() {
-    var hours = '<table class="hours-table"><tbody>' + T.hours.map(function (h) { return '<tr><td>' + esc(h.day) + '</td><td>' + esc(h.time) + '</td></tr>'; }).join('') + '</tbody></table>';
-    return '<div class="row g-4 align-items-stretch"><div class="col-lg-5"><div class="loc-card">' +
-      '<div class="info-row"><span class="ico">' + ico('map-pin') + '</span><div><small>Alamat</small><address class="mb-0">' + esc(T.address) + '</address></div></div>' +
-      '<div class="info-row"><span class="ico">' + ico('clock') + '</span><div class="flex-fill"><small>Jam operasional</small>' + hours + '</div></div>' +
-      '<div class="info-row"><span class="ico">' + ico('phone') + '</span><div><small>Telepon</small><a href="tel:+' + esc(T.phone) + '"><strong>' + esc(T.phoneDisplay) + '</strong></a></div></div>' +
-      '<div class="info-row"><span class="ico">' + ico('mail') + '</span><div><small>Email</small><a href="mailto:' + esc(T.email) + '"><strong>' + esc(T.email) + '</strong></a></div></div>' +
-      '<div class="d-flex flex-wrap gap-2 mt-3"><a class="btn btn-brand flex-fill" href="' + esc(T.mapLink) + '" target="_blank" rel="noopener noreferrer">' + ico('navigation') + ' Petunjuk Arah</a>' +
-      '<a class="btn btn-wa flex-fill" data-wa>' + WA_ICON + ' Chat WhatsApp</a></div></div></div>' +
-      '<div class="col-lg-7"><div class="map-frame"><iframe title="Peta lokasi ' + esc(T.name) + '" src="' + esc(T.mapEmbed) + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div></div>';
-  }
-
-  /* --- section/cta-wa ---------------------------------------------- */
-  function ctaWa() {
-    var c = T.cta;
-    return '<div class="cta-wa"><h2>' + esc(c.title) + '</h2><p>' + esc(c.text) + '</p>' +
-      '<div class="cta-actions"><a class="btn btn-wa btn-lg" data-wa>' + WA_ICON + ' ' + esc(c.button) + '</a>' +
-      '<a class="btn btn-light-ghost btn-lg" href="' + url('pricing') + '">' + ico('receipt-text') + ' Lihat Daftar Harga</a></div></div>';
-  }
-
   /* ============================================================
      RENDER: [data-component] dan [data-render]
      ============================================================ */
-  var COMPONENTS = { 'hero-visual': heroVisual, 'about-brief': aboutBrief, location: location, 'cta-wa': ctaWa };
+  var COMPONENTS = { 'hero-visual': heroVisual };
 
   var LISTS = {
     categories: function (el) {
@@ -439,17 +523,22 @@
     var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     var timers = new WeakMap();
 
-    function set(li, open) {
+    function set(li, open, by) {
       li.classList.toggle('is-open', open);
+      if (open) li.setAttribute('data-by', by || 'click'); else li.removeAttribute('data-by');
       $('.nav-toggle', li).setAttribute('aria-expanded', String(open));
     }
     function closeAll(except) { items.forEach(function (li) { if (li !== except) set(li, false); }); }
 
     items.forEach(function (li) {
       var btn = $('.nav-toggle', li);
-      btn.addEventListener('click', function () { var o = !li.classList.contains('is-open'); closeAll(li); set(li, o); });
+      btn.addEventListener('click', function () {
+        /* dibuka oleh hover lalu diklik: tetap terbuka (jangan langsung menutup) */
+        if (li.getAttribute('data-by') === 'hover') { li.setAttribute('data-by', 'click'); return; }
+        var o = !li.classList.contains('is-open'); closeAll(li); set(li, o, 'click');
+      });
       if (canHover) {
-        li.addEventListener('mouseenter', function () { clearTimeout(timers.get(li)); closeAll(li); set(li, true); });
+        li.addEventListener('mouseenter', function () { clearTimeout(timers.get(li)); closeAll(li); if (!li.classList.contains('is-open')) set(li, true, 'hover'); });
         li.addEventListener('mouseleave', function () { timers.set(li, setTimeout(function () { set(li, false); }, 140)); });
       }
       li.addEventListener('focusout', function (e) { if (!li.contains(e.relatedTarget)) set(li, false); });
@@ -519,6 +608,14 @@
     document.addEventListener('keydown', function (e) {
       if (!box.classList.contains('is-open')) return;
       if (e.key === 'Escape') close();
+      else if (e.key === 'Tab') {                         /* fokus tetap di dalam dialog */
+        var f = $$('button', box).filter(function (b) { return b.offsetParent !== null || b === document.activeElement; });
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (!box.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+        else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
       else if (e.key === 'ArrowLeft') show(idx - 1);
       else if (e.key === 'ArrowRight') show(idx + 1);
     });
@@ -532,25 +629,60 @@
     });
   }
 
+  /* Slider generik: <div data-slider><div class="slider-track">…</div> tombol [data-slider-prev|next]</div>
+     Memakai scroll-snap bawaan browser; tombol hanya menggeser satu slide. */
+  function initSliders() {
+    $$('[data-slider]').forEach(function (sl) {
+      var track = $('.slider-track', sl), prev = $('[data-slider-prev]', sl), next = $('[data-slider-next]', sl), ticking = false;
+      if (!track || !prev || !next) return;
+      function step() {
+        var first = track.children[0];
+        var gap = parseFloat(window.getComputedStyle(track).columnGap) || 0;
+        return first ? first.getBoundingClientRect().width + gap : track.clientWidth;
+      }
+      function update() {
+        var max = track.scrollWidth - track.clientWidth - 1;
+        sl.classList.toggle('is-static', max <= 0);          /* semua slide muat: sembunyikan tombol */
+        var wasPrev = document.activeElement === prev, wasNext = document.activeElement === next;
+        prev.disabled = track.scrollLeft <= 1;
+        next.disabled = track.scrollLeft >= max;
+        /* tombol yang sedang fokus ikut nonaktif: pindahkan fokus ke tombol pasangannya */
+        if (wasNext && next.disabled && !prev.disabled) prev.focus();
+        else if (wasPrev && prev.disabled && !next.disabled) next.focus();
+        ticking = false;
+      }
+      prev.addEventListener('click', function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); });
+      next.addEventListener('click', function () { track.scrollBy({ left: step(), behavior: 'smooth' }); });
+      track.addEventListener('scroll', function () { if (!ticking) { ticking = true; window.requestAnimationFrame(update); } }, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+    });
+  }
+
   /* ------------------------------------------------------------- boot */
+  var modules = [];                                   /* PrintSite.use(fn): dijalankan sebelum renderAll() */
   function boot() {
     applyTheme();
+    modules.forEach(function (fn) { fn(window.PrintSite); });
     renderAll();
     initScroll();
     initMobileMenu();
     initDropdowns();
     initAccordion();
     initLightbox();
+    initSliders();
     document.documentElement.classList.add('js-ready');
   }
 
   /* API kecil untuk halaman lain (services.html, service-detail.html, dll.) */
   window.PrintSite = {
-    data: D, esc: esc, rupiah: rupiah, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
+    data: D, platform: P, site: S, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); },
+    esc: esc, rupiah: rupiah, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate,
-    components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars }
+    components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
+  /* Skrip defer dijalankan saat readyState 'interactive', sebelum DOMContentLoaded: tunggu agar modul lain (sections.js, seo.js) sempat mendaftar. */
+  if (document.readyState === 'complete') boot();
+  else document.addEventListener('DOMContentLoaded', boot);
 })();
