@@ -52,7 +52,6 @@ assets/
     sections.js               Renderer 12 section beranda + varian
     seo.js                    <title>, meta, canonical, Open Graph, JSON-LD dari data
     preview.js                Panel ?customize (khusus mockup)
-    data.js                   LAMA, tidak dipakai lagi (lihat "Catatan")
   css/
     fonts.css                 @font-face 12 font (woff2 lokal)
     style.css                 Design system + komponen; semua warna lewat token
@@ -163,13 +162,9 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 ## Catatan
 
 - **SEO di mockup ini dirender JS.** Di produksi wajib server-side (Blade) agar terbaca crawler tanpa JavaScript.
-- **Kontras warna tidak dijaga otomatis.** Warna utama yang sangat terang membuat teks putih sulit dibaca.
-  Platform perlu memvalidasi kontras saat tenant menyimpan warna.
-- **`assets/js/data.js` adalah berkas lama** (sebelum data dipisah menjadi platform dan tenant). Tidak dimuat
-  oleh halaman mana pun; disimpan sementara sebagai rujukan.
-- **Kontras beberapa warna bawaan Sinar Copy di bawah 4,5:1** (diukur oleh pemeriksa terpisah): teks eyebrow
-  oranye `#D9741A` di atas putih (3,25:1), serta teks putih pada keadaan hover tombol aksen dan WhatsApp
-  (3,1–3,25:1). Belum diubah supaya tampilan Klasik tetap sama; perlu keputusan desain.
+- **Kontras warna tenant belum dijaga otomatis.** Turunan gelap oranye dan hijau WhatsApp sudah dibuat
+  cukup gelap (>= 4,5:1 untuk teks pada putih), tetapi warna utama/aksen yang sangat terang tetap perlu
+  divalidasi platform saat tenant menyimpannya.
 - Beberapa label UI masih tertulis di kode, bukan di data tenant (mis. "Petunjuk Arah", "Chat WhatsApp",
   "Lihat Daftar Harga", teks footer). Pada produksi pindahkan ke berkas bahasa Laravel (`lang/id`).
 - `--header-h: 68px` tidak berada pada kelipatan 8px yang dipakai bagian lain.

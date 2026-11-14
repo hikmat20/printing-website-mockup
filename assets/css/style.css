@@ -18,10 +18,10 @@
   --c-primary-light: color-mix(in srgb, var(--c-primary) 9%, #fff);
   --c-primary-tint: color-mix(in srgb, var(--c-primary) 5%, #fff);
   --c-accent: #F28C28;
-  --c-accent-dark: color-mix(in srgb, var(--c-accent) 85%, #000);
+  --c-accent-dark: color-mix(in srgb, var(--c-accent) 64%, #000);   /* teks/ikon oranye di atas putih: kontras >= 4,5:1 */
   --c-accent-tint: color-mix(in srgb, var(--c-accent) 12%, #fff);
   --c-wa: #25D366;
-  --c-wa-dark: color-mix(in srgb, var(--c-wa) 80%, #000);
+  --c-wa-dark: color-mix(in srgb, var(--c-wa) 58%, #000);       /* latar hover tombol WhatsApp dengan teks putih: >= 4,5:1 */
   --c-surface: #F5F7FA;
   --c-text: #252B35;
   --c-muted: #5B6675;
