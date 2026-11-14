@@ -98,6 +98,19 @@ window.TENANTS['sinar-copy'] = {
           title: 'Fotocopy, Print & Percetakan Jakarta Timur | Sinar Copy & Printing',
           description: 'Fotocopy, print dokumen, cetak banner, jilid skripsi, laminating, dan percetakan lengkap di Jakarta Timur. Harga jelas, hasil rapi, pesan mudah lewat WhatsApp.',
           ogDescription: 'Semua kebutuhan cetak Anda, satu tempat. Fotocopy, print, banner, jilid, dan laminating dengan harga bersahabat.'
+        },
+        services: {
+          title: 'Layanan Fotocopy, Print, Banner & Jilid | Sinar Copy & Printing',
+          description: 'Daftar layanan percetakan di Jakarta Timur: fotocopy, print dokumen, cetak banner, jilid skripsi, laminating, brosur, dan undangan. Lihat harga lalu pesan lewat WhatsApp.'
+        },
+        pricing: {
+          title: 'Daftar Harga Fotocopy, Print & Cetak | Sinar Copy & Printing',
+          description: 'Daftar harga fotocopy, print A4/F4/A3, banner, jilid, laminating, dan cetak promosi di Sinar Copy & Printing Jakarta Timur. Harga jelas per satuan.'
+        },
+        /* Pola untuk halaman bertoken {name} {short} {price} {unit} {category} {site} {city} */
+        service: {
+          title: '{name} di {city} - Mulai {price}/{unit} | {site}',
+          description: '{short} Mulai {price} per {unit}. Pesan mudah lewat WhatsApp di {site}, {city}.'
         }
       }
     }
@@ -136,6 +149,26 @@ window.TENANTS['sinar-copy'] = {
        sections: { faq: { enabled: false }, services: { variant: 'slider', limit: 8 } } */
   site: {
     template: 'classic'
+  },
+
+  /* ---------- Teks halaman internal (milik tenant; struktur halaman dikunci platform) ---------- */
+  pageText: {
+    services: {
+      title: 'Layanan Kami', lead: 'Fotocopy, print, large format, jilid, hingga cetak promosi. Pilih layanan, lihat harga, lalu pesan lewat WhatsApp.',
+      searchLabel: 'Cari layanan', searchPlaceholder: 'Cari layanan, mis. banner atau jilid',
+      empty: { title: 'Layanan tidak ditemukan', text: 'Coba kata kunci lain, atau tanyakan langsung. Kami bisa mengerjakan banyak kebutuhan cetak di luar daftar ini.', button: 'Tanya lewat WhatsApp' }
+    },
+    service: {
+      notFound: { title: 'Layanan tidak ditemukan', text: 'Alamat layanan yang Anda buka tidak ada atau sudah tidak tersedia.', button: 'Lihat semua layanan' },
+      pricingTitle: 'Daftar harga', pricingNote: 'Harga dapat berubah untuk jumlah besar atau file yang perlu penyesuaian. Konfirmasi final lewat WhatsApp.',
+      orderTitle: 'Pesan layanan ini', orderHint: 'Pilih kebutuhan Anda, lalu kirim lewat WhatsApp. Kami balas dengan rincian harga dan estimasi selesai.',
+      orderButton: 'Pesan lewat WhatsApp', relatedTitle: 'Layanan terkait', faqTitle: 'Pertanyaan tentang layanan ini'
+    },
+    pricing: {
+      title: 'Daftar Harga', lead: 'Harga per satuan untuk layanan yang paling sering dipesan. Harga jelas di awal, tanpa biaya tersembunyi.',
+      note: 'Harga dapat berubah untuk jumlah besar, ukuran khusus, atau file yang perlu penyesuaian. Kirim kebutuhan Anda lewat WhatsApp untuk penawaran pasti.',
+      jumpLabel: 'Lompat ke kategori', columns: { service: 'Layanan', spec: 'Spesifikasi', unit: 'Satuan', price: 'Harga', note: 'Catatan' }
+    }
   },
 
   /* ---------- Teks section beranda (milik tenant) ---------- */

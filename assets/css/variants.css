@@ -21,13 +21,13 @@ html[data-buttons="square"]  { --r-btn: 3px;  --r-field: 3px; }
 
 /* Gaya kartu (tenant: site.cardStyle). "elevated" = bawaan style.css.
    Berlaku untuk semua permukaan kartu agar konsisten. */
-html[data-card="outlined"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table),
-html[data-card="flat"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table) { box-shadow: none; }
-html[data-card="outlined"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table) {
+html[data-card="outlined"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table, .order-card, .spec-list),
+html[data-card="flat"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table, .order-card, .spec-list) { box-shadow: none; }
+html[data-card="outlined"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .price-table, .order-card, .spec-list) {
   border: 1.5px solid color-mix(in srgb, var(--c-primary) 26%, var(--c-border));
 }
 html[data-card="outlined"] .card-x:hover { border-color: var(--c-primary); box-shadow: none; }
-html[data-card="flat"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card) {
+html[data-card="flat"] :is(.card-x, .stat, .steps--cards .step, .faq-item, .loc-card, .order-card) {
   border-color: transparent;
   background: color-mix(in srgb, var(--c-primary) 6%, var(--c-card));
 }

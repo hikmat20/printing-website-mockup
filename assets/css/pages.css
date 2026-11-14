@@ -1,0 +1,89 @@
+/* ==========================================================================
+   pages.css — CSS HALAMAN INTERNAL (struktur tetap, dikunci platform)
+   Warna, radius, dan bayangan memakai token tema, jadi ikut template dan tenant.
+   Sentuhan per template ada di templates/<id>.css (bagian "Halaman internal").
+   Urutan: 1. Header halaman  2. Filter & daftar layanan  3. Detail layanan
+           4. Harga  5. Keadaan kosong
+   ========================================================================== */
+
+/* 1. Header halaman -------------------------------------------------------- */
+.page-head { padding: 2rem 0 2.25rem; background: linear-gradient(180deg, var(--c-primary-tint), var(--c-bg)); }
+.page-head h1 { margin: 0 0 .6rem; }
+.page-lead { max-width: 640px; margin: 0; color: var(--c-muted); font-size: 1.0625rem; }
+.page-head .chips { margin-top: 1.5rem; }
+.page-head--service { padding-bottom: 1.75rem; }
+.tag-pill { display: inline-flex; align-items: center; padding: .25rem .8rem; border-radius: var(--r-pill); background: var(--c-primary-light); color: var(--c-primary); font-size: .8125rem; font-weight: 600; }
+.tag-pill:hover { background: var(--c-primary); color: var(--c-on-dark); }
+@media (min-width: 992px) { .page-head { padding: 3rem 0 3rem; } .page-head--service { padding-bottom: 2.25rem; } }
+
+/* 2. Filter & daftar layanan ----------------------------------------------- */
+.filter-bar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.filter-bar > * { min-width: 0; max-width: 100%; }
+.filter-bar .search-input { max-width: 460px; }
+.result-count { margin: 0 0 1.25rem; font-size: .875rem; color: var(--c-muted); }
+
+.svc-list .service-card { height: 100%; }
+@media (min-width: 768px) {
+  .svc-list--list .service-card { display: grid; grid-template-columns: 300px 1fr; }
+  .svc-list--list .service-card .card-media { height: 100%; }
+  .svc-list--list .service-card .card-media img { height: 100%; aspect-ratio: auto; min-height: 200px; object-fit: cover; }
+  .svc-list--list .service-card .card-body-x { justify-content: center; padding: 1.4rem 1.6rem; }
+  .svc-list--list .service-card .price-from { margin-top: .5rem; }
+  .svc-list--list .service-card .card-actions { max-width: 320px; }
+}
+
+/* 3. Detail layanan --------------------------------------------------------- */
+.detail-media { margin: 0 0 1.75rem; }
+.detail-media img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r-media); box-shadow: var(--shadow-md); }
+
+.spec-list { display: grid; gap: 0; margin: 0; border: 1px solid var(--c-border); border-radius: var(--r-card); overflow: hidden; background: var(--c-card); }
+.spec-list > div { display: grid; grid-template-columns: minmax(120px, 36%) 1fr; gap: 1rem; padding: .8rem 1.1rem; border-top: 1px solid var(--c-border); }
+.spec-list > div:first-child { border-top: 0; }
+.spec-list dt { color: var(--c-muted); font-size: .875rem; font-weight: 600; }
+.spec-list dd { margin: 0; font-weight: 600; }
+
+.opt-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .85rem; }
+.opt-list li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.opt-list strong { flex: 0 0 100%; font-size: .875rem; color: var(--c-muted); }
+@media (min-width: 576px) { .opt-list strong { flex-basis: 120px; } }
+.tag-opt { display: inline-block; padding: .25rem .75rem; border: 1px solid var(--c-border); border-radius: var(--r-pill); background: var(--c-card); font-size: .875rem; }
+
+.order-card { padding: 1.4rem; border: 1px solid var(--c-border); border-radius: var(--r-card); background: var(--c-card); box-shadow: var(--shadow-md); }
+@media (min-width: 992px) { .order-card { position: sticky; top: calc(var(--header-h) + 1rem); } }
+.order-card .price-from { margin: 0 0 .5rem; }
+.order-card .price-from strong { font-size: 1.5rem; }
+.order-card .eta { display: flex; align-items: center; gap: .5rem; margin: 0 0 1rem; color: var(--c-muted); font-size: .9375rem; }
+.order-card .eta .i { color: var(--c-accent-dark); flex: none; }
+.order-card .form-note { margin-bottom: 1rem; }
+
+/* 4. Harga ------------------------------------------------------------------ */
+.price-group { margin-bottom: 3rem; scroll-margin-top: calc(var(--header-h) + 1rem); }
+.price-group-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+.price-group-head .ico { width: 52px; height: 52px; flex: none; border-radius: 14px; background: var(--c-primary-light); color: var(--c-primary); display: inline-flex; align-items: center; justify-content: center; }
+.price-group-head h2 { margin: 0 0 .15rem; }
+.price-group-head p { margin: 0; color: var(--c-muted); font-size: .9375rem; }
+.price-block { margin-bottom: 1.75rem; }
+.price-block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .6rem; }
+.price-block-head h3 { margin: 0; }
+.price-block-head h3 a { color: inherit; }
+.note-box { display: flex; align-items: flex-start; gap: .85rem; padding: 1.1rem 1.25rem; border: 1px solid color-mix(in srgb, var(--c-accent) 35%, var(--c-border)); border-radius: var(--r-card); background: var(--c-accent-tint); }
+.note-box .i { flex: none; margin-top: .2rem; color: var(--c-accent-dark); }
+.note-box p { margin: 0; font-size: .9375rem; }
+
+/* 5. Keadaan kosong / tidak ditemukan ------------------------------------------ */
+.empty-state { max-width: 520px; margin: 2rem auto; padding: 2rem 1.25rem; text-align: center; }
+.empty-state[hidden] { display: none; }
+.empty-state .ico { width: 64px; height: 64px; margin: 0 auto 1rem; border-radius: 18px; background: var(--c-primary-light); color: var(--c-primary); display: inline-flex; align-items: center; justify-content: center; }
+.empty-state h1, .empty-state h2 { font-size: 1.5rem; margin-bottom: .5rem; }
+.empty-state p { color: var(--c-muted); margin-bottom: 1.25rem; }
+
+/* Judul bertingkat memakai gaya judul tema (kelas .h3/.h4/.h5 Bootstrap berbobot 500) */
+main .h3, main .h4, main .h5 { font-family: var(--font-heading); font-weight: 700; color: var(--c-primary); line-height: 1.25; letter-spacing: -.01em; }
+
+/* Kolom tabel harga sejajar antar-tabel di desktop */
+@media (min-width: 768px) {
+  .price-table { table-layout: fixed; }
+  .price-table th:nth-child(1) { width: 44%; }
+  .price-table th:nth-child(2) { width: 14%; }
+  .price-table th:nth-child(3) { width: 18%; }
+}

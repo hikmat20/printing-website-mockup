@@ -79,19 +79,59 @@
     };
   }
 
-  /* apply('home', { faqs: [...], title, description, ogDescription, path }) */
+  /* schema.org/BreadcrumbList dari jejak halaman (PS.pageMeta.crumbs) */
+  function breadcrumbList(crumbs) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: crumbs.map(function (c, i) {
+        var item = { '@type': 'ListItem', position: i + 1, name: c.name };
+        if (c.route) item.item = abs(pathFor(c.route, c.slug));
+        return item;
+      })
+    };
+  }
+
+  /* schema.org/Service untuk halaman detail layanan */
+  function servicePage(s, cat, pageUrl) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: s.name,
+      description: s.description,
+      serviceType: cat ? cat.name : undefined,
+      image: abs(s.image),
+      url: pageUrl,
+      areaServed: { '@type': 'City', name: T.city },
+      provider: { '@type': 'LocalBusiness', name: T.name, url: abs('/'), telephone: '+' + T.phone },
+      offers: { '@type': 'Offer', priceCurrency: 'IDR', price: String(s.priceFrom), url: pageUrl,
+        priceSpecification: { '@type': 'UnitPriceSpecification', priceCurrency: 'IDR', price: String(s.priceFrom), unitText: s.unit } }
+    };
+  }
+
+  /* '/layanan/{slug}' + slug -> '/layanan/fotocopy' */
+  function pathFor(routeName, slug) {
+    var r = PS.platform.routes[routeName];
+    return r ? r.laravel.replace('{slug}', slug || '') : '/';
+  }
+
+  function clearLd(id) {
+    var old = head.querySelector('script[data-seo="' + id + '"]');
+    if (old) old.parentNode.removeChild(old);
+  }
+
+  /* apply('home', { faqs: [...], title, description, ogDescription, path, slug, route, robots }) */
   function apply(pageKey, o) {
     o = o || {};
     var pg = (seo.pages && seo.pages[pageKey]) || {};
     var title = o.title || pg.title || T.name;
     var desc = o.description || pg.description || seo.defaultDescription;
-    var route = PS.platform.routes[o.route || pageKey];
-    var path = o.path || (route ? route.laravel : '/');
+    var path = o.path || pathFor(o.route || pageKey, o.slug);
     var pageUrl = abs(path);
 
     document.title = title;
     meta('name', 'description', desc);
-    meta('name', 'robots', 'index, follow');
+    meta('name', 'robots', o.robots || 'index, follow');
     meta('name', 'theme-color', (PS.theme() || {}).primary);
     canonical(pageUrl);
 
@@ -105,17 +145,33 @@
     meta('name', 'twitter:card', 'summary_large_image');
 
     jsonLd('business', localBusiness());
-    if (o.faqs && o.faqs.length) jsonLd('faq', faqPage(o.faqs)); else {
-      var old = head.querySelector('script[data-seo="faq"]');
-      if (old) old.parentNode.removeChild(old);
-    }
+    if (o.faqs && o.faqs.length) jsonLd('faq', faqPage(o.faqs)); else clearLd('faq');
+    if (o.breadcrumbs && o.breadcrumbs.length > 1) jsonLd('breadcrumb', breadcrumbList(o.breadcrumbs)); else clearLd('breadcrumb');
+    if (o.service) jsonLd('service', servicePage(o.service, o.category, pageUrl)); else clearLd('service');
   }
 
-  PS.seo = { apply: apply, localBusiness: localBusiness, faqPage: faqPage, abs: abs };
+  /* Halaman internal: PS.pageMeta ditulis oleh pages.js; dipanggil ulang saat hash (slug) berganti */
+  function applyPage() {
+    var m = PS.pageMeta;
+    if (!m) return;
+    var o = { route: m.route, breadcrumbs: m.crumbs, faqs: m.faqs };
+    if (m.notFound) {
+      o.title = 'Halaman tidak ditemukan | ' + T.name; o.description = seo.defaultDescription; o.robots = 'noindex, follow'; o.path = pathFor('service', '');
+    } else if (m.key === 'service') {
+      var s = m.service, pat = (seo.pages && seo.pages.service) || {};
+      var vars = { name: s.name, short: s.short, price: PS.rupiah(s.priceFrom).replace(/\u00a0/g, ' '), unit: s.unit, category: m.category ? m.category.name : '', site: T.name, city: T.city };
+      o.title = fill(pat.title, vars); o.description = fill(pat.description, vars);
+      o.slug = s.slug; o.service = s; o.category = m.category;
+    }
+    apply(m.key, o);
+  }
+  function fill(tpl, vars) { return String(tpl || '').replace(/\{(\w+)\}/g, function (x, k) { return vars[k] != null ? vars[k] : x; }); }
+
+  PS.seo = { apply: apply, applyPage: applyPage, localBusiness: localBusiness, faqPage: faqPage, breadcrumbList: breadcrumbList, servicePage: servicePage, abs: abs };
 
   /* Beranda: JSON-LD FAQ hanya bila section FAQ aktif (data tidak boleh menyatakan yang tidak tampil) */
   PS.use(function () {
-    if (document.body.getAttribute('data-page') !== 'home') return;
+    if (document.body.getAttribute('data-page') !== 'home') { applyPage(); return; }
     var faqOn = PS.site.home.some(function (s) { return s.id === 'faq'; });
     apply('home', { faqs: faqOn ? D.faqs.filter(function (f) { return f.featured; }) : [] });
   });

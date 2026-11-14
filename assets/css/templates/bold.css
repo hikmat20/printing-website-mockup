@@ -99,3 +99,18 @@ html[data-template="bold"][data-card="outlined"] .pf-card { box-shadow: 4px 4px 
 [data-template="bold"] .site-footer { border-top: 6px solid var(--c-accent); }
 [data-template="bold"] .social a { border-radius: 4px; }
 [data-template="bold"] .wa-float { border-radius: 4px; }
+
+/* Halaman internal ------------------------------------------------------- */
+[data-template="bold"] .page-head { background: var(--c-primary-dark); border-bottom: 6px solid var(--c-accent); padding: 2.5rem 0 2.75rem; }
+[data-template="bold"] .page-head h1 { color: var(--c-on-dark); text-transform: uppercase; letter-spacing: .01em; }
+[data-template="bold"] .page-lead { color: var(--c-on-dark-soft); }
+[data-template="bold"] .page-head .tag-pill { background: var(--c-accent); color: var(--c-on-accent); border-radius: 0; }
+[data-template="bold"] .page-head .tag-pill:hover { background: var(--c-on-dark); color: var(--c-primary-dark); }
+[data-template="bold"] .page-head .chip { background: transparent; border-color: var(--c-on-dark-faint); color: var(--c-on-dark); border-radius: 0; }
+[data-template="bold"] .page-head .chip:hover { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-on-accent); }
+[data-template="bold"] .price-group-head { padding-bottom: .75rem; border-bottom: 3px solid var(--c-primary); }
+[data-template="bold"] .price-group-head .ico { border-radius: 0; background: var(--c-accent); color: var(--c-on-accent); }
+[data-template="bold"] .order-card { border-width: 2px; box-shadow: 6px 6px 0 color-mix(in srgb, var(--c-primary) 85%, transparent); }
+[data-template="bold"] .spec-list { border-width: 2px; }
+[data-template="bold"] .tag-opt { border-radius: 0; border-width: 2px; }
+[data-template="bold"] .note-box { border-radius: 0; border-width: 2px; }

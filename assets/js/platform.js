@@ -89,12 +89,20 @@ window.PLATFORM = {
      Tiap template = skin visual (assets/css/templates/<id>.css) + susunan beranda
      bawaan. Tenant mewarisi semuanya dan boleh menimpa sebagian lewat `site`
      pada data tenant (lihat tenants/sinar-copy.js). */
+  /* Halaman internal: STRUKTUR TETAP (dikunci platform). Tenant hanya boleh memilih varian daftar di bawah ini,
+     lewat site.pages.<halaman>.variant. Bawaan tiap template ada di templates.<id>.pages. */
+  pages: {
+    services: { variants: ['grid', 'list'] },
+    blog:     { variants: ['grid', 'list'] }
+  },
+
   templates: {
     classic: {
       name: 'Klasik',
       description: 'Rapi dan netral: hero dua kolom, kartu berbingkai, susunan yang familiar bagi pelanggan.',
       header: 'standard', cardStyle: 'elevated', buttonShape: 'rounded',
       fonts: { heading: 'plus-jakarta-sans', body: 'plus-jakarta-sans' },
+      pages: { services: 'grid', blog: 'grid' },
       home: [
         { id: 'hero', variant: 'split' },
         { id: 'trust', variant: 'bar' },
@@ -115,6 +123,7 @@ window.PLATFORM = {
       description: 'Lapang dan ringan: hero terpusat, sudut membulat besar, layanan dan testimoni berbentuk slider.',
       header: 'standard', cardStyle: 'elevated', buttonShape: 'pill',
       fonts: { heading: 'poppins', body: 'inter' },
+      pages: { services: 'grid', blog: 'grid' },
       home: [
         { id: 'hero', variant: 'centered' },
         { id: 'trust', variant: 'cards' },
@@ -135,6 +144,7 @@ window.PLATFORM = {
       description: 'Tegas dan kontras tinggi: hero gelap, bingkai tebal, sudut tajam, cocok untuk kesan percetakan yang kuat.',
       header: 'topbar', cardStyle: 'outlined', buttonShape: 'square',
       fonts: { heading: 'montserrat', body: 'open-sans' },
+      pages: { services: 'list', blog: 'list' },
       home: [
         { id: 'hero', variant: 'dark' },
         { id: 'trust', variant: 'bar' },

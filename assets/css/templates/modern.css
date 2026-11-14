@@ -68,3 +68,15 @@
 /* CTA & footer */
 [data-template="modern"] .cta-wa { border-radius: 32px; }
 [data-template="modern"] .site-footer { margin-top: 1.5rem; border-radius: 32px 32px 0 0; }
+
+/* Halaman internal ------------------------------------------------------- */
+[data-template="modern"] .page-head { text-align: center; padding: 3rem 0 3.25rem; background: radial-gradient(60% 120% at 50% 0%, var(--c-accent-tint) 0, transparent 70%), linear-gradient(180deg, var(--c-primary-tint), var(--c-bg)); }
+[data-template="modern"] .page-lead { margin-inline: auto; }
+@media (min-width: 992px) { [data-template="modern"] .page-head .chips { justify-content: center; } }
+[data-template="modern"] .page-head .d-flex { justify-content: center; }
+@media (min-width: 992px) { [data-template="modern"] .filter-bar { justify-items: center; } }
+[data-template="modern"] .filter-bar .search-input { width: 100%; }
+@media (min-width: 992px) { [data-template="modern"] .filter-bar .chips { justify-content: center; } }
+[data-template="modern"] .result-count { text-align: center; }
+[data-template="modern"] .price-block { padding: 1.25rem; border-radius: var(--r-card); background: var(--c-surface); }
+[data-template="modern"] .price-block .price-table { box-shadow: none; }

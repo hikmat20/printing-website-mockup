@@ -62,6 +62,16 @@
       fontHeading: firstValid(fontIds, QS.get('hfont'), th.fontHeading, tpl.fonts.heading)
     };
 
+    /* Halaman internal: struktur tetap; hanya varian daftar yang boleh dipilih tenant */
+    var tpages = ts.pages && typeof ts.pages === 'object' && !Array.isArray(ts.pages) ? ts.pages : {};
+    Object.keys(tpages).forEach(function (k) { if (!hasOwn(P.pages, k)) console.warn('[main.js] site.pages: halaman "' + k + '" tidak punya varian yang bisa dipilih.'); });
+    S.pages = {};
+    Object.keys(P.pages).forEach(function (k) {
+      var o = hasOwn(tpages, k) && tpages[k] && typeof tpages[k] === 'object' ? tpages[k] : {};
+      checkTenant('pages.' + k + '.variant', P.pages[k].variants, o.variant);
+      S.pages[k] = { variant: firstValid(P.pages[k].variants, o.variant, tpl.pages && tpl.pages[k], P.pages[k].variants[0]) };
+    });
+
     /* Susunan beranda: bawaan template -> urutan tenant -> varian/limit/aktif per section */
     var base = tpl.home.map(function (x) { return { id: x.id, variant: x.variant, limit: x.limit }; });
     if (ts.order != null && !Array.isArray(ts.order)) console.warn('[main.js] site.order harus berupa array id section; diabaikan.');
@@ -118,9 +128,15 @@
 
   /* ---------------------------------------------------------------- URL */
   /* Mockup memakai file .html + hash sebagai slug. Di Laravel, ganti dengan route(). */
+  var PREVIEW_KEYS = ['customize', 'template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'];
+  var previewQuery = (function () {          /* khusus mockup: pilihan pratinjau ikut terbawa saat berpindah halaman */
+    var q = new URLSearchParams();
+    PREVIEW_KEYS.forEach(function (k) { if (QS.has(k)) q.set(k, QS.get(k)); });
+    var s = q.toString(); return s ? '?' + s : '';
+  })();
   var url = function (name, slug) {
     var r = D.routes[name];
-    return r.hash && slug ? r.mockup + '#' + slug : r.mockup;
+    return r.mockup + previewQuery + (r.hash && slug ? '#' + slug : '');
   };
 
   /* ------------------------------------------------------------ WhatsApp */
