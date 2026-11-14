@@ -29,6 +29,9 @@
   var fill = function (tpl, vars) {
     return String(tpl || '').replace(/\{(\w+)\}/g, function (m, k) { return vars[k] != null ? vars[k] : m; });
   };
+  /* Hash yang menunjuk elemen halaman (mis. #main dari tautan lompat ke konten) bukan slug: abaikan */
+  var isAnchor = function () { var h = window.location.hash.slice(1); return !!h && !!document.getElementById(h); };
+  var list = function (v) { return Array.isArray(v) ? v : []; };   /* data tenant yang salah tipe jangan merusak halaman */
   var hashSlug = function () { try { return decodeURIComponent(window.location.hash.slice(1)); } catch (e) { return ''; } };
 
   /* layout/breadcrumb: items = [{ label, route?, slug? }]; item terakhir = halaman aktif */
@@ -83,7 +86,7 @@
       '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
     var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
     return {
-      html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-label="Daftar layanan"><div class="container">' + body + '</div></section>' + ctaBand(),
+      html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-labelledby="svc-list-title"><div class="container"><h2 class="visually-hidden" id="svc-list-title">' + esc(x.listTitle || x.title) + '</h2>' + body + '</div></section>' + ctaBand(),
       meta: { key: 'services', route: 'services', crumbs: crumbMeta(cr) },
       after: initServicesFilter
     };
@@ -115,7 +118,7 @@
     }
     chips.forEach(function (b) { b.addEventListener('click', function () { select(b.getAttribute('data-cat'), true); }); });
     search.addEventListener('input', apply);
-    window.addEventListener('hashchange', function () { var s = hashSlug(); select(byKey(D.categories, 'slug', s) ? s : 'all', false); });
+    window.addEventListener('hashchange', function () { if (isAnchor()) return; var s = hashSlug(); select(byKey(D.categories, 'slug', s) ? s : 'all', false); });
     apply();
   }
 
@@ -144,18 +147,19 @@
     if (cat) cr.push({ label: cat.name, route: 'category', slug: cat.slug });
     cr.push({ label: s.name });
 
-    var specs = '<dl class="spec-list">' + s.specs.map(function (p) { return '<div><dt>' + esc(p.label) + '</dt><dd>' + esc(p.value) + '</dd></div>'; }).join('') + '</dl>';
-    var optsInfo = s.options.length ? '<ul class="opt-list">' + s.options.map(function (o) {
+    var sp = list(s.specs), op = list(s.options), pr = list(s.pricing), fq = list(s.faqs);
+    var specs = !sp.length ? '' : '<h2 class="h4 mt-4">Spesifikasi</h2><dl class="spec-list">' + sp.map(function (p) { return '<div><dt>' + esc(p.label) + '</dt><dd>' + esc(p.value) + '</dd></div>'; }).join('') + '</dl>';
+    var optsInfo = op.length ? '<ul class="opt-list">' + op.map(function (o) {
       return '<li><strong>' + esc(o.label) + '</strong>' + o.choices.map(function (c) { return '<span class="tag-opt">' + esc(c) + '</span>'; }).join('') + '</li>';
     }).join('') + '</ul>' : '';
-    var prices = '<table class="price-table"><caption class="visually-hidden">Daftar harga ' + esc(s.name) + '</caption><thead><tr>' +
+    var prices = !pr.length ? '' : '<h2 class="h4 mt-5" id="pricing-title">' + esc(x.pricingTitle) + '</h2><table class="price-table"><caption class="visually-hidden">Daftar harga ' + esc(s.name) + '</caption><thead><tr>' +
       '<th scope="col">Spesifikasi</th><th scope="col">Satuan</th><th scope="col">Harga</th><th scope="col">Catatan</th></tr></thead><tbody>' +
-      s.pricing.map(function (r) {
+      pr.map(function (r) {
         return '<tr><td data-label="Spesifikasi">' + esc(r.spec) + '</td><td data-label="Satuan">' + esc(r.unit) + '</td><td class="price" data-label="Harga">' + rupiah(r.price) + '</td><td data-label="Catatan">' + esc(r.note || '-') + '</td></tr>';
-      }).join('') + '</tbody></table>';
-    var faqs = (s.faqs && s.faqs.length) ? '<h2 class="h4 mt-5">' + esc(x.faqTitle) + '</h2><div class="faq-list mt-3">' + s.faqs.map(C.faqItem).join('') + '</div>' : '';
+      }).join('') + '</tbody></table><p class="form-note mt-2">' + esc(x.pricingNote) + '</p>';
+    var faqs = fq.length ? '<h2 class="h4 mt-5">' + esc(x.faqTitle) + '</h2><div class="faq-list mt-3">' + fq.map(C.faqItem).join('') + '</div>' : '';
 
-    var selects = s.options.map(function (o, i) {
+    var selects = op.map(function (o, i) {
       return '<div class="mb-3"><label class="form-label" for="opt-' + i + '">' + esc(o.label) + '</label><select class="form-select" id="opt-' + i + '" data-opt="' + esc(o.label) + '">' +
         o.choices.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select></div>';
     }).join('');
@@ -166,7 +170,7 @@
       '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" inputmode="numeric" placeholder="Opsional" data-qty></div>' +
       '<a class="btn btn-wa btn-lg w-100" id="order-wa" data-wa data-wa-msg="' + esc(msgOrder(s, document.createElement('div'))) + '">' + WA + ' ' + esc(x.orderButton) + '</a></aside>';
 
-    var related = (s.related || []).map(function (sl) { return byKey(D.services, 'slug', sl); }).filter(Boolean);
+    var related = list(s.related).map(function (sl) { return byKey(D.services, 'slug', sl); }).filter(Boolean);
     var relatedHtml = related.length ? '<section class="section section-alt" aria-labelledby="related-title"><div class="container"><h2 id="related-title" class="h3 mb-4">' + esc(x.relatedTitle) + '</h2>' +
       '<div class="row g-3 g-lg-4">' + related.map(function (r) { return '<div class="col-12 col-md-6 col-lg-4">' + C.serviceCard(r) + '</div>'; }).join('') + '</div></div></section>' : '';
 
@@ -174,16 +178,15 @@
       '<div class="d-flex flex-wrap gap-2 mb-3">' + (cat ? '<a class="tag-pill" href="' + url('category', cat.slug) + '">' + esc(cat.name) + '</a>' : '') + '</div>' +
       '<h1 id="page-title">' + esc(s.name) + '</h1><p class="page-lead">' + esc(s.short) + '</p></div></section>';
 
-    var main = '<section class="section pt-4"><div class="container"><div class="row g-4 g-lg-5 align-items-start">' +
+    var main = '<section class="section pt-4"><div class="container"><div class="row g-4 g-lg-5">' +
       '<div class="col-lg-8"><figure class="detail-media"><img src="' + esc(s.image) + '" alt="' + esc(s.imageAlt) + '" width="800" height="600"></figure>' +
       '<h2 class="h4">Tentang layanan ini</h2><p class="text-muted-x">' + esc(s.description) + '</p>' +
-      '<h2 class="h4 mt-4">Spesifikasi</h2>' + specs + (optsInfo ? '<h2 class="h4 mt-4">Pilihan tersedia</h2>' + optsInfo : '') +
-      '<h2 class="h4 mt-5" id="pricing-title">' + esc(x.pricingTitle) + '</h2>' + prices + '<p class="form-note mt-2">' + esc(x.pricingNote) + '</p>' + faqs + '</div>' +
+      specs + (optsInfo ? '<h2 class="h4 mt-4">Pilihan tersedia</h2>' + optsInfo : '') + prices + faqs + '</div>' +
       '<div class="col-lg-4">' + order + '</div></div></div></section>';
 
     return {
       html: crumbs(cr) + head + main + relatedHtml + ctaBand(),
-      meta: { key: 'service', route: 'service', service: s, category: cat, crumbs: crumbMeta(cr), faqs: s.faqs || [] },
+      meta: { key: 'service', route: 'service', service: s, category: cat, crumbs: crumbMeta(cr), faqs: fq },
       after: function () {
         var card = document.querySelector('.order-card'), wa = document.getElementById('order-wa');
         if (!card || !wa) return;
@@ -198,8 +201,8 @@
   R.pricing = function () {
     var x = PT.pricing || {}, col = x.columns || {};
     var groups = D.categories.map(function (c) {
-      var list = D.services.filter(function (s) { return s.category === c.slug && s.pricing && s.pricing.length; });
-      return list.length ? { cat: c, list: list } : null;
+      var inCat = D.services.filter(function (s) { return s.category === c.slug && Array.isArray(s.pricing) && s.pricing.length; });
+      return inCat.length ? { cat: c, list: inCat } : null;
     }).filter(Boolean);
     var jump = '<nav class="chips mt-4" aria-label="' + esc(x.jumpLabel) + '">' + groups.map(function (g) {
       return '<a class="chip" href="#harga-' + esc(g.cat.slug) + '">' + esc(g.cat.name) + '</a>';
@@ -245,9 +248,11 @@
     render();
     /* Detail layanan memakai hash sebagai slug (di Laravel: /layanan/{slug}); ganti hash = ganti layanan */
     if (pageKey === 'service') window.addEventListener('hashchange', function () {
+      if (isAnchor()) return;
       render();
       if (PS.seo) PS.seo.applyPage();
       window.scrollTo(0, 0);
+      var h1 = document.querySelector('h1'); if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }   /* fokus keyboard pindah ke judul layanan baru */
     });
   });
 })();

@@ -679,7 +679,9 @@
   var modules = [];                                   /* PrintSite.use(fn): dijalankan sebelum renderAll() */
   function boot() {
     applyTheme();
-    modules.forEach(function (fn) { fn(window.PrintSite); });
+    modules.forEach(function (fn) {      /* satu modul gagal tidak boleh mematikan header, footer, dan modul lain */
+      try { fn(window.PrintSite); } catch (e) { console.error('[main.js] modul gagal dijalankan:', e); }
+    });
     renderAll();
     initScroll();
     initMobileMenu();

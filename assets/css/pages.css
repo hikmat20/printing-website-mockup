@@ -87,3 +87,7 @@ main .h3, main .h4, main .h5 { font-family: var(--font-heading); font-weight: 70
   .price-table th:nth-child(2) { width: 14%; }
   .price-table th:nth-child(3) { width: 18%; }
 }
+
+/* Nama panjang tanpa spasi tidak boleh melebarkan halaman */
+.page-head h1, .breadcrumb-item, .card-body-x h3, .price-block-head h3, .order-card h2 { overflow-wrap: anywhere; }
+.price-block-head .link-arrow { white-space: nowrap; flex: none; }

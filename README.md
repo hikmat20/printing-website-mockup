@@ -43,6 +43,7 @@ Parameter URL hanya untuk pratinjau. Di produksi pengaturan ini disimpan di data
 
 ```
 index.html                    Cangkang beranda: <main id="main"> diisi dari data
+services.html service-detail.html pricing.html   Cangkang halaman internal (Gelombang 1)
 assets/
   js/
     platform.js               DATA PLATFORM: rute, navigasi, registri (font, header, kartu,
@@ -50,12 +51,14 @@ assets/
     tenants/sinar-copy.js     DATA TENANT: profil, tema, isi, teks section, pengaturan `site`
     main.js                   Inti: validasi konfigurasi, tema, header/footer, interaksi, hook modul
     sections.js               Renderer 12 section beranda + varian
-    seo.js                    <title>, meta, canonical, Open Graph, JSON-LD dari data
+    pages.js                  Halaman internal (struktur tetap): layanan, detail layanan, harga
+    seo.js                    <title>, meta, canonical, Open Graph, JSON-LD dari data (beranda + halaman internal)
     preview.js                Panel ?customize (khusus mockup)
   css/
     fonts.css                 @font-face 12 font (woff2 lokal)
     style.css                 Design system + komponen; semua warna lewat token
     variants.css              CSS struktural untuk opsi global dan varian komponen
+    pages.css                 CSS halaman internal
     templates/<id>.css        Skin visual per template, dibatasi [data-template="<id>"]
   fonts/  vendor/  images/
 ```
@@ -71,6 +74,24 @@ Template = **skin visual** (`templates/<id>.css`) + **susunan beranda bawaan** (
 | `bold` | Tegas, kontras tinggi, bayangan keras, huruf kapital | topbar | outlined | square | Montserrat / Open Sans |
 
 Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `data-card`, `data-buttons`.
+
+## Halaman internal
+
+Struktur tiap halaman **dikunci platform**; hanya beranda yang section-nya bisa diatur tenant.
+Tenant hanya memilih template, warna, font, gaya kartu/tombol, dan varian daftar yang diizinkan
+`PLATFORM.pages` (`site.pages.services.variant`: `grid` | `list`; bawaan Bold = `list`).
+
+| Halaman | Berkas | Laravel | Status |
+|---|---|---|---|
+| Layanan (filter kategori + cari) | `services.html` | `/layanan` | selesai |
+| Detail layanan (slug = hash `#slug`) | `service-detail.html` | `/layanan/{slug}` | selesai |
+| Harga | `pricing.html` | `/harga` | selesai |
+| Portofolio, Tentang, Kontak | | | Gelombang 2 |
+| Artikel, Detail artikel, FAQ | | | Gelombang 3 |
+
+Teks halaman ada di `tenant.pageText`; pola SEO (judul/deskripsi bertoken `{name} {price} {unit} {city} {site}`)
+di `tenant.seo.pages`. SEO per halaman: BreadcrumbList di semua halaman, Service + FAQPage di detail layanan.
+Parameter pratinjau (`?template=`, dst.) ikut terbawa saat berpindah halaman di mockup.
 
 ## Kustomisasi tenant (`site` di data tenant)
 
@@ -170,5 +191,5 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 - `--header-h: 68px` tidak berada pada kelipatan 8px yang dipakai bagian lain.
 - Gambar adalah ilustrasi SVG buatan sendiri. Ganti dengan foto tenant di produksi;
   `og:image` sebaiknya JPG/PNG 1200×630.
-- Halaman internal (layanan, detail layanan, harga, portofolio, tentang, artikel, detail artikel,
-  kontak, FAQ) belum ada di repo ini. Pemetaan rutenya sudah ada di `PLATFORM.routes`.
+- Halaman portofolio, tentang, kontak, artikel, detail artikel, dan FAQ belum dibuat (Gelombang 2 dan 3).
+  Tautan ke halaman itu masih mengarah ke berkas yang belum ada. Pemetaan rutenya sudah ada di `PLATFORM.routes`.

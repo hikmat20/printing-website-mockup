@@ -155,7 +155,7 @@ window.TENANTS['sinar-copy'] = {
   pageText: {
     services: {
       title: 'Layanan Kami', lead: 'Fotocopy, print, large format, jilid, hingga cetak promosi. Pilih layanan, lihat harga, lalu pesan lewat WhatsApp.',
-      searchLabel: 'Cari layanan', searchPlaceholder: 'Cari layanan, mis. banner atau jilid',
+      listTitle: 'Daftar layanan', searchLabel: 'Cari layanan', searchPlaceholder: 'Cari layanan, mis. banner atau jilid',
       empty: { title: 'Layanan tidak ditemukan', text: 'Coba kata kunci lain, atau tanyakan langsung. Kami bisa mengerjakan banyak kebutuhan cetak di luar daftar ini.', button: 'Tanya lewat WhatsApp' }
     },
     service: {

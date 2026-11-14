@@ -112,7 +112,8 @@
   /* '/layanan/{slug}' + slug -> '/layanan/fotocopy' */
   function pathFor(routeName, slug) {
     var r = PS.platform.routes[routeName];
-    return r ? r.laravel.replace('{slug}', slug || '') : '/';
+    var p = r ? r.laravel.replace('{slug}', slug || '') : '/';
+    return p.length > 1 ? p.replace(/\/$/, '') : p;
   }
 
   function clearLd(id) {
