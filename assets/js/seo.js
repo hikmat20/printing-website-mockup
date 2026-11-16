@@ -149,13 +149,15 @@
     if (o.faqs && o.faqs.length) jsonLd('faq', faqPage(o.faqs)); else clearLd('faq');
     if (o.breadcrumbs && o.breadcrumbs.length > 1) jsonLd('breadcrumb', breadcrumbList(o.breadcrumbs)); else clearLd('breadcrumb');
     if (o.service) jsonLd('service', servicePage(o.service, o.category, pageUrl)); else clearLd('service');
+    clearLd('page');
+    if (o.pageLd) jsonLd('page', o.pageLd(pageUrl));          /* JSON-LD khusus halaman (CollectionPage, AboutPage, ContactPage) */
   }
 
   /* Halaman internal: PS.pageMeta ditulis oleh pages.js; dipanggil ulang saat hash (slug) berganti */
   function applyPage() {
     var m = PS.pageMeta;
     if (!m) return;
-    var o = { route: m.route, breadcrumbs: m.crumbs, faqs: m.faqs };
+    var o = { route: m.route, breadcrumbs: m.crumbs, faqs: m.faqs, pageLd: m.pageLd };
     if (m.notFound) {
       o.title = 'Halaman tidak ditemukan | ' + T.name; o.description = seo.defaultDescription; o.robots = 'noindex, follow'; o.path = pathFor('service', '');
     } else if (m.key === 'service') {

@@ -114,3 +114,9 @@ html[data-template="bold"][data-card="outlined"] .pf-card { box-shadow: 4px 4px 
 [data-template="bold"] .spec-list { border-width: 2px; }
 [data-template="bold"] .tag-opt { border-radius: 0; border-width: 2px; }
 [data-template="bold"] .note-box { border-radius: 0; border-width: 2px; }
+[data-template="bold"] .vm-card { border-top: 6px solid var(--c-accent); }
+[data-template="bold"] .vm-card .ico { border-radius: 0; background: var(--c-accent); color: var(--c-on-accent); }
+[data-template="bold"] .milestones::before { width: 4px; left: 38px; background: var(--c-primary); }
+[data-template="bold"] .milestone-year { border-radius: 0; background: var(--c-accent); color: var(--c-on-accent); }
+[data-template="bold"] .contact-form { border-width: 2px; }
+[data-template="bold"] .contact-form .form-control, [data-template="bold"] .contact-form .form-select { border-radius: 0; border-width: 2px; }

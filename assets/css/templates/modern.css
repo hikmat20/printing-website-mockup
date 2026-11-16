@@ -80,3 +80,4 @@
 [data-template="modern"] .result-count { text-align: center; }
 [data-template="modern"] .price-block { padding: 1.25rem; border-radius: var(--r-card); background: var(--c-surface); }
 [data-template="modern"] .price-block .price-table { box-shadow: none; }
+[data-template="modern"] .vm-card { border-radius: 20px; }

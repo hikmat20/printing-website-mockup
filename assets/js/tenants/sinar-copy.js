@@ -80,6 +80,23 @@ window.TENANTS['sinar-copy'] = {
       image: 'assets/images/general/ruang-produksi.svg',
       alt: 'Dua mesin cetak digital di ruang produksi'
     },
+    aboutPage: {
+      vision: { title: 'Visi', text: 'Menjadi tempat cetak pertama yang diingat warga sekitar: cepat, rapi, dan jujur soal harga.' },
+      missionTitle: 'Misi',
+      mission: [
+        'Mengerjakan setiap pesanan sesuai spesifikasi yang disepakati di awal.',
+        'Menyebutkan harga dan estimasi selesai sebelum pekerjaan dimulai.',
+        'Merawat mesin dan menjaga kualitas bahan agar hasil cetak konsisten.',
+        'Membantu pelanggan memilih kertas, ukuran, dan finishing yang pas, tanpa memaksa.'
+      ],
+      milestones: [
+        { year: '2012', title: 'Satu mesin fotocopy', text: 'Membuka layanan fotocopy dan print dokumen di depan kampus.' },
+        { year: '2016', title: 'Jilid dan laminating', text: 'Menambah layanan jilid skripsi, laminating, dan cetak kartu nama.' },
+        { year: '2020', title: 'Cetak digital', text: 'Mesin digital printing untuk brosur, undangan, dan sticker kemasan.' },
+        { year: '2023', title: 'Large format', text: 'Mulai mencetak banner, spanduk, dan poster ukuran besar.' },
+        { year: 'Kini', title: 'Pesan lewat WhatsApp', text: 'Pelanggan mengirim file dan kebutuhan dari mana saja, lalu mengambil pesanan di toko.' }
+      ]
+    },
     stats: [
       { value: '13+', label: 'Tahun melayani' },
       { value: '25rb+', label: 'Pesanan selesai' },
@@ -102,6 +119,18 @@ window.TENANTS['sinar-copy'] = {
         services: {
           title: 'Layanan Fotocopy, Print, Banner & Jilid | Sinar Copy & Printing',
           description: 'Daftar layanan percetakan di Jakarta Timur: fotocopy, print dokumen, cetak banner, jilid skripsi, laminating, brosur, dan undangan. Lihat harga lalu pesan lewat WhatsApp.'
+        },
+        portfolio: {
+          title: 'Portofolio Hasil Cetak | Sinar Copy & Printing',
+          description: 'Contoh hasil cetak Sinar Copy & Printing Jakarta Timur: banner, brosur, undangan, buku, sticker, dan kartu nama untuk berbagai pelanggan.'
+        },
+        about: {
+          title: 'Tentang Kami - Percetakan & Fotocopy Jakarta Timur | Sinar Copy & Printing',
+          description: 'Sinar Copy & Printing melayani pelajar, kantor, dan UMKM di Jakarta Timur sejak 2012. Kenali cerita, visi, dan cara kerja kami.'
+        },
+        contact: {
+          title: 'Kontak & Lokasi Toko | Sinar Copy & Printing',
+          description: 'Hubungi Sinar Copy & Printing lewat WhatsApp, telepon, atau datang ke toko di Pulogadung, Jakarta Timur. Lihat jam buka dan peta lokasi.'
         },
         pricing: {
           title: 'Daftar Harga Fotocopy, Print & Cetak | Sinar Copy & Printing',
@@ -163,6 +192,28 @@ window.TENANTS['sinar-copy'] = {
       pricingTitle: 'Daftar harga', pricingNote: 'Harga dapat berubah untuk jumlah besar atau file yang perlu penyesuaian. Konfirmasi final lewat WhatsApp.',
       orderTitle: 'Pesan layanan ini', orderHint: 'Pilih kebutuhan Anda, lalu kirim lewat WhatsApp. Kami balas dengan rincian harga dan estimasi selesai.',
       orderButton: 'Pesan lewat WhatsApp', relatedTitle: 'Layanan terkait', faqTitle: 'Pertanyaan tentang layanan ini'
+    },
+    portfolio: {
+      title: 'Portofolio', lead: 'Contoh pesanan yang sudah kami selesaikan untuk kafe, klinik, sekolah, dan keluarga di sekitar Jakarta Timur. Klik gambar untuk memperbesar.',
+      listTitle: 'Daftar hasil pekerjaan', countNoun: 'karya', clientLabel: 'Klien',
+      empty: { title: 'Belum ada karya di kategori ini', text: 'Pilih kategori lain, atau ceritakan kebutuhan Anda. Kami bisa mengerjakan yang serupa.', button: 'Tanya lewat WhatsApp' }
+    },
+    about: {
+      title: 'Tentang Kami', lead: 'Kenali Sinar Copy & Printing: dari satu mesin fotocopy kecil menjadi mitra cetak warga Jakarta Timur.',
+      visionTitle: 'Visi & Misi', milestonesTitle: 'Perjalanan Kami', milestonesText: 'Beberapa tonggak yang membentuk cara kami bekerja hari ini.'
+    },
+    contact: {
+      title: 'Hubungi Kami', lead: 'Punya pertanyaan, butuh penawaran, atau ingin konsultasi bahan dan ukuran? Isi formulir ini atau datang langsung ke toko kami.',
+      formTitle: 'Kirim pesan', formHint: 'Pesan Anda dikirim lewat WhatsApp supaya cepat dibalas. Semua kolom bertanda * wajib diisi.',
+      fields: {
+        name:    { label: 'Nama', placeholder: 'Nama lengkap', error: 'Isi nama Anda, minimal 2 huruf.' },
+        phone:   { label: 'Nomor WhatsApp', placeholder: 'mis. 0812-3456-7890', error: 'Isi nomor WhatsApp yang valid, mis. 081234567890.' },
+        service: { label: 'Layanan yang diminati', other: 'Lainnya / belum tahu' },
+        message: { label: 'Pesan', placeholder: 'Ceritakan kebutuhan Anda: ukuran, jumlah, kertas, tenggat.', error: 'Tulis pesan minimal 10 karakter.' }
+      },
+      submit: 'Kirim lewat WhatsApp',
+      success: { title: 'Pesan siap dikirim', text: 'WhatsApp akan terbuka dengan pesan Anda. Jika tidak terbuka, tekan tombol di bawah ini.', button: 'Buka WhatsApp' },
+      infoTitle: 'Informasi toko'
     },
     pricing: {
       title: 'Daftar Harga', lead: 'Harga per satuan untuk layanan yang paling sering dipesan. Harga jelas di awal, tanpa biaya tersembunyi.',

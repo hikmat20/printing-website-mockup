@@ -43,7 +43,8 @@ Parameter URL hanya untuk pratinjau. Di produksi pengaturan ini disimpan di data
 
 ```
 index.html                    Cangkang beranda: <main id="main"> diisi dari data
-services.html service-detail.html pricing.html   Cangkang halaman internal (Gelombang 1)
+services.html service-detail.html pricing.html portfolio.html about.html contact.html
+                              Cangkang halaman internal (Gelombang 1 dan 2)
 assets/
   js/
     platform.js               DATA PLATFORM: rute, navigasi, registri (font, header, kartu,
@@ -51,7 +52,7 @@ assets/
     tenants/sinar-copy.js     DATA TENANT: profil, tema, isi, teks section, pengaturan `site`
     main.js                   Inti: validasi konfigurasi, tema, header/footer, interaksi, hook modul
     sections.js               Renderer 12 section beranda + varian
-    pages.js                  Halaman internal (struktur tetap): layanan, detail layanan, harga
+    pages.js                  Halaman internal (struktur tetap): layanan, detail layanan, harga, portofolio, tentang, kontak
     seo.js                    <title>, meta, canonical, Open Graph, JSON-LD dari data (beranda + halaman internal)
     preview.js                Panel ?customize (khusus mockup)
   css/
@@ -86,11 +87,16 @@ Tenant hanya memilih template, warna, font, gaya kartu/tombol, dan varian daftar
 | Layanan (filter kategori + cari) | `services.html` | `/layanan` | selesai |
 | Detail layanan (slug = hash `#slug`) | `service-detail.html` | `/layanan/{slug}` | selesai |
 | Harga | `pricing.html` | `/harga` | selesai |
-| Portofolio, Tentang, Kontak | | | Gelombang 2 |
+| Portofolio (filter kategori + lightbox) | `portfolio.html` | `/portofolio` | selesai |
+| Tentang (profil, visi/misi, perjalanan, keunggulan) | `about.html` | `/tentang-kami` | selesai |
+| Kontak (form kirim via WhatsApp, info, peta) | `contact.html` | `/kontak` | selesai |
 | Artikel, Detail artikel, FAQ | | | Gelombang 3 |
 
 Teks halaman ada di `tenant.pageText`; pola SEO (judul/deskripsi bertoken `{name} {price} {unit} {city} {site}`)
-di `tenant.seo.pages`. SEO per halaman: BreadcrumbList di semua halaman, Service + FAQPage di detail layanan.
+di `tenant.seo.pages`. SEO per halaman: BreadcrumbList di semua halaman, Service + FAQPage di detail layanan,
+CollectionPage (portofolio), AboutPage (tentang), ContactPage (kontak).
+Form kontak memvalidasi di sisi klien (nama, ponsel Indonesia 10-13 digit, pesan) lalu membuka `wa.me` dengan teks ter-encode;
+pada produksi validasi dan antispam wajib diulang di server (POST `/kontak`). Kolom honeypot hanya penghalang bot sederhana.
 Parameter pratinjau (`?template=`, dst.) ikut terbawa saat berpindah halaman di mockup.
 
 ## Kustomisasi tenant (`site` di data tenant)
@@ -191,5 +197,5 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 - `--header-h: 68px` tidak berada pada kelipatan 8px yang dipakai bagian lain.
 - Gambar adalah ilustrasi SVG buatan sendiri. Ganti dengan foto tenant di produksi;
   `og:image` sebaiknya JPG/PNG 1200×630.
-- Halaman portofolio, tentang, kontak, artikel, detail artikel, dan FAQ belum dibuat (Gelombang 2 dan 3).
-  Tautan ke halaman itu masih mengarah ke berkas yang belum ada. Pemetaan rutenya sudah ada di `PLATFORM.routes`.
+- Halaman artikel, detail artikel, dan FAQ belum dibuat (Gelombang 3). Tautan ke halaman itu masih
+  mengarah ke berkas yang belum ada. Pemetaan rutenya sudah ada di `PLATFORM.routes`.

@@ -116,7 +116,7 @@
       (x.eyebrow ? '<span class="eyebrow">' + esc(x.eyebrow) + '</span>' : '') + '<h2 id="about-title">' + esc(a.title) + '</h2>' +
       a.text.map(function (p) { return '<p class="text-muted-x">' + esc(p) + '</p>'; }).join('') +
       '<ul class="check-list">' + a.highlights.map(function (t) { return '<li>' + ico('circle-check') + '<span>' + esc(t) + '</span></li>'; }).join('') + '</ul>' +
-      (x.cta ? '<a class="btn btn-outline-brand" href="' + url(x.cta.route) + '">' + esc(x.cta.label) + ' ' + ico('arrow-right') + '</a>' : '') + '</div>';
+      (x.cta && !o.noCta ? '<a class="btn btn-outline-brand" href="' + url(x.cta.route) + '">' + esc(x.cta.label) + ' ' + ico('arrow-right') + '</a>' : '') + '</div>';
     var stats = '<div class="stats">' + T.stats.map(function (s) { return '<div class="stat"><strong>' + esc(s.value) + '</strong><span>' + esc(s.label) + '</span></div>'; }).join('') + '</div>';
     return wrap('about', '<div class="row g-4 g-lg-5 align-items-center">' + media + text + '</div>' + stats, o);
   };
@@ -203,6 +203,7 @@
 
   /* ------------------------------------------------- susun beranda dari data */
   PS.sections = R;
+  R.parts = { infoRows: infoRows, mapFrame: mapFrame };      /* dipakai halaman Kontak */
   PS.use(function () {
     var main = document.getElementById('main');
     if (!main || document.body.getAttribute('data-page') !== 'home') return;

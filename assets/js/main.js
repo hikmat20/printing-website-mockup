@@ -286,7 +286,7 @@
           '<a class="dropdown-all" href="' + url('services') + '">Lihat semua layanan ' + ico('arrow-right') + '</a>';
       } else {
         active = item.dropdown.some(function (c) { return c.route === page; });
-        links = item.dropdown.map(function (c) { return '<a href="' + url(c.route) + '">' + esc(c.label) + '</a>'; }).join('');
+        links = item.dropdown.map(function (c) { return '<a href="' + url(c.route) + '"' + (c.route === page ? ' aria-current="page"' : '') + '>' + esc(c.label) + '</a>'; }).join('');
       }
       var id = 'dd-' + item.label.toLowerCase().replace(/\W+/g, '');
       return '<li class="has-dropdown"><button type="button" class="nav-toggle' + (active ? ' is-active' : '') + '" aria-expanded="false" aria-controls="' + id + '">' +
@@ -325,7 +325,7 @@
       if (item.dropdown) {
         var subs = item.dropdown === 'categories'
           ? D.categories.map(function (c) { return '<a href="' + url('category', c.slug) + '">' + esc(c.name) + '</a>'; }).join('') + '<a href="' + url('services') + '"><strong>Lihat semua layanan</strong></a>'
-          : item.dropdown.map(function (c) { return '<a href="' + url(c.route) + '">' + esc(c.label) + '</a>'; }).join('');
+          : item.dropdown.map(function (c) { return '<a href="' + url(c.route) + '"' + (c.route === page ? ' aria-current="page"' : '') + '>' + esc(c.label) + '</a>'; }).join('');
         var active = item.dropdown === 'categories' ? page === 'services' : item.dropdown.some(function (c) { return c.route === page; });
         var id = 'm-sub-' + item.label.toLowerCase().replace(/\W+/g, '');
         return '<li><button type="button" class="m-link m-toggle' + (active ? ' is-active' : '') + '" aria-expanded="false" aria-controls="' + id + '">' + esc(item.label) + ico('chevron-down') + '</button>' +
@@ -604,7 +604,7 @@
       cap.innerHTML = '<strong>' + esc(title ? title.textContent : '') + '</strong>' + esc(desc ? desc.textContent : '');
     }
     function open(group, btn) {
-      items = $$('.pf-card', group);
+      items = $$('.pf-card', group).filter(function (b) { return !b.closest('.hidden-by-filter'); });   /* hanya yang tampil setelah disaring */
       lastFocus = btn;
       show(items.indexOf(btn));
       box.classList.add('is-open'); document.body.classList.add('is-locked');

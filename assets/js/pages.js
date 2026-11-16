@@ -10,6 +10,9 @@
  *   R.services -> resources/views/pages/services.blade.php  (+ filter via query ?kategori=)
  *   R.service  -> pages/service.blade.php   (route /layanan/{slug})
  *   R.pricing  -> pages/pricing.blade.php
+ *   R.portfolio -> pages/portfolio.blade.php  (filter kategori via ?kategori=)
+ *   R.about    -> pages/about.blade.php
+ *   R.contact  -> pages/contact.blade.php     (POST /kontak: validasi + antispam di server)
  * Pada produksi halaman dirender server-side; filter/pencarian di sini hanya sisi klien.
  */
 (function () {
@@ -92,20 +95,23 @@
     };
   };
 
-  function initServicesFilter() {
-    var list = document.getElementById('svc-list'), search = document.getElementById('svc-search'), count = document.getElementById('svc-count'), empty = document.getElementById('svc-empty');
+  /* Filter kategori (+ pencarian opsional) untuk daftar layanan dan portofolio.
+     cfg: { list, search?, count, empty, noun } -> id elemen. Setiap item: [data-item][data-category][data-q]. */
+  function initFilter(cfg) {
+    var list = document.getElementById(cfg.list), search = cfg.search ? document.getElementById(cfg.search) : null;
+    var count = document.getElementById(cfg.count), empty = document.getElementById(cfg.empty);
     if (!list) return;
     var cols = Array.prototype.slice.call(list.querySelectorAll('[data-item]'));
     var chips = Array.prototype.slice.call(document.querySelectorAll('.chip[data-cat]'));
     function current() { var c = chips.filter(function (b) { return b.getAttribute('aria-pressed') === 'true'; })[0]; return c ? c.getAttribute('data-cat') : 'all'; }
     function apply() {
-      var cat = current(), q = search.value.trim().toLowerCase(), n = 0;
+      var cat = current(), q = search ? search.value.trim().toLowerCase() : '', n = 0;
       cols.forEach(function (c) {
         var show = (cat === 'all' || c.getAttribute('data-category') === cat) && (!q || c.getAttribute('data-q').indexOf(q) > -1);
         c.classList.toggle('hidden-by-filter', !show);
         if (show) n++;
       });
-      count.textContent = n + ' layanan' + (cat !== 'all' ? ' dalam kategori ' + byKey(D.categories, 'slug', cat).name : '') + (q ? ' untuk "' + search.value.trim() + '"' : '');
+      count.textContent = n + ' ' + cfg.noun + (cat !== 'all' ? ' dalam kategori ' + byKey(D.categories, 'slug', cat).name : '') + (q ? ' untuk "' + search.value.trim() + '"' : '');
       empty.hidden = n !== 0;
     }
     function select(cat, pushHash) {
@@ -117,10 +123,11 @@
       apply();
     }
     chips.forEach(function (b) { b.addEventListener('click', function () { select(b.getAttribute('data-cat'), true); }); });
-    search.addEventListener('input', apply);
-    window.addEventListener('hashchange', function () { if (isAnchor()) return; var s = hashSlug(); select(byKey(D.categories, 'slug', s) ? s : 'all', false); });
+    if (search) search.addEventListener('input', apply);
+    window.addEventListener('hashchange', function () { if (isAnchor()) return; var s = hashSlug(); select(chips.some(function (b) { return b.getAttribute('data-cat') === s; }) ? s : 'all', false); });
     apply();
   }
+  function initServicesFilter() { initFilter({ list: 'svc-list', search: 'svc-search', count: 'svc-count', empty: 'svc-empty', noun: 'layanan' }); }
 
   /* ------------------------------------------------------ /layanan/{slug} */
   function msgOrder(s, root) {
@@ -229,6 +236,132 @@
       meta: { key: 'pricing', route: 'pricing', crumbs: crumbMeta(cr) }
     };
   };
+
+  /* ---------------------------------------------------------- /portofolio */
+  R.portfolio = function () {
+    var x = PT.portfolio || {};
+    var cats = D.categories.filter(function (c) { return D.portfolio.some(function (p) { return p.category === c.slug; }); });
+    var active = byKey(cats, 'slug', hashSlug()) ? hashSlug() : 'all';   /* hash kategori tanpa karya -> Semua */
+    var chips = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (active === 'all') + '">Semua</button>' + cats.map(function (c) {
+      return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + '</button>';
+    }).join('');
+    var items = D.portfolio.map(function (p, i) {
+      return '<div class="col-6 col-lg-4" data-item data-category="' + esc(p.category) + '">' + C.portfolioCard(p, i) + '</div>';
+    }).join('');
+    var empty = x.empty || {};
+    var body = '<div class="filter-bar"><div class="chips" role="group" aria-label="Filter kategori">' + chips + '</div></div>' +
+      '<p class="result-count" id="pf-count" role="status" aria-live="polite"></p>' +
+      '<div class="row g-3 g-lg-4" id="pf-list" data-lightbox-group>' + items + '</div>' +
+      '<div class="empty-state" id="pf-empty" hidden><span class="ico">' + ico('image-off', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
+      '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
+    var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
+    return {
+      html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-labelledby="pf-title"><div class="container"><h2 class="visually-hidden" id="pf-title">' + esc(x.listTitle || x.title) + '</h2>' + body + '</div></section>' + ctaBand(),
+      meta: {
+        key: 'portfolio', route: 'portfolio', crumbs: crumbMeta(cr),
+        pageLd: function (pageUrl) {
+          return { '@context': 'https://schema.org', '@type': 'CollectionPage', name: x.title, url: pageUrl,
+            hasPart: D.portfolio.map(function (p) { return { '@type': 'ImageObject', name: p.title, description: p.description, contentUrl: PS.seo.abs(p.image) }; }) };
+        }
+      },
+      after: function () { initFilter({ list: 'pf-list', count: 'pf-count', empty: 'pf-empty', noun: x.countNoun || 'karya' }); }
+    };
+  };
+
+  /* ------------------------------------------------------------- /tentang-kami */
+  R.about = function () {
+    var x = PT.about || {}, a = (T.aboutPage && typeof T.aboutPage === 'object') ? T.aboutPage : {};
+    var mission = list(a.mission).filter(function (m) { return typeof m === 'string' && m; });
+    var ms = list(a.milestones).filter(function (m) { return m && typeof m === 'object' && (m.title || m.text); });
+    var vis = (a.vision && typeof a.vision === 'object' && (a.vision.title || a.vision.text)) ? a.vision : null;
+    var vm = (vis || mission.length) ? '<section class="section section-alt" aria-labelledby="vm-title"><div class="container"><div class="section-head"><h2 id="vm-title">' + esc(x.visionTitle) + '</h2></div>' +
+      '<div class="row g-3 g-lg-4">' +
+      (vis ? '<div class="col-lg-5"><div class="card-x vm-card"><span class="ico">' + ico('eye') + '</span><h3>' + esc(vis.title) + '</h3><p>' + esc(vis.text) + '</p></div></div>' : '') +
+      (mission.length ? '<div class="col-lg-7"><div class="card-x vm-card"><span class="ico">' + ico('target') + '</span><h3>' + esc(a.missionTitle) + '</h3><ul class="check-list">' +
+        mission.map(function (m) { return '<li>' + ico('circle-check') + '<span>' + esc(m) + '</span></li>'; }).join('') + '</ul></div></div>' : '') +
+      '</div></div></section>' : '';
+    var timeline = ms.length ? '<section class="section" aria-labelledby="ms-title"><div class="container"><div class="section-head"><h2 id="ms-title">' + esc(x.milestonesTitle) + '</h2>' +
+      (x.milestonesText ? '<p>' + esc(x.milestonesText) + '</p>' : '') + '</div><ol class="milestones">' +
+      ms.map(function (m) { return '<li class="milestone"><span class="milestone-year">' + esc(m.year) + '</span><div><h3>' + esc(m.title) + '</h3><p>' + esc(m.text) + '</p></div></li>'; }).join('') +
+      '</ol></div></section>' : '';
+    var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
+    return {
+      html: crumbs(cr) + pageHead(x.title, x.lead) + PS.sections.about('split', { alt: false, noCta: true }) + vm + timeline + PS.sections.why('grid', { alt: true }) + ctaBand(),
+      meta: {
+        key: 'about', route: 'about', crumbs: crumbMeta(cr),
+        pageLd: function (pageUrl) {
+          var biz = { '@type': 'LocalBusiness', name: T.name, url: PS.seo.abs('/') };
+          if (T.since) biz.foundingDate = String(T.since);
+          return { '@context': 'https://schema.org', '@type': 'AboutPage', name: x.title, url: pageUrl, about: biz };
+        }
+      }
+    };
+  };
+
+  /* ------------------------------------------------------------------ /kontak */
+  var PHONE_RE = /^(\+?62|0)8\d{8,11}$/;      /* ponsel Indonesia: 10-13 digit */
+  R.contact = function () {
+    var x = PT.contact || {}, f = x.fields || {};
+    var svcOpts = '<option value="">' + esc((f.service || {}).other) + '</option>' + D.services.map(function (s) { return '<option>' + esc(s.name) + '</option>'; }).join('');
+    function field(id, inner, hint) { return '<div class="mb-3" data-field="' + id + '">' + inner + '<div class="invalid-msg" id="c-' + id + '-err" hidden>' + esc(hint || '') + '</div></div>'; }
+    var form = '<form class="contact-form card-x" id="contact-form" novalidate aria-labelledby="form-title">' +
+      '<h2 class="h4" id="form-title">' + esc(x.formTitle) + '</h2><p class="form-note">' + esc(x.formHint) + '</p>' +
+      field('name', '<label class="form-label" for="c-name">' + esc(f.name.label) + ' *</label><input class="form-control" id="c-name" name="name" maxlength="80" autocomplete="name" placeholder="' + esc(f.name.placeholder) + '" required aria-describedby="c-name-err">', f.name.error) +
+      field('phone', '<label class="form-label" for="c-phone">' + esc(f.phone.label) + ' *</label><input class="form-control" id="c-phone" name="phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="' + esc(f.phone.placeholder) + '" required aria-describedby="c-phone-err">', f.phone.error) +
+      '<div class="mb-3"><label class="form-label" for="c-service">' + esc(f.service.label) + '</label><select class="form-select" id="c-service" name="service">' + svcOpts + '</select></div>' +
+      field('message', '<label class="form-label" for="c-message">' + esc(f.message.label) + ' *</label><textarea class="form-control" id="c-message" name="message" rows="5" maxlength="1000" placeholder="' + esc(f.message.placeholder) + '" required aria-describedby="c-message-err"></textarea>', f.message.error) +
+      '<div class="visually-hidden" aria-hidden="true"><label>Jangan diisi <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>' +   /* honeypot spam; Laravel: validasi sisi server */
+      '<button type="submit" class="btn btn-wa btn-lg w-100">' + WA + ' ' + esc(x.submit) + '</button>' +
+      '<div class="form-success" id="contact-success" role="status" tabindex="-1">' + ico('circle-check') + '<div><strong>' + esc((x.success || {}).title) + '</strong><p class="mb-2">' + esc((x.success || {}).text) + '</p>' +
+      '<a class="btn btn-wa btn-sm" id="contact-wa" target="_blank" rel="noopener noreferrer">' + WA + ' ' + esc((x.success || {}).button) + '</a></div></div></form>';
+    var info = '<div class="loc-card loc-card--page"><h2 class="h4">' + esc(x.infoTitle) + '</h2>' + PS.sections.parts.infoRows() + '</div>';
+    var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
+    return {
+      html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-label="Formulir dan informasi kontak"><div class="container"><div class="row g-4 g-lg-5">' +
+        '<div class="col-lg-7">' + form + '</div><div class="col-lg-5">' + info + '</div>' +
+        '<div class="col-12">' + PS.sections.parts.mapFrame() + '</div></div></div></section>',
+      meta: {
+        key: 'contact', route: 'contact', crumbs: crumbMeta(cr),
+        pageLd: function (pageUrl) { return { '@context': 'https://schema.org', '@type': 'ContactPage', name: x.title, url: pageUrl, about: { '@type': 'LocalBusiness', name: T.name, telephone: '+' + T.phone, email: T.email } }; }
+      },
+      after: initContactForm
+    };
+  };
+
+  function initContactForm() {
+    var form = document.getElementById('contact-form');
+    if (!form) return;
+    var x = PT.contact || {};
+    var rules = {
+      name: function (v) { return v.trim().length >= 2; },
+      phone: function (v) { return PHONE_RE.test(v.replace(/[\s.\-()]/g, '')); },
+      message: function (v) { return v.trim().length >= 10; }
+    };
+    function setErr(id, bad) {
+      var input = form.querySelector('[name="' + id + '"]'), msg = document.getElementById('c-' + id + '-err');
+      input.classList.toggle('is-invalid', bad); input.setAttribute('aria-invalid', String(bad)); msg.hidden = !bad;
+    }
+    Object.keys(rules).forEach(function (id) {
+      var input = form.querySelector('[name="' + id + '"]');
+      input.addEventListener('blur', function () { setErr(id, !rules[id](input.value)); });
+      input.addEventListener('input', function () { if (input.classList.contains('is-invalid') && rules[id](input.value)) setErr(id, false); });
+    });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (form.website.value) return;                                  /* honeypot terisi: kemungkinan bot */
+      var firstBad = null;
+      Object.keys(rules).forEach(function (id) { var bad = !rules[id](form[id].value); setErr(id, bad); if (bad && !firstBad) firstBad = form[id]; });
+      if (firstBad) { firstBad.focus(); return; }
+      var svc = form.service.value;
+      var msg = 'Halo ' + T.shortName + ', saya ' + form.name.value.trim() + ' (WA ' + form.phone.value.trim() + ').' +
+        (svc ? ' Saya tertarik dengan layanan ' + svc + '.' : '') + '\n\n' + form.message.value.trim();
+      var enc; try { enc = encodeURIComponent(msg); } catch (err) { enc = encodeURIComponent(msg.replace(/[\uD800-\uDFFF]/g, '')); }   /* karakter surrogat tunggal (tempel/IME) */
+      var link = 'https://wa.me/' + T.whatsapp + '?text=' + enc;
+      var ok = document.getElementById('contact-success'), a = document.getElementById('contact-wa');
+      a.href = link; ok.classList.add('is-shown'); ok.focus();
+      window.open(link, '_blank', 'noopener');
+    });
+  }
 
   /* ------------------------------------------------- pasang ke <main> */
   function render() {
