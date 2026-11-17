@@ -120,7 +120,16 @@
   var ico = function (name, cls) { return '<i data-lucide="' + name + '" class="i ' + (cls || '') + '" aria-hidden="true"></i>'; };
   var findBy = function (list, key, val) { return list.filter(function (x) { return x[key] === val; })[0]; };
   var fmtDate = function (iso) {
-    return new Date(iso + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    var d = new Date(iso + 'T00:00:00');
+    return isNaN(d) ? '' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+  /* Baris meta artikel: tiap bagian hanya tampil bila datanya valid; tidak pernah menulis "undefined" */
+  var metaParts = function (a, readLabel, by) {
+    var parts = [], d = a && a.date ? fmtDate(a.date) : '', rt = parseInt(a && a.readTime, 10);
+    if (d) parts.push('<time datetime="' + esc(a.date) + '">' + d + '</time>');
+    if (by && a && a.author) parts.push('<span>' + esc(by) + ' ' + esc(a.author) + '</span>');
+    if (rt > 0) parts.push('<span>' + rt + ' ' + esc(readLabel) + '</span>');
+    return parts;
   };
 
   /* Logo WhatsApp (Lucide tidak menyediakan ikon merek ini) */
@@ -254,7 +263,7 @@
     return '<article class="card-x article-card">' +
       '<div class="card-media"><img src="' + esc(a.image) + '" alt="' + esc(a.imageAlt) + '" width="800" height="600" loading="lazy">' +
       '<span class="tag">' + esc(a.category) + '</span></div>' +
-      '<div class="card-body-x"><div class="meta-row"><time datetime="' + esc(a.date) + '">' + fmtDate(a.date) + '</time><span>•</span><span>' + a.readTime + ' menit baca</span></div>' +
+      '<div class="card-body-x"><div class="meta-row">' + metaParts(a, 'menit baca').join('<span aria-hidden="true">•</span>') + '</div>' +
       '<h3><a href="' + url('article', a.slug) + '">' + esc(a.title) + '</a></h3>' +
       '<p>' + esc(a.excerpt) + '</p>' +
       '<span class="link-arrow mt-auto">Baca selengkapnya ' + ico('arrow-right') + '</span></div></article>';
@@ -696,7 +705,7 @@
   window.PrintSite = {
     data: D, platform: P, site: S, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); },
     esc: esc, rupiah: rupiah, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
-    ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate,
+    ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
     components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }
   };
 

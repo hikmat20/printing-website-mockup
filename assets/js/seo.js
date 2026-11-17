@@ -136,14 +136,16 @@
     meta('name', 'theme-color', (PS.theme() || {}).primary);
     canonical(pageUrl);
 
-    meta('property', 'og:type', 'website');
+    meta('property', 'og:type', o.ogType || 'website');
     meta('property', 'og:site_name', T.name);
     meta('property', 'og:locale', seo.locale || 'id_ID');
     meta('property', 'og:title', title);
     meta('property', 'og:description', o.ogDescription || pg.ogDescription || desc);
     meta('property', 'og:url', pageUrl);
-    meta('property', 'og:image', abs(seo.ogImage));    /* produksi: ganti ke JPG/PNG 1200x630 (SVG tidak didukung semua platform) */
+    meta('property', 'og:image', abs(o.image || seo.ogImage));    /* produksi: ganti ke JPG/PNG 1200x630 (SVG tidak didukung semua platform) */
     meta('name', 'twitter:card', 'summary_large_image');
+    if (o.published) meta('property', 'article:published_time', o.published);
+    else { var pt = head.querySelector('meta[property="article:published_time"]'); if (pt) pt.parentNode.removeChild(pt); }
 
     jsonLd('business', localBusiness());
     if (o.faqs && o.faqs.length) jsonLd('faq', faqPage(o.faqs)); else clearLd('faq');
@@ -159,18 +161,23 @@
     if (!m) return;
     var o = { route: m.route, breadcrumbs: m.crumbs, faqs: m.faqs, pageLd: m.pageLd };
     if (m.notFound) {
-      o.title = 'Halaman tidak ditemukan | ' + T.name; o.description = seo.defaultDescription; o.robots = 'noindex, follow'; o.path = pathFor('service', '');
+      o.title = 'Halaman tidak ditemukan | ' + T.name; o.description = seo.defaultDescription; o.robots = 'noindex, follow'; o.path = pathFor(m.route || 'service', '');
     } else if (m.key === 'service') {
       var s = m.service, pat = (seo.pages && seo.pages.service) || {};
       var vars = { name: s.name, short: s.short, price: PS.rupiah(s.priceFrom).replace(/\u00a0/g, ' '), unit: s.unit, category: m.category ? m.category.name : '', site: T.name, city: T.city };
       o.title = fill(pat.title, vars); o.description = fill(pat.description, vars);
       o.slug = s.slug; o.service = s; o.category = m.category;
+    } else if (m.key === 'article') {
+      var a = m.article, ap = (seo.pages && seo.pages.article) || {};
+      var av = { name: a.title, short: a.excerpt, category: a.category, site: T.name, city: T.city };
+      o.title = fill(ap.title, av); o.description = fill(ap.description, av);
+      o.slug = a.slug; o.ogType = 'article'; o.image = a.image; o.published = a.date;
     }
     apply(m.key, o);
   }
   function fill(tpl, vars) { return String(tpl || '').replace(/\{(\w+)\}/g, function (x, k) { return vars[k] != null ? vars[k] : x; }); }
 
-  PS.seo = { apply: apply, applyPage: applyPage, localBusiness: localBusiness, faqPage: faqPage, breadcrumbList: breadcrumbList, servicePage: servicePage, abs: abs };
+  PS.seo = { apply: apply, applyPage: applyPage, localBusiness: localBusiness, faqPage: faqPage, breadcrumbList: breadcrumbList, servicePage: servicePage, abs: abs, pathFor: pathFor };
 
   /* Beranda: JSON-LD FAQ hanya bila section FAQ aktif (data tidak boleh menyatakan yang tidak tampil) */
   PS.use(function () {

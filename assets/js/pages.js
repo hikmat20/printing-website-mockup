@@ -13,6 +13,9 @@
  *   R.portfolio -> pages/portfolio.blade.php  (filter kategori via ?kategori=)
  *   R.about    -> pages/about.blade.php
  *   R.contact  -> pages/contact.blade.php     (POST /kontak: validasi + antispam di server)
+ *   R.blog     -> pages/blog.blade.php        (/artikel; varian grid|list dari site.pages.blog.variant)
+ *   R.article  -> pages/article.blade.php     (/artikel/{slug}; di mockup slug = hash)
+ *   R.faq      -> pages/faq.blade.php         (/faq; JSON-LD FAQPage dari semua pertanyaan)
  * Pada produksi halaman dirender server-side; filter/pencarian di sini hanya sisi klien.
  */
 (function () {
@@ -111,7 +114,8 @@
         c.classList.toggle('hidden-by-filter', !show);
         if (show) n++;
       });
-      count.textContent = n + ' ' + cfg.noun + (cat !== 'all' ? ' dalam kategori ' + byKey(D.categories, 'slug', cat).name : '') + (q ? ' untuk "' + search.value.trim() + '"' : '');
+      var cobj = cat !== 'all' ? byKey(cfg.cats || D.categories, 'slug', cat) : null;
+      count.textContent = n + ' ' + cfg.noun + (cobj ? ' dalam kategori ' + cobj.name : '') + (q ? ' untuk "' + search.value.trim() + '"' : '');
       empty.hidden = n !== 0;
     }
     function select(cat, pushHash) {
@@ -364,6 +368,170 @@
   }
 
   /* ------------------------------------------------- pasang ke <main> */
+  /* ------------------------------------------------------------ /artikel */
+  var slugify = function (v) { return String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); };
+  var articles = function () {                       /* terbaru dulu; abaikan data yang bukan objek / tanpa slug */
+    return list(D.articles).filter(function (a) { return a && typeof a === 'object' && a.slug && a.title; })
+      .slice().sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+  };
+  var articleCats = function (arts) {
+    var seen = {}, out = [];
+    arts.forEach(function (a) { var sl = slugify(a.category); if (sl && !seen[sl]) { seen[sl] = 1; out.push({ slug: sl, name: a.category }); } });
+    return out;
+  };
+
+  R.blog = function () {
+    var x = PT.blog || {}; x = { title: x.title || 'Artikel', lead: x.lead, listTitle: x.listTitle, searchLabel: x.searchLabel, searchPlaceholder: x.searchPlaceholder, countNoun: x.countNoun, empty: x.empty }; var variant = PS.site.pages.blog.variant, arts = articles(), cats = articleCats(arts);
+    var active = byKey(cats, 'slug', hashSlug()) ? hashSlug() : 'all';
+    var chips = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (active === 'all') + '">Semua</button>' + cats.map(function (c) {
+      return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + '</button>';
+    }).join('');
+    var colCls = variant === 'list' ? 'col-12' : 'col-12 col-md-6 col-lg-4';
+    var items = arts.map(function (a) {
+      var q = (a.title + ' ' + (a.excerpt || '') + ' ' + (a.category || '')).toLowerCase();
+      return '<div class="' + colCls + '" data-item data-category="' + esc(slugify(a.category)) + '" data-q="' + esc(q) + '">' + C.articleCard(a) + '</div>';
+    }).join('');
+    var empty = x.empty || {};
+    var body =
+      '<div class="filter-bar">' +
+        '<div class="search-input"><label class="visually-hidden" for="art-search">' + esc(x.searchLabel || 'Cari artikel') + '</label>' + ico('search') +
+        '<input id="art-search" type="search" class="form-control" placeholder="' + esc(x.searchPlaceholder || '') + '" autocomplete="off"></div>' +
+        '<div class="chips" role="group" aria-label="Filter kategori">' + chips + '</div></div>' +
+      '<p class="result-count" id="art-count" role="status" aria-live="polite"></p>' +
+      '<div class="row g-3 g-lg-4 art-list art-list--' + variant + '" id="art-list">' + items + '</div>' +
+      '<div class="empty-state" id="art-empty" hidden><span class="ico">' + ico('search-x', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
+      '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
+    var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
+    return {
+      html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-labelledby="art-list-title"><div class="container"><h2 class="visually-hidden" id="art-list-title">' + esc(x.listTitle || x.title) + '</h2>' + body + '</div></section>' + ctaBand(),
+      meta: {
+        key: 'blog', route: 'blog', crumbs: crumbMeta(cr),
+        pageLd: function (pageUrl) {
+          return { '@context': 'https://schema.org', '@type': 'Blog', name: x.title, url: pageUrl, inLanguage: 'id-ID',
+            publisher: { '@type': 'LocalBusiness', name: T.name, url: PS.seo.abs('/') },
+            blogPost: arts.map(function (a) {
+              return { '@type': 'BlogPosting', headline: a.title, datePublished: a.date, image: a.image ? PS.seo.abs(a.image) : undefined, url: PS.seo.abs(PS.seo.pathFor('article', a.slug)) };
+            }) };
+        }
+      },
+      after: function () { initFilter({ list: 'art-list', search: 'art-search', count: 'art-count', empty: 'art-empty', noun: x.countNoun || 'artikel', cats: cats }); }
+    };
+  };
+
+  /* ------------------------------------------------------ /artikel/{slug} */
+  /* Isi artikel = daftar blok data: { type: 'h2'|'p'|'ul'|'ol'|'note', text | items }. Tidak ada HTML dari data. */
+  function articleBlock(b) {
+    if (!b || typeof b !== 'object') return '';
+    var strs = function (v) { return list(v).filter(function (t) { return typeof t === 'string' && t; }); };
+    switch (b.type) {
+      case 'h2': return b.text ? '<h2>' + esc(b.text) + '</h2>' : '';
+      case 'p': return b.text ? '<p>' + esc(b.text) + '</p>' : '';
+      case 'ul': case 'ol': var it = strs(b.items); return it.length ? '<' + b.type + '>' + it.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</' + b.type + '>' : '';
+      case 'note': return b.text ? '<div class="note-box">' + ico('lightbulb') + '<p>' + esc(b.text) + '</p></div>' : '';
+      default: return '';
+    }
+  }
+
+  R.article = function () {
+    var x = PT.article || {}, arts = articles(), a = byKey(arts, 'slug', hashSlug());
+    if (!a) {
+      var nf = x.notFound || {};
+      return {
+        html: crumbs([{ label: 'Beranda', route: 'home' }, { label: 'Artikel', route: 'blog' }, { label: nf.title }]) +
+          '<section class="section"><div class="container"><div class="empty-state"><span class="ico">' + ico('file-question', 'i-lg') + '</span>' +
+          '<h1 id="page-title">' + esc(nf.title) + '</h1><p>' + esc(nf.text) + '</p><a class="btn btn-brand" href="' + url('blog') + '">' + esc(nf.button) + '</a></div></div></section>',
+        meta: { key: 'article', route: 'article', notFound: true }
+      };
+    }
+    var cr = [{ label: 'Beranda', route: 'home' }, { label: (PT.blog && PT.blog.title) || 'Artikel', route: 'blog' }, { label: a.title }];
+    var pageUrl = PS.seo.abs(PS.seo.pathFor('article', a.slug));
+    var svcs = list(a.services).map(function (sl) { return byKey(D.services, 'slug', sl); }).filter(Boolean);
+    var others = arts.filter(function (o) { return o.slug !== a.slug; });
+    var related = others.filter(function (o) { return o.category === a.category; }).concat(others.filter(function (o) { return o.category !== a.category; })).slice(0, 3);
+    var share = 'https://wa.me/?text=' + encodeURIComponent(fill(x.shareText, { title: a.title }) + ' ' + pageUrl);
+
+    var head = '<header class="article-head"><div class="container"><div class="article-wrap">' +
+      '<span class="tag">' + esc(a.category) + '</span>' +
+      '<h1 id="page-title">' + esc(a.title) + '</h1>' +
+      '<div class="meta-row">' + PS.metaParts(a, x.readTime, x.by).join('') + '</div>' +
+      '</div></div></header>';
+    var hero = !a.image ? '' : '<div class="container"><div class="article-wrap article-wrap--wide"><figure class="article-hero"><img src="' + esc(a.image) + '" alt="' + esc(a.imageAlt) + '" width="800" height="600" fetchpriority="high"></figure></div></div>';
+    var content = '<div class="container"><div class="article-wrap"><div class="article-body">' + list(a.body).map(articleBlock).join('') + '</div>' +
+      '<div class="article-share"><a class="btn btn-outline-brand" href="' + esc(share) + '" target="_blank" rel="noopener noreferrer">' + WA + ' ' + esc(x.share) + '</a>' +
+      '<a class="link-arrow" href="' + url('blog') + '">' + ico('arrow-left') + ' ' + esc(x.back) + '</a></div></div></div>';
+    var rs = !svcs.length ? '' : '<section class="section section-alt" aria-labelledby="art-svc-title"><div class="container"><div class="section-head"><h2 id="art-svc-title">' + esc(x.servicesTitle) + '</h2></div><div class="row g-3 g-lg-4 justify-content-center">' +
+      svcs.map(function (s) { return '<div class="col-12 col-md-6 col-lg-4">' + C.serviceCard(s) + '</div>'; }).join('') + '</div></div></section>';
+    var ra = !related.length ? '' : '<section class="section" aria-labelledby="art-rel-title"><div class="container"><div class="section-head"><h2 id="art-rel-title">' + esc(x.relatedTitle) + '</h2></div><div class="row g-3 g-lg-4">' +
+      related.map(function (o) { return '<div class="col-12 col-md-6 col-lg-4">' + C.articleCard(o) + '</div>'; }).join('') + '</div></div></section>';
+    return {
+      html: crumbs(cr) + '<article class="article-page">' + head + hero + content + '</article>' + rs + ra + ctaBand(),
+      meta: {
+        key: 'article', route: 'article', article: a, crumbs: crumbMeta(cr),
+        pageLd: function (u) {
+          return { '@context': 'https://schema.org', '@type': 'Article', headline: a.title, description: a.excerpt, image: a.image ? [PS.seo.abs(a.image)] : undefined,
+            datePublished: a.date, dateModified: a.date, articleSection: a.category, inLanguage: 'id-ID',
+            author: { '@type': 'Organization', name: a.author || T.name },
+            publisher: { '@type': 'Organization', name: T.name, url: PS.seo.abs('/') },
+            mainEntityOfPage: { '@type': 'WebPage', '@id': u } };
+        }
+      }
+    };
+  };
+
+  /* ------------------------------------------------------------ /faq */
+  R.faq = function () {
+    var x = PT.faq || {}; if (!x.title) x = Object.assign({}, x, { title: 'Pertanyaan Umum' }); var all = list(D.faqs).filter(function (f) { return f && typeof f === 'object' && f.q && f.a; });
+    var seenG = {};
+    var groups = list(D.faqGroups).filter(function (g) { if (!g || !g.slug || seenG[g.slug]) return false; seenG[g.slug] = 1; return true; }).map(function (g) {
+      return { slug: g.slug, name: g.name, items: all.filter(function (f) { return f.group === g.slug; }) };
+    });
+    var rest = all.filter(function (f) { return !byKey(groups, 'slug', f.group); });        /* pertanyaan tanpa kelompok valid tetap tampil */
+    if (rest.length) groups.push({ slug: 'lainnya', name: x.otherGroup || 'Lainnya', items: rest });
+    groups = groups.filter(function (g) { return g.items.length; });
+    var empty = x.empty || {};
+    var jump = !groups.length ? '' : '<nav class="faq-jump" aria-label="' + esc(x.jumpLabel || 'Lompat ke kelompok') + '"><ul class="chips">' + groups.map(function (g) {
+      return '<li data-jump="' + esc(g.slug) + '"><a class="chip" href="#faq-g-' + esc(g.slug) + '">' + esc(g.name) + '</a></li>'; }).join('') + '</ul></nav>';
+    var sections = groups.map(function (g) {
+      return '<section class="faq-group" id="faq-g-' + esc(g.slug) + '" aria-labelledby="faq-g-' + esc(g.slug) + '-title" data-group>' +
+        '<h2 class="h4" id="faq-g-' + esc(g.slug) + '-title">' + esc(g.name) + '</h2><div class="faq-list">' +
+        g.items.map(function (f) { return C.faqItem(f).replace('<div class="faq-item">', '<div class="faq-item" data-item data-q="' + esc((f.q + ' ' + f.a).toLowerCase()) + '">'); }).join('') +
+        '</div></section>';
+    }).join('');
+    var body = '<div class="filter-bar"><div class="search-input"><label class="visually-hidden" for="faq-search">' + esc(x.searchLabel || 'Cari pertanyaan') + '</label>' + ico('search') +
+      '<input id="faq-search" type="search" class="form-control" placeholder="' + esc(x.searchPlaceholder || '') + '" autocomplete="off"></div>' + jump + '</div>' +
+      '<p class="result-count" id="faq-count" role="status" aria-live="polite"></p>' +
+      '<div class="faq-groups">' + sections + '</div>' +
+      '<div class="empty-state" id="faq-empty" hidden><span class="ico">' + ico('search-x', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
+      '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
+    var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
+    return {
+      html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-label="' + esc(x.title) + '"><div class="container"><div class="faq-page">' + body + '</div></div></section>' + ctaBand(),
+      meta: { key: 'faq', route: 'faq', crumbs: crumbMeta(cr), faqs: all },
+      after: function () { initFaqSearch(x.countNoun || 'pertanyaan'); }
+    };
+  };
+
+  /* Pencarian FAQ: sembunyikan pertanyaan yang tidak cocok dan kelompok yang jadi kosong. */
+  function initFaqSearch(noun) {
+    var input = document.getElementById('faq-search'), count = document.getElementById('faq-count'), empty = document.getElementById('faq-empty');
+    if (!input) return;
+    var items = Array.prototype.slice.call(document.querySelectorAll('#main [data-item]'));
+    var groups = Array.prototype.slice.call(document.querySelectorAll('#main [data-group]'));
+    function apply() {
+      var q = input.value.trim().toLowerCase(), n = 0;
+      items.forEach(function (it) { var show = !q || it.getAttribute('data-q').indexOf(q) > -1; it.classList.toggle('hidden-by-filter', !show); if (show) n++; });
+      groups.forEach(function (g) {
+        var hide = !g.querySelector('[data-item]:not(.hidden-by-filter)'), li = document.querySelector('[data-jump="' + g.id.replace('faq-g-', '') + '"]');
+        g.classList.toggle('hidden-by-filter', hide);
+        if (li) li.hidden = hide;                                   /* tautan ke kelompok yang tersembunyi ikut disembunyikan */
+      });
+      count.textContent = n + ' ' + noun + (q ? ' untuk "' + input.value.trim() + '"' : '');
+      empty.hidden = n !== 0;
+    }
+    input.addEventListener('input', apply);
+    apply();
+  }
+
   function render() {
     var main = document.getElementById('main');
     if (!main || !R[pageKey]) return;
@@ -379,13 +547,13 @@
   PS.use(function () {
     if (!R[pageKey]) return;
     render();
-    /* Detail layanan memakai hash sebagai slug (di Laravel: /layanan/{slug}); ganti hash = ganti layanan */
-    if (pageKey === 'service') window.addEventListener('hashchange', function () {
+    /* Detail layanan/artikel memakai hash sebagai slug (di Laravel: /layanan/{slug}, /artikel/{slug}); ganti hash = ganti isi */
+    if (pageKey === 'service' || pageKey === 'article') window.addEventListener('hashchange', function () {
       if (isAnchor()) return;
       render();
       if (PS.seo) PS.seo.applyPage();
       window.scrollTo(0, 0);
-      var h1 = document.querySelector('h1'); if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }   /* fokus keyboard pindah ke judul layanan baru */
+      var h1 = document.querySelector('h1'); if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }   /* fokus keyboard pindah ke judul baru */
     });
   });
 })();

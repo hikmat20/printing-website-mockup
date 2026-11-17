@@ -120,3 +120,10 @@ html[data-template="bold"][data-card="outlined"] .pf-card { box-shadow: 4px 4px 
 [data-template="bold"] .milestone-year { border-radius: 0; background: var(--c-accent); color: var(--c-on-accent); }
 [data-template="bold"] .contact-form { border-width: 2px; }
 [data-template="bold"] .contact-form .form-control, [data-template="bold"] .contact-form .form-select { border-radius: 0; border-width: 2px; }
+[data-template="bold"] .article-head { background: var(--c-primary-dark); border-bottom: 6px solid var(--c-accent); }
+[data-template="bold"] .article-head h1 { color: var(--c-on-dark); text-transform: uppercase; letter-spacing: .01em; }
+[data-template="bold"] .article-head .meta-row { color: var(--c-on-dark-soft); }
+[data-template="bold"] .article-head .tag { background: var(--c-accent); color: var(--c-on-accent); border-radius: 0; }
+[data-template="bold"] .article-hero { border-radius: 0; border: 2px solid var(--c-primary); }
+[data-template="bold"] .article-hero { margin-top: 2rem; }
+[data-template="bold"] .faq-group h2 { padding-bottom: .5rem; border-bottom: 3px solid var(--c-primary); }

@@ -81,3 +81,7 @@
 [data-template="modern"] .price-block { padding: 1.25rem; border-radius: var(--r-card); background: var(--c-surface); }
 [data-template="modern"] .price-block .price-table { box-shadow: none; }
 [data-template="modern"] .vm-card { border-radius: 20px; }
+[data-template="modern"] .article-hero { border-radius: 24px; }
+[data-template="modern"] .article-head { text-align: center; }
+[data-template="modern"] .article-head .meta-row { justify-content: center; }
+[data-template="modern"] .faq-page { margin-inline: auto; }

@@ -43,8 +43,8 @@ Parameter URL hanya untuk pratinjau. Di produksi pengaturan ini disimpan di data
 
 ```
 index.html                    Cangkang beranda: <main id="main"> diisi dari data
-services.html service-detail.html pricing.html portfolio.html about.html contact.html
-                              Cangkang halaman internal (Gelombang 1 dan 2)
+services.html service-detail.html pricing.html portfolio.html about.html contact.html blog.html article-detail.html faq.html
+                              Cangkang halaman internal (9 halaman)
 assets/
   js/
     platform.js               DATA PLATFORM: rute, navigasi, registri (font, header, kartu,
@@ -52,7 +52,7 @@ assets/
     tenants/sinar-copy.js     DATA TENANT: profil, tema, isi, teks section, pengaturan `site`
     main.js                   Inti: validasi konfigurasi, tema, header/footer, interaksi, hook modul
     sections.js               Renderer 12 section beranda + varian
-    pages.js                  Halaman internal (struktur tetap): layanan, detail layanan, harga, portofolio, tentang, kontak
+    pages.js                  Halaman internal (struktur tetap): layanan, detail layanan, harga, portofolio, tentang, kontak, artikel, detail artikel, FAQ
     seo.js                    <title>, meta, canonical, Open Graph, JSON-LD dari data (beranda + halaman internal)
     preview.js                Panel ?customize (khusus mockup)
   css/
@@ -90,11 +90,16 @@ Tenant hanya memilih template, warna, font, gaya kartu/tombol, dan varian daftar
 | Portofolio (filter kategori + lightbox) | `portfolio.html` | `/portofolio` | selesai |
 | Tentang (profil, visi/misi, perjalanan, keunggulan) | `about.html` | `/tentang-kami` | selesai |
 | Kontak (form kirim via WhatsApp, info, peta) | `contact.html` | `/kontak` | selesai |
-| Artikel, Detail artikel, FAQ | | | Gelombang 3 |
+| Artikel (filter kategori + cari; varian `grid`\|`list`) | `blog.html` | `/artikel` | selesai |
+| Detail artikel (slug = hash `#slug`) | `article-detail.html` | `/artikel/{slug}` | selesai |
+| FAQ (per kelompok + pencarian) | `faq.html` | `/faq` | selesai |
 
 Teks halaman ada di `tenant.pageText`; pola SEO (judul/deskripsi bertoken `{name} {price} {unit} {city} {site}`)
 di `tenant.seo.pages`. SEO per halaman: BreadcrumbList di semua halaman, Service + FAQPage di detail layanan,
-CollectionPage (portofolio), AboutPage (tentang), ContactPage (kontak).
+CollectionPage (portofolio), AboutPage (tentang), ContactPage (kontak), Blog (artikel),
+Article (detail artikel, og:type article), FAQPage (FAQ).
+Isi artikel = daftar blok data `{ type: 'h2'|'p'|'ul'|'ol'|'note', text | items }` di `articles[].body`; tidak ada HTML dari data.
+Di Laravel: tabel `articles` + `article_blocks` (atau JSON), halaman `/artikel/{slug}`.
 Form kontak memvalidasi di sisi klien (nama, ponsel Indonesia 10-13 digit, pesan) lalu membuka `wa.me` dengan teks ter-encode;
 pada produksi validasi dan antispam wajib diulang di server (POST `/kontak`). Kolom honeypot hanya penghalang bot sederhana.
 Parameter pratinjau (`?template=`, dst.) ikut terbawa saat berpindah halaman di mockup.
@@ -197,5 +202,5 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 - `--header-h: 68px` tidak berada pada kelipatan 8px yang dipakai bagian lain.
 - Gambar adalah ilustrasi SVG buatan sendiri. Ganti dengan foto tenant di produksi;
   `og:image` sebaiknya JPG/PNG 1200×630.
-- Halaman artikel, detail artikel, dan FAQ belum dibuat (Gelombang 3). Tautan ke halaman itu masih
-  mengarah ke berkas yang belum ada. Pemetaan rutenya sudah ada di `PLATFORM.routes`.
+- Semua 9 halaman internal sudah ada. Slug detail layanan dan detail artikel memakai hash hanya di mockup;
+  di Laravel memakai rute `/layanan/{slug}` dan `/artikel/{slug}`.

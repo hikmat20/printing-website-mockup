@@ -3,7 +3,7 @@
    Warna, radius, dan bayangan memakai token tema, jadi ikut template dan tenant.
    Sentuhan per template ada di templates/<id>.css (bagian "Halaman internal").
    Urutan: 1. Header halaman  2. Filter & daftar layanan  3. Detail layanan
-           4. Harga  5. Keadaan kosong  6. Portofolio  7. Tentang  8. Kontak
+           4. Harga  5. Keadaan kosong  6. Portofolio  7. Tentang  8. Kontak  9. Artikel  10. FAQ
    ========================================================================== */
 
 /* 1. Header halaman -------------------------------------------------------- */
@@ -24,13 +24,21 @@
 
 .svc-list .service-card { height: 100%; }
 @media (min-width: 768px) {
-  .svc-list--list .service-card { display: grid; grid-template-columns: 300px 1fr; }
+  .svc-list--list .service-card { display: grid; grid-template-columns: 300px minmax(0, 1fr); }
   .svc-list--list .service-card .card-media { height: 100%; }
   .svc-list--list .service-card .card-media img { height: 100%; aspect-ratio: auto; min-height: 200px; object-fit: cover; }
   .svc-list--list .service-card .card-body-x { justify-content: center; padding: 1.4rem 1.6rem; }
   .svc-list--list .service-card .price-from { margin-top: .5rem; }
   .svc-list--list .service-card .card-actions { max-width: 320px; }
+  .art-list--list .article-card { display: grid; grid-template-columns: 300px minmax(0, 1fr); }
+  .art-list--list .article-card .card-media { height: 100%; }
+  .art-list--list .article-card .card-media img { height: 100%; aspect-ratio: auto; min-height: 200px; object-fit: cover; }
+  .art-list--list .article-card .card-body-x { justify-content: center; padding: 1.4rem 1.6rem; }
 }
+.art-list .article-card { height: 100%; }
+.art-list .article-card .tag { max-width: calc(100% - 1.5rem); overflow-wrap: anywhere; }
+.art-list .article-card h3, .art-list .article-card p, .art-list .article-card .meta-row > * { overflow-wrap: anywhere; min-width: 0; }
+.art-list .article-card .card-body-x { min-width: 0; }
 
 /* 3. Detail layanan --------------------------------------------------------- */
 .detail-media { margin: 0 0 1.75rem; }
@@ -136,3 +144,43 @@ main .h3, main .h4, main .h5 { font-family: var(--font-heading); font-weight: 70
 .loc-card--page .info-row > div, .form-success > div, .vm-card li > span { min-width: 0; }
 .milestone-year { max-width: 100%; overflow-wrap: anywhere; }
 .contact-form .btn, .form-success .btn, .empty-state .btn { white-space: normal; }
+
+/* 9. Artikel + detail artikel --------------------------------------------------- */
+.article-head { padding: 2.25rem 0 1.5rem; background: linear-gradient(180deg, var(--c-primary-light), var(--c-bg)); }
+.article-wrap { max-width: 760px; margin: 0 auto; }
+.article-wrap--wide { max-width: 960px; }
+.article-head .tag { margin-bottom: .85rem; }
+.article-head h1 { margin: 0 0 1rem; font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem); line-height: 1.2; overflow-wrap: anywhere; }
+.article-hero { margin: 0 0 2rem; border-radius: var(--r-card); overflow: hidden; background: var(--c-primary-light); }
+.article-hero img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+.article-body { font-size: 1.0625rem; line-height: 1.75; overflow-wrap: anywhere; }
+.article-body > * + * { margin-top: 1.1rem; }
+.article-body h2 { margin-top: 2rem; font-size: 1.375rem; line-height: 1.35; }
+.article-body h2 + p, .article-body h2 + ul, .article-body h2 + ol { margin-top: .6rem; }
+.article-body ul, .article-body ol { padding-left: 1.4rem; }
+.article-body li + li { margin-top: .4rem; }
+.article-body p { margin-bottom: 0; }
+.article-body .note-box { margin-top: 2rem; }
+.article-share { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin: 2.5rem 0 0; padding-top: 1.5rem; border-top: 1px solid var(--c-border); }
+.article-share .btn { white-space: normal; }
+.article-page + .section, .article-page { padding-bottom: 0; }
+.article-page { padding-bottom: 3rem; }
+
+/* 10. FAQ ---------------------------------------------------------------------- */
+.faq-page { max-width: 880px; }
+.faq-jump ul { list-style: none; margin: 0; padding: 0 0 .35rem; }
+.faq-jump .chip { text-decoration: none; }
+.faq-group { margin-top: 2rem; scroll-margin-top: calc(var(--header-h, 68px) + 16px); }
+.faq-group:first-child { margin-top: 0; }
+.faq-group h2 { margin-bottom: 1rem; overflow-wrap: anywhere; }
+.faq-q span { overflow-wrap: anywhere; }
+.faq-a p { overflow-wrap: anywhere; }
+
+/* Teks panjang tanpa spasi tidak boleh melebarkan halaman */
+.article-head .tag { max-width: 100%; overflow-wrap: anywhere; }
+.article-head .meta-row > * { min-width: 0; overflow-wrap: anywhere; }
+.article-head .meta-row > * + *::before { content: "•"; margin-right: .5rem; color: var(--c-muted); }
+.faq-jump li { flex: 0 0 auto; max-width: 100%; }
+.faq-jump li[hidden] { display: none; }
+.faq-jump .chip { max-width: 100%; overflow-wrap: anywhere; }
+.filter-bar .chip { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: left; }
