@@ -1,7 +1,8 @@
 /*
- * data.js — SUMBER DATA MOCKUP (setara "database" untuk satu tenant)
- * ---------------------------------------------------------------
- * Semua konten bisnis diambil dari objek di bawah ini. Mengganti file ini = mengganti tenant.
+ * tenants/sinar-copy.js — DATA TENANT (diedit/dimiliki satu client)
+ * ---------------------------------------------------------------------------
+ * Berisi profil bisnis, branding (tema), pilihan template, dan seluruh konten
+ * milik satu tenant. Mengganti file ini = mengganti tenant.
  * Pemetaan ke Laravel (saran):
  *   tenant        -> tabel tenants (+ tenant_settings)
  *   theme         -> kolom/JSON branding pada tenants
@@ -12,7 +13,8 @@
  *   faqs          -> faqs (group = faq_groups)
  *   articles      -> articles (+ article_categories)
  */
-window.SITE_DATA = {
+window.TENANTS = window.TENANTS || {};
+window.TENANTS['sinar-copy'] = {
 
   /* ---------- Profil bisnis ---------- */
   tenant: {
@@ -27,12 +29,13 @@ window.SITE_DATA = {
     whatsapp: '6281234567890',          // format internasional tanpa "+" (untuk wa.me)
     email: 'info@example.com',
     address: 'Jl. Raya Bekasi Km 18 No. 27, Pulogadung, Jakarta Timur 13920',
+    addressParts: { street: 'Jl. Raya Bekasi Km 18 No. 27, Pulogadung', locality: 'Jakarta Timur', region: 'DKI Jakarta', postalCode: '13920', country: 'ID' },
     city: 'Jakarta Timur',
     geo: { lat: -6.1844, lng: 106.9097 },
     hoursSummary: '08.00–21.00',
     hours: [
-      { day: 'Senin – Sabtu', time: '08.00 – 21.00' },
-      { day: 'Minggu', time: '09.00 – 17.00' }
+      { day: 'Senin – Sabtu', time: '08.00 – 21.00', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '08:00', closes: '21:00' },
+      { day: 'Minggu', time: '09.00 – 17.00', days: ['Sunday'], opens: '09:00', closes: '17:00' }
     ],
     mapEmbed: 'https://www.google.com/maps?q=Pulogadung,+Jakarta+Timur&output=embed',
     mapLink: 'https://www.google.com/maps/search/?api=1&query=Pulogadung+Jakarta+Timur',
@@ -46,6 +49,10 @@ window.SITE_DATA = {
       eyebrow: 'Percetakan & Fotocopy Terpercaya di Jakarta Timur',
       headline: 'Semua Kebutuhan Cetak Anda, Satu Tempat.',
       subheadline: 'Melayani fotocopy, print dokumen, cetak ukuran besar, jilid buku, laminating, dan berbagai kebutuhan percetakan lainnya dengan hasil berkualitas dan harga bersahabat.',
+      actions: {
+        primary:   { label: 'Lihat Layanan', route: 'services', icon: 'layout-grid' },
+        secondary: { label: 'Pesan Sekarang', icon: 'message-circle', message: 'Halo, saya ingin memesan layanan cetak. Mohon informasi lebih lanjut.' }
+      },
       image: 'assets/images/general/hero.svg',
       imageAlt: 'Ilustrasi mesin cetak dengan dokumen, kartu nama, dan brosur hasil cetak',
       points: ['Hasil cetak tajam & rapi', 'Harga jelas, tanpa biaya tersembunyi', 'Pesan cukup lewat WhatsApp'],
@@ -73,6 +80,23 @@ window.SITE_DATA = {
       image: 'assets/images/general/ruang-produksi.svg',
       alt: 'Dua mesin cetak digital di ruang produksi'
     },
+    aboutPage: {
+      vision: { title: 'Visi', text: 'Menjadi tempat cetak pertama yang diingat warga sekitar: cepat, rapi, dan jujur soal harga.' },
+      missionTitle: 'Misi',
+      mission: [
+        'Mengerjakan setiap pesanan sesuai spesifikasi yang disepakati di awal.',
+        'Menyebutkan harga dan estimasi selesai sebelum pekerjaan dimulai.',
+        'Merawat mesin dan menjaga kualitas bahan agar hasil cetak konsisten.',
+        'Membantu pelanggan memilih kertas, ukuran, dan finishing yang pas, tanpa memaksa.'
+      ],
+      milestones: [
+        { year: '2012', title: 'Satu mesin fotocopy', text: 'Membuka layanan fotocopy dan print dokumen di depan kampus.' },
+        { year: '2016', title: 'Jilid dan laminating', text: 'Menambah layanan jilid skripsi, laminating, dan cetak kartu nama.' },
+        { year: '2020', title: 'Cetak digital', text: 'Mesin digital printing untuk brosur, undangan, dan sticker kemasan.' },
+        { year: '2023', title: 'Large format', text: 'Mulai mencetak banner, spanduk, dan poster ukuran besar.' },
+        { year: 'Kini', title: 'Pesan lewat WhatsApp', text: 'Pelanggan mengirim file dan kebutuhan dari mana saja, lalu mengambil pesanan di toko.' }
+      ]
+    },
     stats: [
       { value: '13+', label: 'Tahun melayani' },
       { value: '25rb+', label: 'Pesanan selesai' },
@@ -82,7 +106,55 @@ window.SITE_DATA = {
     seo: {
       defaultTitleSuffix: 'Sinar Copy & Printing Jakarta Timur',
       defaultDescription: 'Fotocopy, print dokumen, cetak banner, jilid, laminating, dan percetakan lengkap di Jakarta Timur. Harga jelas, pesan lewat WhatsApp.',
-      ogImage: 'assets/images/general/hero.svg'
+      ogImage: 'assets/images/general/hero.svg',
+      locale: 'id_ID',
+      priceRange: 'Rp',
+      /* Judul & deskripsi per halaman (Laravel: tabel seo_metadata per tenant + halaman) */
+      pages: {
+        home: {
+          title: 'Fotocopy, Print & Percetakan Jakarta Timur | Sinar Copy & Printing',
+          description: 'Fotocopy, print dokumen, cetak banner, jilid skripsi, laminating, dan percetakan lengkap di Jakarta Timur. Harga jelas, hasil rapi, pesan mudah lewat WhatsApp.',
+          ogDescription: 'Semua kebutuhan cetak Anda, satu tempat. Fotocopy, print, banner, jilid, dan laminating dengan harga bersahabat.'
+        },
+        services: {
+          title: 'Layanan Fotocopy, Print, Banner & Jilid | Sinar Copy & Printing',
+          description: 'Daftar layanan percetakan di Jakarta Timur: fotocopy, print dokumen, cetak banner, jilid skripsi, laminating, brosur, dan undangan. Lihat harga lalu pesan lewat WhatsApp.'
+        },
+        portfolio: {
+          title: 'Portofolio Hasil Cetak | Sinar Copy & Printing',
+          description: 'Contoh hasil cetak Sinar Copy & Printing Jakarta Timur: banner, brosur, undangan, buku, sticker, dan kartu nama untuk berbagai pelanggan.'
+        },
+        about: {
+          title: 'Tentang Kami - Percetakan & Fotocopy Jakarta Timur | Sinar Copy & Printing',
+          description: 'Sinar Copy & Printing melayani pelajar, kantor, dan UMKM di Jakarta Timur sejak 2012. Kenali cerita, visi, dan cara kerja kami.'
+        },
+        contact: {
+          title: 'Kontak & Lokasi Toko | Sinar Copy & Printing',
+          description: 'Hubungi Sinar Copy & Printing lewat WhatsApp, telepon, atau datang ke toko di Pulogadung, Jakarta Timur. Lihat jam buka dan peta lokasi.'
+        },
+        pricing: {
+          title: 'Daftar Harga Fotocopy, Print & Cetak | Sinar Copy & Printing',
+          description: 'Daftar harga fotocopy, print A4/F4/A3, banner, jilid, laminating, dan cetak promosi di Sinar Copy & Printing Jakarta Timur. Harga jelas per satuan.'
+        },
+        blog: {
+          title: 'Artikel & Tips Cetak, Kertas, Banner, dan Jilid | Sinar Copy & Printing',
+          description: 'Tips hemat print, panduan memilih kertas, ukuran banner, menyiapkan file desain, dan jenis jilid dari Sinar Copy & Printing Jakarta Timur.'
+        },
+        faq: {
+          title: 'FAQ: Pertanyaan Seputar Fotocopy, Print & Pemesanan | Sinar Copy & Printing',
+          description: 'Jawaban atas pertanyaan yang sering diajukan: cara memesan, pembayaran, antar, waktu pengerjaan print, banner, jilid, laminating, dan undangan.'
+        },
+        /* Pola untuk halaman bertoken {name} {short} {price} {unit} {category} {site} {city}.
+           Detail artikel: {name} = judul, {short} = ringkasan, {category} = kategori artikel. */
+        article: {
+          title: '{name} | {site}',
+          description: '{short}'
+        },
+        service: {
+          title: '{name} di {city} - Mulai {price}/{unit} | {site}',
+          description: '{short} Mulai {price} per {unit}. Pesan mudah lewat WhatsApp di {site}, {city}.'
+        }
+      }
     }
   },
 
@@ -92,42 +164,105 @@ window.SITE_DATA = {
     primaryDark: '#0F2B49',
     primaryLight: '#E8EEF5',
     accent: '#F28C28',
-    accentDark: '#D9741A',
+    accentDark: '#A8550C',
     whatsapp: '#25D366',
-    whatsappDark: '#1DA851',
     surface: '#F5F7FA',
     text: '#252B35',
-    muted: '#5B6675'
+    muted: '#5B6675',
+    /* Turunan warna — opsional. Bila dikosongkan, dihitung otomatis dari primary/accent. */
+    primaryTint: '#F3F7FC',
+    accentTint: '#FFF1E0',
+    onDarkSoft: '#D6E2F0',
+    onDarkMuted: '#B9CBE0',
+    onDarkFaint: '#9DB4CF',
+    overlay: '#0A1C30'
+    /* Opsional (harus ada di PLATFORM.fonts): fontHeading, fontBody — bila kosong ikut template.
+       Kunci turunan di atas (primaryDark … overlay) menimpa hasil hitungan otomatis: hapus untuk tenant baru agar ikut primary/accent. */
   },
 
-  /* ---------- Pemetaan URL: mockup -> Laravel ---------- */
-  routes: {
-    home:        { mockup: 'index.html',          laravel: '/' },
-    services:    { mockup: 'services.html',       laravel: '/layanan' },
-    service:     { mockup: 'service-detail.html', laravel: '/layanan/{slug}', hash: true },
-    category:    { mockup: 'services.html',       laravel: '/layanan/kategori/{slug}', hash: true },
-    pricing:     { mockup: 'pricing.html',        laravel: '/harga' },
-    portfolio:   { mockup: 'portfolio.html',      laravel: '/portofolio' },
-    about:       { mockup: 'about.html',          laravel: '/tentang-kami' },
-    blog:        { mockup: 'blog.html',           laravel: '/artikel' },
-    article:     { mockup: 'article-detail.html', laravel: '/artikel/{slug}', hash: true },
-    contact:     { mockup: 'contact.html',        laravel: '/kontak' },
-    faq:         { mockup: 'faq.html',            laravel: '/faq' }
+  /* ---------- Pengaturan tampilan tenant (Controlled Customization) ----------
+     Semua opsional. Yang tidak diisi mengikuti template standar.
+     Nilai harus ada di registri platform (PLATFORM.templates/sections/headers/...),
+     jika tidak, otomatis kembali ke default template.
+     Laravel: kolom JSON `settings` pada tabel tenants.
+     Contoh penyesuaian:
+       header: 'topbar', cardStyle: 'outlined', buttonShape: 'pill',
+       order: ['services', 'categories', 'about'],             // urutan section yang tidak terkunci
+       sections: { faq: { enabled: false }, services: { variant: 'slider', limit: 8 } } */
+  site: {
+    template: 'classic'
   },
 
-  /* ---------- Navigasi ---------- */
-  nav: [
-    { label: 'Beranda', route: 'home' },
-    { label: 'Layanan', route: 'services', dropdown: 'categories' },
-    { label: 'Harga', route: 'pricing' },
-    { label: 'Portofolio', route: 'portfolio' },
-    { label: 'Informasi', dropdown: [
-        { label: 'Tentang Kami', route: 'about' },
-        { label: 'Artikel', route: 'blog' },
-        { label: 'FAQ', route: 'faq' }
-    ] },
-    { label: 'Kontak', route: 'contact' }
-  ],
+  /* ---------- Teks halaman internal (milik tenant; struktur halaman dikunci platform) ---------- */
+  pageText: {
+    services: {
+      title: 'Layanan Kami', lead: 'Fotocopy, print, large format, jilid, hingga cetak promosi. Pilih layanan, lihat harga, lalu pesan lewat WhatsApp.',
+      listTitle: 'Daftar layanan', searchLabel: 'Cari layanan', searchPlaceholder: 'Cari layanan, mis. banner atau jilid',
+      empty: { title: 'Layanan tidak ditemukan', text: 'Coba kata kunci lain, atau tanyakan langsung. Kami bisa mengerjakan banyak kebutuhan cetak di luar daftar ini.', button: 'Tanya lewat WhatsApp' }
+    },
+    service: {
+      notFound: { title: 'Layanan tidak ditemukan', text: 'Alamat layanan yang Anda buka tidak ada atau sudah tidak tersedia.', button: 'Lihat semua layanan' },
+      pricingTitle: 'Daftar harga', pricingNote: 'Harga dapat berubah untuk jumlah besar atau file yang perlu penyesuaian. Konfirmasi final lewat WhatsApp.',
+      orderTitle: 'Pesan layanan ini', orderHint: 'Pilih kebutuhan Anda, lalu kirim lewat WhatsApp. Kami balas dengan rincian harga dan estimasi selesai.',
+      orderButton: 'Pesan lewat WhatsApp', relatedTitle: 'Layanan terkait', faqTitle: 'Pertanyaan tentang layanan ini'
+    },
+    portfolio: {
+      title: 'Portofolio', lead: 'Contoh pesanan yang sudah kami selesaikan untuk kafe, klinik, sekolah, dan keluarga di sekitar Jakarta Timur. Klik gambar untuk memperbesar.',
+      listTitle: 'Daftar hasil pekerjaan', countNoun: 'karya', clientLabel: 'Klien',
+      empty: { title: 'Belum ada karya di kategori ini', text: 'Pilih kategori lain, atau ceritakan kebutuhan Anda. Kami bisa mengerjakan yang serupa.', button: 'Tanya lewat WhatsApp' }
+    },
+    about: {
+      title: 'Tentang Kami', lead: 'Kenali Sinar Copy & Printing: dari satu mesin fotocopy kecil menjadi mitra cetak warga Jakarta Timur.',
+      visionTitle: 'Visi & Misi', milestonesTitle: 'Perjalanan Kami', milestonesText: 'Beberapa tonggak yang membentuk cara kami bekerja hari ini.'
+    },
+    contact: {
+      title: 'Hubungi Kami', lead: 'Punya pertanyaan, butuh penawaran, atau ingin konsultasi bahan dan ukuran? Isi formulir ini atau datang langsung ke toko kami.',
+      formTitle: 'Kirim pesan', formHint: 'Pesan Anda dikirim lewat WhatsApp supaya cepat dibalas. Semua kolom bertanda * wajib diisi.',
+      fields: {
+        name:    { label: 'Nama', placeholder: 'Nama lengkap', error: 'Isi nama Anda, minimal 2 huruf.' },
+        phone:   { label: 'Nomor WhatsApp', placeholder: 'mis. 0812-3456-7890', error: 'Isi nomor WhatsApp yang valid, mis. 081234567890.' },
+        service: { label: 'Layanan yang diminati', other: 'Lainnya / belum tahu' },
+        message: { label: 'Pesan', placeholder: 'Ceritakan kebutuhan Anda: ukuran, jumlah, kertas, tenggat.', error: 'Tulis pesan minimal 10 karakter.' }
+      },
+      submit: 'Kirim lewat WhatsApp',
+      success: { title: 'Pesan siap dikirim', text: 'WhatsApp akan terbuka dengan pesan Anda. Jika tidak terbuka, tekan tombol di bawah ini.', button: 'Buka WhatsApp' },
+      infoTitle: 'Informasi toko'
+    },
+    blog: {
+      title: 'Artikel & Tips Cetak', lead: 'Panduan singkat soal kertas, ukuran, file desain, dan jilid supaya hasil cetak Anda rapi dan biayanya terkontrol.',
+      listTitle: 'Daftar artikel', searchLabel: 'Cari artikel', searchPlaceholder: 'Cari artikel, mis. kertas', countNoun: 'artikel',
+      empty: { title: 'Artikel tidak ditemukan', text: 'Coba kata kunci lain, atau tanyakan langsung ke kami soal kebutuhan cetak Anda.', button: 'Tanya lewat WhatsApp' }
+    },
+    article: {
+      notFound: { title: 'Artikel tidak ditemukan', text: 'Alamat artikel yang Anda buka tidak ada atau sudah dihapus.', button: 'Lihat semua artikel' },
+      by: 'Ditulis oleh', readTime: 'menit baca', share: 'Bagikan lewat WhatsApp', shareText: 'Baca artikel ini: {title}',
+      servicesTitle: 'Layanan terkait', relatedTitle: 'Artikel lainnya', back: 'Semua artikel'
+    },
+    faq: {
+      title: 'Pertanyaan yang Sering Diajukan', lead: 'Jawaban singkat soal pemesanan, pembayaran, dan pengerjaan. Tidak menemukan jawabannya? Tanyakan langsung lewat WhatsApp.',
+      searchLabel: 'Cari pertanyaan', searchPlaceholder: 'Cari pertanyaan, mis. banner', jumpLabel: 'Lompat ke kelompok', otherGroup: 'Lainnya', countNoun: 'pertanyaan',
+      empty: { title: 'Pertanyaan tidak ditemukan', text: 'Coba kata kunci lain, atau tanyakan langsung. Admin kami siap membantu.', button: 'Tanya lewat WhatsApp' }
+    },
+    pricing: {
+      title: 'Daftar Harga', lead: 'Harga per satuan untuk layanan yang paling sering dipesan. Harga jelas di awal, tanpa biaya tersembunyi.',
+      note: 'Harga dapat berubah untuk jumlah besar, ukuran khusus, atau file yang perlu penyesuaian. Kirim kebutuhan Anda lewat WhatsApp untuk penawaran pasti.',
+      jumpLabel: 'Lompat ke kategori', columns: { service: 'Layanan', spec: 'Spesifikasi', unit: 'Satuan', price: 'Harga', note: 'Catatan' }
+    }
+  },
+
+  /* ---------- Teks section beranda (milik tenant) ---------- */
+  homeText: {
+    trust:        { title: 'Keunggulan kami' },
+    categories:   { eyebrow: 'Kategori Layanan', title: 'Cari Layanan Sesuai Kebutuhan', text: 'Dari lembar tugas sampai spanduk acara, pilih kategori yang Anda butuhkan.' },
+    services:     { eyebrow: 'Layanan Unggulan', title: 'Layanan yang Paling Sering Dipesan', text: 'Harga jelas dan bisa dipesan langsung lewat WhatsApp.', cta: { label: 'Lihat Semua Layanan', route: 'services' } },
+    about:        { eyebrow: 'Tentang Kami', cta: { label: 'Selengkapnya', route: 'about' } },
+    why:          { eyebrow: 'Mengapa Memilih Kami', title: 'Hasil Rapi, Harga Jelas, Pengerjaan Cepat' },
+    portfolio:    { eyebrow: 'Portofolio', title: 'Hasil Pekerjaan Kami', text: 'Beberapa pesanan yang sudah kami selesaikan. Klik gambar untuk memperbesar.', cta: { label: 'Lihat Semua Portofolio', route: 'portfolio' } },
+    steps:        { eyebrow: 'Cara Pemesanan', title: 'Pesan Cetak dalam 4 Langkah Mudah', text: 'Tidak perlu antre. Cukup kirim kebutuhan Anda lewat WhatsApp.' },
+    testimonials: { eyebrow: 'Testimoni', title: 'Kata Pelanggan Kami', text: 'Pelajar, guru, kantor, dan pelaku UMKM sudah mempercayakan kebutuhan cetak mereka kepada kami.' },
+    faq:          { eyebrow: 'FAQ', title: 'Pertanyaan yang Sering Diajukan', cta: { label: 'Lihat semua pertanyaan', route: 'faq' } },
+    location:     { eyebrow: 'Lokasi', title: 'Kunjungi Toko Kami', text: 'Datang langsung untuk konsultasi, cek contoh kertas, atau ambil pesanan.' }
+  },
 
   /* ---------- Keunggulan singkat (trust bar) ---------- */
   trust: [
@@ -478,18 +613,115 @@ window.SITE_DATA = {
     { group: 'large-format', featured: true, q: 'Berapa ukuran file banner yang disarankan?', a: 'Gunakan ukuran asli dengan resolusi minimal 100 dpi. Tim kami akan membantu mengecek file sebelum dicetak.' },
     { group: 'large-format', featured: false, q: 'Berapa lama cetak banner selesai?', a: 'Umumnya 1–2 hari kerja, tergantung antrean dan ukuran. Pesanan mendesak dapat ditanyakan ke admin.' },
     { group: 'finishing', featured: true, q: 'Jilid skripsi memakan waktu berapa lama?', a: 'Jilid lakban atau spiral bisa selesai dalam 1 jam. Hard cover membutuhkan 1–2 hari kerja.' },
-    { group: 'finishing', featured: false, q: 'Apakah laminating cocok untuk ijazah?', a: 'Kami tidak menyarankan laminasi dokumen asli yang masih perlu dilegalisir. Gunakan fotokopi yang dilaminasi.' },
+    { group: 'finishing', featured: false, q: 'Apakah laminating cocok untuk ijazah?', a: 'Kami tidak menyarankan laminasi dokumen asli yang masih perlu dilegalisir. Gunakan fotocopy yang dilaminasi.' },
     { group: 'promosi-undangan', featured: false, q: 'Apakah bisa dibantu desain brosur atau undangan?', a: 'Bisa. Tim desain kami membuat desain berdasarkan referensi Anda dengan biaya mulai Rp 75.000.' },
     { group: 'promosi-undangan', featured: false, q: 'Berapa minimal pesan undangan?', a: 'Minimal 100 pcs. Untuk jumlah lebih sedikit silakan tanyakan ke admin.' }
   ],
 
   /* ---------- Artikel ---------- */
   articles: [
-    { slug: 'tips-hemat-print-dokumen', title: '7 Tips Hemat Print Dokumen untuk Mahasiswa dan Kantor', category: 'Tips Cetak', date: '2026-10-28', author: 'Tim Sinar Copy', readTime: 4, image: 'assets/images/articles/tips-hemat-print-dokumen.svg', imageAlt: 'Printer mencetak dokumen di atas meja', excerpt: 'Biaya print sering membengkak tanpa terasa. Berikut cara sederhana mengurangi biaya tanpa mengorbankan kualitas.' },
-    { slug: 'memilih-jenis-kertas', title: 'Panduan Memilih Jenis Kertas: HVS, Art Paper, hingga Art Carton', category: 'Panduan', date: '2026-10-14', author: 'Tim Sinar Copy', readTime: 5, image: 'assets/images/articles/memilih-jenis-kertas.svg', imageAlt: 'Tumpukan buku dengan berbagai jenis kertas', excerpt: 'Salah memilih kertas bisa membuat hasil cetak kurang maksimal. Kenali perbedaan gramasi dan permukaan kertas.' },
-    { slug: 'ukuran-banner-yang-tepat', title: 'Cara Menentukan Ukuran Banner yang Tepat untuk Usaha Anda', category: 'Panduan', date: '2026-09-30', author: 'Tim Sinar Copy', readTime: 4, image: 'assets/images/articles/ukuran-banner-yang-tepat.svg', imageAlt: 'Banner promosi terpasang di depan toko', excerpt: 'Banner terlalu kecil tidak terbaca, terlalu besar boros. Pelajari cara menghitung ukuran ideal.' },
-    { slug: 'siapkan-file-sebelum-cetak', title: 'Checklist Menyiapkan File Desain Sebelum Dicetak', category: 'Tips Cetak', date: '2026-09-12', author: 'Tim Sinar Copy', readTime: 6, image: 'assets/images/articles/siapkan-file-sebelum-cetak.svg', imageAlt: 'Lingkaran warna CMYK pada lembar cetak', excerpt: 'Warna pudar, gambar pecah, atau tulisan terpotong biasanya berasal dari file. Ini daftar periksanya.' },
-    { slug: 'jenis-jilid-untuk-skripsi', title: 'Jilid Lakban, Spiral, atau Hard Cover: Mana untuk Skripsi?', category: 'Panduan', date: '2026-08-25', author: 'Tim Sinar Copy', readTime: 3, image: 'assets/images/articles/jenis-jilid-untuk-skripsi.svg', imageAlt: 'Skripsi dengan jilid spiral dan sampul biru', excerpt: 'Setiap kampus punya ketentuan berbeda. Kenali perbedaan jenis jilid agar tidak salah saat bimbingan.' },
-    { slug: 'manfaat-laminating', title: 'Kapan Dokumen Perlu Dilaminating? Ini Manfaat dan Batasannya', category: 'Edukasi', date: '2026-08-10', author: 'Tim Sinar Copy', readTime: 3, image: 'assets/images/articles/manfaat-laminating.svg', imageAlt: 'Dokumen berlapis plastik laminating', excerpt: 'Laminating melindungi dokumen dari air dan sobekan, tetapi tidak cocok untuk semua jenis berkas.' }
+    {
+      slug: 'tips-hemat-print-dokumen', title: '7 Tips Hemat Print Dokumen untuk Mahasiswa dan Kantor', category: 'Tips Cetak', date: '2026-10-28', author: 'Tim Sinar Copy', readTime: 4, image: 'assets/images/articles/tips-hemat-print-dokumen.svg', imageAlt: 'Printer mencetak dokumen di atas meja', excerpt: 'Biaya print sering membengkak tanpa terasa. Berikut cara sederhana mengurangi biaya tanpa mengorbankan kualitas.',
+      services: ['print-a4', 'fotocopy', 'jilid-buku'],
+      body: [
+        { type: 'p', text: 'Biaya print jarang terasa mahal per lembar, tetapi menumpuk saat tugas, laporan, dan arsip dicetak setiap minggu. Tujuh kebiasaan sederhana berikut bisa menurunkan biaya tanpa membuat hasil sulit dibaca.' },
+        { type: 'h2', text: '1. Cetak bolak-balik' },
+        { type: 'p', text: 'Pilih cetak dua sisi untuk dokumen panjang. Jumlah kertas turun separuh, dan dokumen lebih tipis saat dijilid. Harga print dihitung per sisi, jadi hemat utamanya ada pada kertas dan jilid, bukan pada tinta.' },
+        { type: 'h2', text: '2. Muat beberapa halaman dalam satu lembar' },
+        { type: 'p', text: 'Untuk bahan bacaan atau draf, gunakan pengaturan 2 atau 4 halaman per lembar. Hasilnya cukup terbaca untuk keperluan belajar atau koreksi.' },
+        { type: 'h2', text: '3. Periksa tampilan sebelum mencetak' },
+        { type: 'p', text: 'Buka pratinjau cetak dan cek halaman kosong, tabel yang terpotong, serta gambar yang bergeser. Satu kali cek menghemat cetak ulang.' },
+        { type: 'h2', text: '4. Hitam putih untuk yang tidak perlu warna' },
+        { type: 'p', text: 'Cetak warna hanya untuk halaman yang memang membutuhkannya, seperti grafik atau sampul. Pisahkan halaman berwarna agar bisa dicetak terpisah.' },
+        { type: 'h2', text: '5. Atur margin dan ukuran huruf' },
+        { type: 'p', text: 'Margin yang terlalu lebar dan huruf terlalu besar memperbanyak halaman. Ikuti ketentuan kampus atau kantor, lalu rapikan sisanya.' },
+        { type: 'h2', text: '6. Kirim dalam PDF' },
+        { type: 'p', text: 'File PDF menjaga susunan halaman. File Word kadang bergeser di komputer lain sehingga halaman bertambah atau tabel pindah tempat.' },
+        { type: 'h2', text: '7. Gabungkan pesanan' },
+        { type: 'p', text: 'Kumpulkan beberapa file menjadi satu pesanan. Pesanan dalam jumlah besar lebih mudah mendapat harga grosir dan lebih cepat diproses.' },
+        { type: 'note', text: 'Tidak yakin pengaturan mana yang cocok? Kirim file Anda lewat WhatsApp dan kami sarankan pengaturan yang paling hemat.' }
+      ]
+    },
+    {
+      slug: 'memilih-jenis-kertas', title: 'Panduan Memilih Jenis Kertas: HVS, Art Paper, hingga Art Carton', category: 'Panduan', date: '2026-10-14', author: 'Tim Sinar Copy', readTime: 5, image: 'assets/images/articles/memilih-jenis-kertas.svg', imageAlt: 'Tumpukan buku dengan berbagai jenis kertas', excerpt: 'Salah memilih kertas bisa membuat hasil cetak kurang maksimal. Kenali perbedaan gramasi dan permukaan kertas.',
+      services: ['print-a4', 'cetak-brosur', 'kartu-nama'],
+      body: [
+        { type: 'p', text: 'Hasil cetak yang bagus dimulai dari kertas yang tepat. Dua hal yang paling menentukan adalah gramasi (ketebalan) dan jenis permukaan.' },
+        { type: 'h2', text: 'Gramasi: seberapa tebal kertasnya' },
+        { type: 'p', text: 'Gramasi dinyatakan dalam gsm (gram per meter persegi). Semakin besar angkanya, semakin tebal dan kaku kertasnya.' },
+        { type: 'ul', items: ['70–80 gsm: kertas HVS untuk dokumen, tugas, dan fotocopy sehari-hari.', '100–120 gsm: HVS tebal atau art paper tipis untuk surat resmi dan lembar isi buku.', '120–150 gsm: art paper untuk brosur dan flyer.', '260–310 gsm: art carton untuk kartu nama, sampul, dan kartu undangan.'] },
+        { type: 'h2', text: 'Jenis permukaan' },
+        { type: 'ul', items: ['HVS: permukaan halus tanpa lapisan, mudah ditulis dan cocok untuk dokumen.', 'Art paper: berlapis, tersedia glossy (mengilap) dan matte (doff). Warna tampak lebih tajam.', 'Art carton: versi tebal dari art paper dengan permukaan berlapis, cocok untuk kartu nama dan sampul.', 'Kertas tekstur: untuk undangan atau sertifikat yang ingin tampil lebih berkelas.'] },
+        { type: 'h2', text: 'Glossy atau matte' },
+        { type: 'p', text: 'Glossy membuat foto dan warna terlihat hidup, tetapi memantulkan cahaya dan mudah berbekas sidik jari. Matte lebih nyaman dibaca dan terlihat lebih tenang, sehingga cocok untuk brosur yang banyak teks.' },
+        { type: 'note', text: 'Bingung memilih? Sebutkan kegunaan cetakannya dan jumlahnya. Kami akan menyarankan kertas yang paling pas.' }
+      ]
+    },
+    {
+      slug: 'ukuran-banner-yang-tepat', title: 'Cara Menentukan Ukuran Banner yang Tepat untuk Usaha Anda', category: 'Panduan', date: '2026-09-30', author: 'Tim Sinar Copy', readTime: 4, image: 'assets/images/articles/ukuran-banner-yang-tepat.svg', imageAlt: 'Banner promosi terpasang di depan toko', excerpt: 'Banner terlalu kecil tidak terbaca, terlalu besar boros. Pelajari cara menghitung ukuran ideal.',
+      services: ['cetak-banner', 'print-a0'],
+      body: [
+        { type: 'p', text: 'Banner yang terlalu kecil tidak terbaca dari jauh, sedangkan banner yang terlalu besar memboroskan biaya dan bisa tidak muat di tempat pemasangan. Ukur dulu sebelum memesan.' },
+        { type: 'h2', text: 'Mulai dari jarak baca' },
+        { type: 'p', text: 'Patokan sederhana: tinggi huruf sekitar 2,5 cm untuk setiap 3 meter jarak baca. Untuk teks utama yang harus terbaca dari 9 meter, tinggi hurufnya kira-kira 7,5 cm.' },
+        { type: 'h2', text: 'Ukur tempat pemasangan' },
+        { type: 'ul', items: ['Ukur lebar dan tinggi area yang tersedia, lalu sisakan ruang 5–10 cm agar tidak mepet.', 'Catat cara pemasangan: dipaku, dikaitkan ke rangka, atau digantung. Ini menentukan perlu tidaknya mata ayam (lubang pengait) dan lipatan pinggir.', 'Pastikan banner tidak menutup pintu, jendela, atau rambu.'] },
+        { type: 'h2', text: 'Ukuran yang umum dipakai' },
+        { type: 'ul', items: ['X-Banner 60 × 160 cm (lengkap dengan standing) untuk di dalam ruangan.', '100 × 200 cm untuk spanduk toko atau acara kecil.', '3 × 1 m untuk spanduk di depan usaha. Lebar bahan maksimal 3 m, jadi sisi lainnya menyesuaikan.'] },
+        { type: 'h2', text: 'Siapkan desain sesuai ukuran akhir' },
+        { type: 'p', text: 'Buat desain dengan rasio yang sama dengan ukuran cetak. Gunakan gambar beresolusi cukup dan sisakan area aman di tepi agar teks tidak terpotong saat finishing.' },
+        { type: 'note', text: 'Kirim foto tempat pemasangan dan ukurannya lewat WhatsApp. Kami bantu hitung ukuran dan jenis bahan.' }
+      ]
+    },
+    {
+      slug: 'siapkan-file-sebelum-cetak', title: 'Checklist Menyiapkan File Desain Sebelum Dicetak', category: 'Tips Cetak', date: '2026-09-12', author: 'Tim Sinar Copy', readTime: 6, image: 'assets/images/articles/siapkan-file-sebelum-cetak.svg', imageAlt: 'Lingkaran warna CMYK pada lembar cetak', excerpt: 'Warna pudar, gambar pecah, atau tulisan terpotong biasanya berasal dari file. Ini daftar periksanya.',
+      services: ['digital-printing', 'cetak-brosur', 'print-a4'],
+      body: [
+        { type: 'p', text: 'Sebagian besar masalah hasil cetak berasal dari file, bukan dari mesin. Gunakan daftar berikut sebelum mengirim file.' },
+        { type: 'h2', text: 'Ukuran dan area aman' },
+        { type: 'ul', items: ['Buat file sesuai ukuran akhir cetak, misalnya A5 untuk brosur A5.', 'Tambahkan bleed (area lebih) 3 mm di semua sisi jika desain memakai warna atau gambar sampai tepi.', 'Jauhkan teks penting minimal 5 mm dari tepi supaya tidak terpotong.'] },
+        { type: 'h2', text: 'Warna' },
+        { type: 'p', text: 'Layar memakai RGB, sedangkan mesin cetak memakai CMYK. Warna yang sangat cerah di layar, seperti biru neon atau hijau terang, bisa tampak lebih kusam saat dicetak. Jika memungkinkan, atur dokumen ke CMYK sejak awal agar hasilnya bisa diperkirakan.' },
+        { type: 'h2', text: 'Gambar dan resolusi' },
+        { type: 'ul', items: ['Gunakan resolusi 300 dpi pada ukuran cetak untuk brosur, kartu nama, dan undangan.', 'Untuk banner yang dilihat dari jauh, resolusi 100 dpi pada ukuran asli sudah cukup.', 'Hindari memperbesar gambar kecil, karena hasilnya pecah.'] },
+        { type: 'h2', text: 'Huruf' },
+        { type: 'p', text: 'Ubah teks menjadi kurva (outline) atau sertakan huruf saat mengekspor PDF. Jika tidak, huruf bisa berganti otomatis di komputer lain.' },
+        { type: 'h2', text: 'Format file' },
+        { type: 'p', text: 'PDF adalah format paling aman. Jika memakai CorelDRAW atau Illustrator, kirim file asli beserta PDF-nya.' },
+        { type: 'note', text: 'Kami membantu mengecek file sebelum dicetak. Kirim lewat WhatsApp atau email dan kami kabari bila ada yang perlu diperbaiki.' }
+      ]
+    },
+    {
+      slug: 'jenis-jilid-untuk-skripsi', title: 'Jilid Lakban, Spiral, atau Hard Cover: Mana untuk Skripsi?', category: 'Panduan', date: '2026-08-25', author: 'Tim Sinar Copy', readTime: 3, image: 'assets/images/articles/jenis-jilid-untuk-skripsi.svg', imageAlt: 'Skripsi dengan jilid spiral dan sampul biru', excerpt: 'Setiap kampus punya ketentuan berbeda. Kenali perbedaan jenis jilid agar tidak salah saat bimbingan.',
+      services: ['jilid-buku', 'laminating', 'print-a4'],
+      body: [
+        { type: 'p', text: 'Setiap kampus punya ketentuan jilid yang berbeda. Cek buku pedoman atau tanyakan ke bagian akademik sebelum menjilid agar tidak perlu mengulang.' },
+        { type: 'h2', text: 'Jilid lakban' },
+        { type: 'p', text: 'Punggung dilapisi lakban kain. Cepat, murah, dan umum dipakai untuk draf bimbingan karena mudah dibuka kembali. Kurang awet untuk dokumen tebal yang sering dibuka.' },
+        { type: 'h2', text: 'Jilid spiral' },
+        { type: 'p', text: 'Lembar dilubangi lalu diikat kawat atau plastik spiral. Halaman bisa dibuka rata, nyaman untuk dibaca, dan cocok untuk laporan atau modul. Jumlah halaman yang bisa dijilid dibatasi oleh ukuran spiral.' },
+        { type: 'h2', text: 'Jilid hard cover' },
+        { type: 'p', text: 'Sampul keras dengan punggung buku yang dilem dan dijahit. Hasilnya paling rapi dan awet, sehingga dipakai untuk skripsi akhir, tesis, dan arsip. Pengerjaannya lebih lama dibanding jilid lakban.' },
+        { type: 'h2', text: 'Memilih berdasarkan tahap' },
+        { type: 'ul', items: ['Bimbingan dan revisi: jilid lakban atau spiral.', 'Sidang: ikuti ketentuan kampus, biasanya lakban atau spiral dengan sampul sesuai warna fakultas.', 'Pengumpulan akhir ke perpustakaan: hard cover dengan tulisan emas pada sampul.'] },
+        { type: 'note', text: 'Bawa atau kirim contoh ketentuan kampus Anda. Kami akan menyesuaikan warna sampul dan jenis jilidnya.' }
+      ]
+    },
+    {
+      slug: 'manfaat-laminating', title: 'Kapan Dokumen Perlu Dilaminasi? Ini Manfaat dan Batasannya', category: 'Edukasi', date: '2026-08-10', author: 'Tim Sinar Copy', readTime: 3, image: 'assets/images/articles/manfaat-laminating.svg', imageAlt: 'Dokumen berlapis plastik laminating', excerpt: 'Laminating melindungi dokumen dari air dan sobekan, tetapi tidak cocok untuk semua jenis berkas.',
+      services: ['laminating', 'jilid-buku'],
+      body: [
+        { type: 'p', text: 'Laminating melapisi dokumen dengan plastik tipis sehingga lebih tahan air, noda, dan sobekan. Namun, tidak semua berkas cocok dilaminasi.' },
+        { type: 'h2', text: 'Cocok dilaminasi' },
+        { type: 'ul', items: ['Kartu identitas pengurus, kartu anggota, dan kartu nama khusus.', 'Daftar harga atau menu yang sering dipegang.', 'Poster, jadwal, dan SOP yang dipasang di dinding.', 'Materi belajar atau kartu hafalan yang dipakai berulang.'] },
+        { type: 'h2', text: 'Sebaiknya tidak dilaminasi' },
+        { type: 'ul', items: ['Dokumen asli seperti ijazah atau akta yang masih perlu dilegalisir. Laminasi membuatnya tidak bisa distempel atau ditandatangani lagi. Gunakan fotocopy-nya.', 'Kertas thermal seperti struk, karena panas dapat membuat kertasnya menghitam.', 'Foto atau dokumen yang masih akan ditulisi.'] },
+        { type: 'h2', text: 'Glossy atau doff' },
+        { type: 'p', text: 'Laminasi glossy membuat warna tampak tajam tetapi memantulkan cahaya. Laminasi doff lebih nyaman dibaca dan tidak silau, sehingga banyak dipilih untuk daftar harga dan kartu.' },
+        { type: 'h2', text: 'Ketebalan' },
+        { type: 'p', text: 'Plastik laminasi tersedia dalam beberapa ketebalan, sekitar 80–125 mikron. Pilih yang lebih tebal untuk kartu atau dokumen yang sering dipegang agar kaku dan awet. Yang lebih tipis sudah cukup untuk lembar yang ditempel di dinding.' },
+        { type: 'note', text: 'Ragu apakah dokumen Anda boleh dilaminasi? Tanyakan dulu ke kami sebelum dikerjakan.' }
+      ]
+    }
   ]
 };
