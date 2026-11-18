@@ -193,6 +193,73 @@ window.TENANTS['sinar-copy'] = {
     template: 'classic'
   },
 
+  /* ---------- Teks per paket (opsional) ----------
+     Paket menentukan fungsi (harga, tombol pesan); teks yang menyebut fungsi itu ikut berbeda.
+     Hanya bagian yang berbeda yang ditulis: objek digabung per kunci, array diganti utuh.
+     Paket tanpa entri di sini memakai teks utama di atas. Laravel: tabel tenant_texts per paket. */
+  packageText: {
+    profile: {
+      tenant: {
+        hero: {
+          subheadline: 'Melayani fotocopy, print dokumen, cetak ukuran besar, jilid buku, laminating, dan berbagai kebutuhan percetakan lainnya dengan hasil berkualitas dan pengerjaan rapi.',
+          actions: { secondary: { label: 'Hubungi Kami', icon: 'message-circle', message: 'Halo, saya ingin berkonsultasi mengenai kebutuhan cetak. Mohon informasi lebih lanjut.' } },
+          points: ['Hasil cetak tajam & rapi', 'Dikerjakan sesuai spesifikasi', 'Konsultasi cukup lewat WhatsApp'],
+          chips: [
+            { icon: 'timer', title: 'Selesai ± 30 menit', text: 'Print hingga 50 lembar' },
+            { icon: 'badge-check', title: 'Sejak 2012', text: 'Melayani Jakarta Timur' }
+          ]
+        },
+        cta: {
+          title: 'Butuh Layanan Cetak? Hubungi Kami Sekarang',
+          text: 'Ceritakan kebutuhan Anda. Kami balas dengan saran bahan, ukuran, dan estimasi pengerjaan, biasanya dalam hitungan menit.'
+        },
+        seo: {
+          defaultDescription: 'Fotocopy, print dokumen, cetak banner, jilid, laminating, dan percetakan lengkap di Jakarta Timur. Hasil rapi, pengerjaan cepat.',
+          pages: {
+            home: {
+              description: 'Fotocopy, print dokumen, cetak banner, jilid skripsi, laminating, dan percetakan lengkap di Jakarta Timur. Hasil rapi, pengerjaan cepat, konsultasi lewat WhatsApp.',
+              ogDescription: 'Semua kebutuhan cetak Anda, satu tempat. Fotocopy, print, banner, jilid, dan laminating di Jakarta Timur.'
+            },
+            services: {
+              description: 'Daftar layanan percetakan di Jakarta Timur: fotocopy, print dokumen, cetak banner, jilid skripsi, laminating, brosur, dan undangan. Hubungi kami untuk konsultasi.'
+            },
+            service: { title: '{name} di {city} | {site}', description: '{short} Hubungi {site}, {city}.' }
+          }
+        },
+        about: { text: [
+          'Sinar Copy & Printing berawal dari satu mesin fotocopy kecil di depan kampus. Kini kami melayani pelajar, kantor, dan pelaku UMKM dengan layanan cetak lengkap, dari lembar tugas sampai spanduk acara.',
+          'Kami percaya hasil cetak yang baik dimulai dari komunikasi yang jelas: spesifikasi dikonfirmasi di awal, estimasi disebutkan sebelum dikerjakan, dan pesanan selesai sesuai janji.'
+        ] },
+        aboutPage: {
+          vision: { text: 'Menjadi tempat cetak pertama yang diingat warga sekitar: cepat, rapi, dan jujur dalam setiap pesanan.' },
+          mission: [
+            'Mengerjakan setiap pesanan sesuai spesifikasi yang disepakati di awal.',
+            'Menyebutkan estimasi selesai sebelum pekerjaan dimulai.',
+            'Merawat mesin dan menjaga kualitas bahan agar hasil cetak konsisten.',
+            'Membantu pelanggan memilih kertas, ukuran, dan finishing yang pas, tanpa memaksa.'
+          ]
+        }
+      },
+      pageText: {
+        services: { lead: 'Fotocopy, print, large format, jilid, hingga cetak promosi. Pilih layanan, lalu hubungi kami untuk konsultasi.' },
+        service: {
+          orderTitle: 'Tanya layanan ini', orderHint: 'Ceritakan kebutuhan Anda. Kami bantu dengan saran bahan, ukuran, dan estimasi pengerjaan.', orderButton: 'Hubungi Kami'
+        }
+      },
+      homeText: {
+        services: { text: 'Pilih layanan yang Anda butuhkan, lalu hubungi kami untuk konsultasi.' },
+        why: { title: 'Hasil Rapi, Pengerjaan Cepat, Layanan Ramah' },
+        steps: { eyebrow: 'Cara Bekerja', title: 'Dari Konsultasi sampai Pesanan Jadi', text: 'Tidak perlu antre. Cukup ceritakan kebutuhan Anda lewat WhatsApp.' }
+      },
+      trust: [
+        { icon: 'zap', title: 'Cepat & Tepat Waktu', text: 'Pesanan ringan selesai dalam hitungan jam.' },
+        { icon: 'badge-check', title: 'Hasil Rapi & Tajam', text: 'Mesin digital terawat dengan kontrol kualitas.' },
+        { icon: 'users', title: 'Layanan Ramah', text: 'Konsultasi bahan dan ukuran tanpa dipungut biaya.' },
+        { icon: 'message-circle', title: 'Konsultasi via WhatsApp', text: 'Kirim file dan kebutuhan, kami balas dengan cepat.' }
+      ]
+    }
+  },
+
   /* ---------- Teks halaman internal (milik tenant; struktur halaman dikunci platform) ---------- */
   pageText: {
     services: {
@@ -304,7 +371,7 @@ window.TENANTS['sinar-copy'] = {
         { spec: 'A4 berwarna', unit: 'lembar', price: 1500, note: 'Warna penuh' }
       ],
       faqs: [
-        { q: 'Apakah bisa fotocopy dua sisi?', a: 'Bisa. Pilih opsi dua sisi saat memesan. Harga dihitung per lembar kertas.' },
+        { q: 'Apakah bisa fotocopy dua sisi?', a: 'Bisa. Pilih opsi dua sisi saat memesan. Harga dihitung per lembar kertas.', byPackage: { profile: { a: 'Bisa. Pilih opsi dua sisi saat memesan.' } } },
         { q: 'Apakah bisa memperbesar atau memperkecil?', a: 'Bisa. Sebutkan persentase atau ukuran tujuan, misalnya A4 ke A3.' }
       ],
       related: ['print-a4', 'jilid-buku', 'laminating']
@@ -331,7 +398,7 @@ window.TENANTS['sinar-copy'] = {
       ],
       faqs: [
         { q: 'Bagaimana cara mengirim file?', a: 'Kirim lewat WhatsApp atau email. Sebutkan jumlah halaman, ukuran, dan warna yang diinginkan.' },
-        { q: 'Apakah bisa print dua sisi (bolak-balik)?', a: 'Bisa. Harga dihitung per sisi, jadi cetak bolak-balik dihitung dua sisi.' },
+        { q: 'Apakah bisa print dua sisi (bolak-balik)?', a: 'Bisa. Harga dihitung per sisi, jadi cetak bolak-balik dihitung dua sisi.', byPackage: { profile: { a: 'Bisa. Cetak bolak-balik tersedia untuk dokumen panjang.' } } },
         { q: 'Berapa lama pengerjaan?', a: 'Untuk 50 lembar atau kurang, biasanya selesai dalam 10–30 menit.' }
       ],
       related: ['fotocopy', 'print-a3', 'jilid-buku', 'laminating']
@@ -456,7 +523,7 @@ window.TENANTS['sinar-copy'] = {
         { spec: 'Vinyl A3+ + laminasi', unit: 'lembar', price: 25000, note: 'Tahan air' },
         { spec: 'Potong bentuk (kiss cut)', unit: 'lembar', price: 10000, note: 'Tambahan' }
       ],
-      faqs: [{ q: 'Minimal pesan berapa?', a: 'Minimal 1 lembar A3+. Semakin banyak, harga semakin ringan.' }],
+      faqs: [{ q: 'Minimal pesan berapa?', a: 'Minimal 1 lembar A3+. Semakin banyak, harga semakin ringan.', byPackage: { profile: { a: 'Minimal 1 lembar A3+. Untuk jumlah banyak, hubungi kami.' } } }],
       related: ['digital-printing', 'cetak-brosur', 'cetak-banner']
     },
     {
@@ -495,7 +562,7 @@ window.TENANTS['sinar-copy'] = {
         { spec: 'Flyer A4 Art Paper 120 gsm (min. 100)', unit: 'lembar', price: 2200, note: 'Dua sisi' },
         { spec: 'Brosur lipat 3 A4 Art Paper 150 gsm (min. 100)', unit: 'lembar', price: 3500, note: 'Sudah dilipat' }
       ],
-      faqs: [{ q: 'Apakah bisa dibantu desain?', a: 'Bisa. Tim desain kami dapat membuatkan desain dengan biaya mulai Rp 75.000.' }],
+      faqs: [{ q: 'Apakah bisa dibantu desain?', a: 'Bisa. Tim desain kami dapat membuatkan desain dengan biaya mulai Rp 75.000.', byPackage: { profile: { a: 'Bisa. Tim desain kami dapat membuatkan desain sesuai kebutuhan Anda. Hubungi kami untuk detailnya.' } } }],
       related: ['kartu-nama', 'cetak-sticker', 'digital-printing']
     },
     {
@@ -552,7 +619,7 @@ window.TENANTS['sinar-copy'] = {
         { spec: 'Buku A5, 200 halaman, isi hitam putih (min. 50 eks)', unit: 'eksemplar', price: 26000, note: '' },
         { spec: 'Buku yasin 64 halaman (min. 100 eks)', unit: 'eksemplar', price: 9000, note: '' }
       ],
-      faqs: [{ q: 'Apakah bisa dicetak 1 eksemplar dulu?', a: 'Bisa untuk contoh (mock-up). Harga satuan lebih tinggi dari harga cetak massal.' }],
+      faqs: [{ q: 'Apakah bisa dicetak 1 eksemplar dulu?', a: 'Bisa untuk contoh (mock-up). Harga satuan lebih tinggi dari harga cetak massal.', byPackage: { profile: { a: 'Bisa untuk contoh (mock-up). Hubungi kami untuk mengatur jumlah dan jadwalnya.' } } }],
       related: ['jilid-buku', 'cetak-undangan', 'print-a4']
     }
   ],
@@ -573,7 +640,7 @@ window.TENANTS['sinar-copy'] = {
   steps: [
     { icon: 'message-circle', title: 'Hubungi Kami', text: 'Chat lewat WhatsApp dan sebutkan kebutuhan cetak Anda.' },
     { icon: 'file-up', title: 'Kirim File', text: 'Kirim file desain atau dokumen, kami cek kelengkapannya.' },
-    { icon: 'receipt-text', title: 'Konfirmasi Harga', text: 'Kami kirim rincian harga dan estimasi waktu pengerjaan.' },
+    { icon: 'receipt-text', title: 'Konfirmasi Harga', text: 'Kami kirim rincian harga dan estimasi waktu pengerjaan.', byPackage: { profile: { icon: 'clipboard-check', title: 'Konfirmasi Kebutuhan', text: 'Kami cek file dan spesifikasi, lalu kirim estimasi waktu pengerjaan.' } } },
     { icon: 'package-check', title: 'Ambil atau Antar', text: 'Ambil di toko, atau kami antar untuk area tertentu.' }
   ],
 
@@ -581,7 +648,7 @@ window.TENANTS['sinar-copy'] = {
   why: [
     { icon: 'timer', title: 'Pengerjaan Cepat', text: 'Pesanan ringan selesai dalam hitungan jam, bukan hari.' },
     { icon: 'sparkles', title: 'Kualitas Terjaga', text: 'Setiap pesanan dicek sebelum diserahkan, jadi hasil rapi dan sesuai.' },
-    { icon: 'tag', title: 'Harga Bersahabat', text: 'Harga grosir otomatis untuk jumlah banyak, tanpa biaya tersembunyi.' },
+    { icon: 'tag', title: 'Harga Bersahabat', text: 'Harga grosir otomatis untuk jumlah banyak, tanpa biaya tersembunyi.', byPackage: { profile: { icon: 'layers', title: 'Jumlah Sedikit atau Banyak', text: 'Satu lembar sampai ribuan eksemplar dikerjakan dengan kerapian yang sama.' } } },
     { icon: 'headset', title: 'Konsultasi Gratis', text: 'Bingung memilih kertas atau ukuran? Kami bantu sarankan yang pas.' }
   ],
 
@@ -589,7 +656,7 @@ window.TENANTS['sinar-copy'] = {
   testimonials: [
     { name: 'Rina Kusuma', role: 'Mahasiswa Akhir', rating: 5, text: 'Jilid skripsi selesai dalam sehari dan hasilnya rapi. Pas banget menjelang sidang, terima kasih banyak!' },
     { name: 'Bapak Hendra', role: 'Pemilik Kafe Senja', rating: 5, text: 'Banner pembukaan kafe tajam warnanya dan tepat waktu. Admin ramah dan responsif lewat WhatsApp.' },
-    { name: 'Ibu Dewi Lestari', role: 'Guru SD', rating: 5, text: 'Langganan fotocopy dan laminating materi ajar. Harga bersahabat dan hasilnya selalu bersih.' },
+    { name: 'Ibu Dewi Lestari', role: 'Guru SD', rating: 5, text: 'Langganan fotocopy dan laminating materi ajar. Harga bersahabat dan hasilnya selalu bersih.', byPackage: { profile: { text: 'Langganan fotocopy dan laminating materi ajar. Pelayanannya ramah dan hasilnya selalu bersih.' } } },
     { name: 'Andi Pratama', role: 'Admin Kantor', rating: 4, text: 'Cetak kartu nama untuk satu kantor, hasilnya profesional. Dibantu cek file sebelum dicetak.' },
     { name: 'Siti Nurhaliza', role: 'Pemilik Usaha Makanan', rating: 5, text: 'Sticker label produk saya dibuat dengan potong bentuk yang rapi. Kemasan jadi terlihat premium.' }
   ],
@@ -603,18 +670,18 @@ window.TENANTS['sinar-copy'] = {
     { slug: 'promosi-undangan', name: 'Brosur, Kartu Nama & Undangan' }
   ],
   faqs: [
-    { group: 'umum', featured: true, q: 'Bagaimana cara memesan?', a: 'Hubungi kami lewat WhatsApp, sebutkan jenis layanan, ukuran, dan jumlah, lalu kirim file Anda. Kami konfirmasi harga dan estimasi selesai sebelum dikerjakan.' },
+    { group: 'umum', featured: true, q: 'Bagaimana cara memesan?', a: 'Hubungi kami lewat WhatsApp, sebutkan jenis layanan, ukuran, dan jumlah, lalu kirim file Anda. Kami konfirmasi harga dan estimasi selesai sebelum dikerjakan.', byPackage: { profile: { a: 'Hubungi kami lewat WhatsApp, sebutkan jenis layanan, ukuran, dan jumlah, lalu kirim file Anda. Kami konfirmasi kebutuhan dan estimasi selesai sebelum dikerjakan.' } } },
     { group: 'umum', featured: true, q: 'Apakah bisa kirim file lewat WhatsApp atau email?', a: 'Bisa. Format yang kami terima antara lain PDF, DOCX, XLSX, JPG, PNG, CDR, dan AI. Untuk hasil terbaik, kirim dalam PDF.' },
     { group: 'umum', featured: true, q: 'Metode pembayaran apa saja yang tersedia?', a: 'Tunai, transfer bank, dan QRIS. Untuk pesanan besar kami meminta uang muka 50%.' },
     { group: 'umum', featured: false, q: 'Apakah tersedia layanan antar?', a: 'Tersedia untuk area Jakarta Timur dan sekitarnya dengan biaya sesuai jarak. Tanyakan ke admin untuk detailnya.' },
     { group: 'fotocopy-print', featured: true, q: 'Berapa lama print dokumen selesai?', a: 'Dokumen hingga 50 lembar biasanya selesai dalam 10–30 menit. Jumlah lebih banyak kami informasikan estimasinya.' },
     { group: 'fotocopy-print', featured: false, q: 'Apakah bisa print dari flashdisk?', a: 'Bisa. Bawa flashdisk Anda ke toko, atau kirim file lewat WhatsApp.' },
-    { group: 'fotocopy-print', featured: false, q: 'Apakah ada harga khusus untuk jumlah banyak?', a: 'Ada. Fotocopy di atas 100 lembar mendapat harga grosir otomatis.' },
+    { group: 'fotocopy-print', featured: false, q: 'Apakah ada harga khusus untuk jumlah banyak?', a: 'Ada. Fotocopy di atas 100 lembar mendapat harga grosir otomatis.', byPackage: { profile: { hidden: true } } },
     { group: 'large-format', featured: true, q: 'Berapa ukuran file banner yang disarankan?', a: 'Gunakan ukuran asli dengan resolusi minimal 100 dpi. Tim kami akan membantu mengecek file sebelum dicetak.' },
     { group: 'large-format', featured: false, q: 'Berapa lama cetak banner selesai?', a: 'Umumnya 1–2 hari kerja, tergantung antrean dan ukuran. Pesanan mendesak dapat ditanyakan ke admin.' },
     { group: 'finishing', featured: true, q: 'Jilid skripsi memakan waktu berapa lama?', a: 'Jilid lakban atau spiral bisa selesai dalam 1 jam. Hard cover membutuhkan 1–2 hari kerja.' },
     { group: 'finishing', featured: false, q: 'Apakah laminating cocok untuk ijazah?', a: 'Kami tidak menyarankan laminasi dokumen asli yang masih perlu dilegalisir. Gunakan fotocopy yang dilaminasi.' },
-    { group: 'promosi-undangan', featured: false, q: 'Apakah bisa dibantu desain brosur atau undangan?', a: 'Bisa. Tim desain kami membuat desain berdasarkan referensi Anda dengan biaya mulai Rp 75.000.' },
+    { group: 'promosi-undangan', featured: false, q: 'Apakah bisa dibantu desain brosur atau undangan?', a: 'Bisa. Tim desain kami membuat desain berdasarkan referensi Anda dengan biaya mulai Rp 75.000.', byPackage: { profile: { a: 'Bisa. Tim desain kami membuat desain berdasarkan referensi Anda.' } } },
     { group: 'promosi-undangan', featured: false, q: 'Berapa minimal pesan undangan?', a: 'Minimal 100 pcs. Untuk jumlah lebih sedikit silakan tanyakan ke admin.' }
   ],
 
@@ -626,7 +693,7 @@ window.TENANTS['sinar-copy'] = {
       body: [
         { type: 'p', text: 'Biaya print jarang terasa mahal per lembar, tetapi menumpuk saat tugas, laporan, dan arsip dicetak setiap minggu. Tujuh kebiasaan sederhana berikut bisa menurunkan biaya tanpa membuat hasil sulit dibaca.' },
         { type: 'h2', text: '1. Cetak bolak-balik' },
-        { type: 'p', text: 'Pilih cetak dua sisi untuk dokumen panjang. Jumlah kertas turun separuh, dan dokumen lebih tipis saat dijilid. Harga print dihitung per sisi, jadi hemat utamanya ada pada kertas dan jilid, bukan pada tinta.' },
+        { type: 'p', text: 'Pilih cetak dua sisi untuk dokumen panjang. Jumlah kertas turun separuh, dan dokumen lebih tipis saat dijilid. Harga print dihitung per sisi, jadi hemat utamanya ada pada kertas dan jilid, bukan pada tinta.', byPackage: { profile: { text: 'Pilih cetak dua sisi untuk dokumen panjang. Jumlah kertas turun separuh, dan dokumen lebih tipis saat dijilid. Hematnya ada pada kertas dan jilid, bukan pada tinta.' } } },
         { type: 'h2', text: '2. Muat beberapa halaman dalam satu lembar' },
         { type: 'p', text: 'Untuk bahan bacaan atau draf, gunakan pengaturan 2 atau 4 halaman per lembar. Hasilnya cukup terbaca untuk keperluan belajar atau koreksi.' },
         { type: 'h2', text: '3. Periksa tampilan sebelum mencetak' },
@@ -638,7 +705,7 @@ window.TENANTS['sinar-copy'] = {
         { type: 'h2', text: '6. Kirim dalam PDF' },
         { type: 'p', text: 'File PDF menjaga susunan halaman. File Word kadang bergeser di komputer lain sehingga halaman bertambah atau tabel pindah tempat.' },
         { type: 'h2', text: '7. Gabungkan pesanan' },
-        { type: 'p', text: 'Kumpulkan beberapa file menjadi satu pesanan. Pesanan dalam jumlah besar lebih mudah mendapat harga grosir dan lebih cepat diproses.' },
+        { type: 'p', text: 'Kumpulkan beberapa file menjadi satu pesanan. Pesanan dalam jumlah besar lebih mudah mendapat harga grosir dan lebih cepat diproses.', byPackage: { profile: { text: 'Kumpulkan beberapa file menjadi satu pesanan. Pesanan dalam jumlah besar lebih mudah diatur dan lebih cepat diproses.' } } },
         { type: 'note', text: 'Tidak yakin pengaturan mana yang cocok? Kirim file Anda lewat WhatsApp dan kami sarankan pengaturan yang paling hemat.' }
       ]
     },
@@ -713,11 +780,11 @@ window.TENANTS['sinar-copy'] = {
       body: [
         { type: 'p', text: 'Laminating melapisi dokumen dengan plastik tipis sehingga lebih tahan air, noda, dan sobekan. Namun, tidak semua berkas cocok dilaminasi.' },
         { type: 'h2', text: 'Cocok dilaminasi' },
-        { type: 'ul', items: ['Kartu identitas pengurus, kartu anggota, dan kartu nama khusus.', 'Daftar harga atau menu yang sering dipegang.', 'Poster, jadwal, dan SOP yang dipasang di dinding.', 'Materi belajar atau kartu hafalan yang dipakai berulang.'] },
+        { type: 'ul', items: ['Kartu identitas pengurus, kartu anggota, dan kartu nama khusus.', 'Daftar harga atau menu yang sering dipegang.', 'Poster, jadwal, dan SOP yang dipasang di dinding.', 'Materi belajar atau kartu hafalan yang dipakai berulang.'], byPackage: { profile: { items: ['Kartu identitas pengurus, kartu anggota, dan kartu nama khusus.', 'Menu atau katalog yang sering dipegang.', 'Poster, jadwal, dan SOP yang dipasang di dinding.', 'Materi belajar atau kartu hafalan yang dipakai berulang.'] } } },
         { type: 'h2', text: 'Sebaiknya tidak dilaminasi' },
         { type: 'ul', items: ['Dokumen asli seperti ijazah atau akta yang masih perlu dilegalisir. Laminasi membuatnya tidak bisa distempel atau ditandatangani lagi. Gunakan fotocopy-nya.', 'Kertas thermal seperti struk, karena panas dapat membuat kertasnya menghitam.', 'Foto atau dokumen yang masih akan ditulisi.'] },
         { type: 'h2', text: 'Glossy atau doff' },
-        { type: 'p', text: 'Laminasi glossy membuat warna tampak tajam tetapi memantulkan cahaya. Laminasi doff lebih nyaman dibaca dan tidak silau, sehingga banyak dipilih untuk daftar harga dan kartu.' },
+        { type: 'p', text: 'Laminasi glossy membuat warna tampak tajam tetapi memantulkan cahaya. Laminasi doff lebih nyaman dibaca dan tidak silau, sehingga banyak dipilih untuk daftar harga dan kartu.', byPackage: { profile: { text: 'Laminasi glossy membuat warna tampak tajam tetapi memantulkan cahaya. Laminasi doff lebih nyaman dibaca dan tidak silau, sehingga banyak dipilih untuk menu dan kartu.' } } },
         { type: 'h2', text: 'Ketebalan' },
         { type: 'p', text: 'Plastik laminasi tersedia dalam beberapa ketebalan, sekitar 80–125 mikron. Pilih yang lebih tebal untuk kartu atau dokumen yang sering dipegang agar kaku dan awet. Yang lebih tipis sudah cukup untuk lembar yang ditempel di dinding.' },
         { type: 'note', text: 'Ragu apakah dokumen Anda boleh dilaminasi? Tanyakan dulu ke kami sebelum dikerjakan.' }

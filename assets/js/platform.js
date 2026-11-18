@@ -14,7 +14,7 @@ window.PLATFORM = {
     services:    { mockup: 'services.html',       laravel: '/layanan' },
     service:     { mockup: 'service-detail.html', laravel: '/layanan/{slug}', hash: true },
     category:    { mockup: 'services.html',       laravel: '/layanan/kategori/{slug}', hash: true },
-    pricing:     { mockup: 'pricing.html',        laravel: '/harga' },
+    pricing:     { mockup: 'pricing.html',        laravel: '/harga', module: 'pricing' },
     portfolio:   { mockup: 'portfolio.html',      laravel: '/portofolio' },
     about:       { mockup: 'about.html',          laravel: '/tentang-kami' },
     blog:        { mockup: 'blog.html',           laravel: '/artikel' },
@@ -27,7 +27,7 @@ window.PLATFORM = {
   nav: [
     { label: 'Beranda', route: 'home' },
     { label: 'Layanan', route: 'services', dropdown: 'categories' },
-    { label: 'Harga', route: 'pricing' },
+    { label: 'Harga', route: 'pricing', module: 'pricing' },
     { label: 'Portofolio', route: 'portfolio' },
     { label: 'Informasi', dropdown: [
         { label: 'Tentang Kami', route: 'about' },
@@ -83,6 +83,45 @@ window.PLATFORM = {
     faq:          { banded: true,  variants: ['list', 'columns'],      anchor: 'faq' },
     location:     { banded: true,  variants: ['split', 'stacked'],     anchor: 'lokasi' },
     cta:          { locked: true,  variants: ['gradient', 'solid'] }
+  },
+
+  /* ---------- Paket (fungsi yang dijual) ----------
+     SUMBU TERPISAH dari template: template = tampilan, paket = modul yang aktif.
+     Tenant memilih lewat site.package. Paket yang available:false belum dikerjakan
+     (Gelombang B dan C) dan tidak bisa dipilih: nilainya jatuh ke defaultPackage.
+     modules.prices      : harga tampil di kartu, detail layanan, dan data terstruktur
+     modules.pricingPage : halaman /harga ada (menu, footer, tombol CTA mengikuti)
+     modules.order       : contact (arahkan ke halaman Kontak) | whatsapp (per item)
+                           | inquiry (daftar tanya, Gelombang B) | cart (keranjang, Gelombang C)
+     seo.service         : pola judul/deskripsi detail layanan bila harga tidak tampil
+                           dan pola tenant masih memakai token {price}
+     Laravel: config/platform.php (packages) + bendera modules per tenant. */
+  defaultPackage: 'showcase',
+  packages: {
+    profile: {
+      name: 'Company Profile', available: true,
+      description: 'Memperkenalkan usaha: layanan, portofolio, artikel, dan kontak. Tanpa harga dan tanpa tombol pesan per item.',
+      modules: { prices: false, pricingPage: false, order: 'contact' },
+      seo: { service: { title: '{name} di {city} | {site}', description: '{short} Hubungi {site}, {city}.' } }
+    },
+    showcase: {
+      name: 'Showcase + WA', available: true,
+      description: 'Etalase layanan dengan harga; pelanggan memesan lewat WhatsApp dari tiap layanan.',
+      modules: { prices: true, pricingPage: true, order: 'whatsapp' },
+      seo: {}
+    },
+    catalog: {
+      name: 'Katalog', available: false, wave: 'B',
+      description: 'Katalog produk dengan filter dan daftar tanya yang dikirim sekali lewat WhatsApp.',
+      modules: { prices: true, pricingPage: true, order: 'inquiry' },
+      seo: {}
+    },
+    shop: {
+      name: 'Semi e-commerce', available: false, wave: 'C',
+      description: 'Keranjang dan checkout yang berujung pesan WhatsApp; pembayaran dan akun dibuat di Laravel.',
+      modules: { prices: true, pricingPage: true, order: 'cart' },
+      seo: {}
+    }
   },
 
   /* ---------- Template standar ----------

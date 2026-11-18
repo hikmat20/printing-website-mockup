@@ -163,7 +163,8 @@
     var optsInfo = op.length ? '<ul class="opt-list">' + op.map(function (o) {
       return '<li><strong>' + esc(o.label) + '</strong>' + o.choices.map(function (c) { return '<span class="tag-opt">' + esc(c) + '</span>'; }).join('') + '</li>';
     }).join('') + '</ul>' : '';
-    var prices = !pr.length ? '' : '<h2 class="h4 mt-5" id="pricing-title">' + esc(x.pricingTitle) + '</h2><table class="price-table"><caption class="visually-hidden">Daftar harga ' + esc(s.name) + '</caption><thead><tr>' +
+    var showPrices = PS.modules.prices;
+    var prices = !pr.length || !showPrices ? '' : '<h2 class="h4 mt-5" id="pricing-title">' + esc(x.pricingTitle) + '</h2><table class="price-table"><caption class="visually-hidden">Daftar harga ' + esc(s.name) + '</caption><thead><tr>' +
       '<th scope="col">Spesifikasi</th><th scope="col">Satuan</th><th scope="col">Harga</th><th scope="col">Catatan</th></tr></thead><tbody>' +
       pr.map(function (r) {
         return '<tr><td data-label="Spesifikasi">' + esc(r.spec) + '</td><td data-label="Satuan">' + esc(r.unit) + '</td><td class="price" data-label="Harga">' + rupiah(r.price) + '</td><td data-label="Catatan">' + esc(r.note || '-') + '</td></tr>';
@@ -174,12 +175,16 @@
       return '<div class="mb-3"><label class="form-label" for="opt-' + i + '">' + esc(o.label) + '</label><select class="form-select" id="opt-' + i + '" data-opt="' + esc(o.label) + '">' +
         o.choices.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select></div>';
     }).join('');
+    var contactOnly = PS.modules.order === 'contact';       /* paket Company Profile: tanpa pilihan dan tombol pesan per layanan */
     var order = '<aside class="order-card" aria-labelledby="order-title"><h2 id="order-title" class="h5">' + esc(x.orderTitle) + '</h2>' +
-      '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' +
+      (showPrices ? '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' : '') +
       '<p class="eta">' + ico('clock') + '<span>' + esc(s.eta) + '</span></p>' +
-      '<p class="form-note">' + esc(x.orderHint) + '</p>' + selects +
-      '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" inputmode="numeric" placeholder="Opsional" data-qty></div>' +
-      '<a class="btn btn-wa btn-lg w-100" id="order-wa" data-wa data-wa-msg="' + esc(msgOrder(s, document.createElement('div'))) + '">' + WA + ' ' + esc(x.orderButton) + '</a></aside>';
+      '<p class="form-note">' + esc(x.orderHint) + '</p>' +
+      (contactOnly
+        ? '<a class="btn btn-brand btn-lg w-100" href="' + url('contact') + '">' + ico('message-square') + ' ' + esc(x.orderButton) + '</a></aside>'
+        : selects +
+          '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" inputmode="numeric" placeholder="Opsional" data-qty></div>' +
+          '<a class="btn btn-wa btn-lg w-100" id="order-wa" data-wa data-wa-msg="' + esc(msgOrder(s, document.createElement('div'))) + '">' + WA + ' ' + esc(x.orderButton) + '</a></aside>');
 
     var related = list(s.related).map(function (sl) { return byKey(D.services, 'slug', sl); }).filter(Boolean);
     var relatedHtml = related.length ? '<section class="section section-alt" aria-labelledby="related-title"><div class="container"><h2 id="related-title" class="h3 mb-4">' + esc(x.relatedTitle) + '</h2>' +
@@ -211,6 +216,15 @@
   /* --------------------------------------------------------------- /harga */
   R.pricing = function () {
     var x = PT.pricing || {}, col = x.columns || {};
+    if (!PS.modules.pricingPage) {                       /* paket tanpa halaman harga: alamat langsung tidak boleh menampilkan harga */
+      var na = x.unavailable || { title: 'Halaman tidak tersedia', text: 'Informasi harga tidak ditampilkan di situs ini. Hubungi kami untuk penawaran sesuai kebutuhan Anda.', button: 'Hubungi Kami' };
+      return {
+        html: crumbs([{ label: 'Beranda', route: 'home' }, { label: na.title }]) +
+          '<section class="section"><div class="container"><div class="empty-state"><span class="ico">' + ico('file-question', 'i-lg') + '</span>' +
+          '<h1 id="page-title">' + esc(na.title) + '</h1><p>' + esc(na.text) + '</p><a class="btn btn-brand" href="' + url('contact') + '">' + esc(na.button) + '</a></div></div></section>',
+        meta: { key: 'pricing', route: 'pricing', notFound: true }
+      };
+    }
     var groups = D.categories.map(function (c) {
       var inCat = D.services.filter(function (s) { return s.category === c.slug && Array.isArray(s.pricing) && s.pricing.length; });
       return inCat.length ? { cat: c, list: inCat } : null;

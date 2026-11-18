@@ -32,6 +32,7 @@ Pratinjau template tanpa mengubah kode: tambahkan parameter URL.
 ```
 index.html?customize                       panel pratinjau (pilih template, font, warna, dll.)
 index.html?template=modern                 template: classic | modern | bold
+index.html?package=profile                 paket: profile | showcase (catalog dan shop menyusul)
 index.html?template=bold&font=roboto&hfont=montserrat
 index.html?primary=%230a7d4f&accent=%23e0a100
 index.html?header=topbar&cards=outlined&buttons=pill
@@ -102,13 +103,34 @@ Isi artikel = daftar blok data `{ type: 'h2'|'p'|'ul'|'ol'|'note', text | items 
 Di Laravel: tabel `articles` + `article_blocks` (atau JSON), halaman `/artikel/{slug}`.
 Form kontak memvalidasi di sisi klien (nama, ponsel Indonesia 10-13 digit, pesan) lalu membuka `wa.me` dengan teks ter-encode;
 pada produksi validasi dan antispam wajib diulang di server (POST `/kontak`). Kolom honeypot hanya penghalang bot sederhana.
-Parameter pratinjau (`?template=`, dst.) ikut terbawa saat berpindah halaman di mockup.
+Parameter pratinjau (`?template=`, `?package=`, dst.) ikut terbawa saat berpindah halaman di mockup.
+
+## Paket (fungsi yang dijual)
+
+Paket adalah **sumbu terpisah dari template**: template = tampilan, paket = modul yang aktif.
+Registri: `PLATFORM.packages`; tenant memilih lewat `site.package` (kosong = `showcase`).
+
+| Paket | Status | Harga tampil | Halaman Harga | Tombol pesan |
+|---|---|---|---|---|
+| `profile` Company Profile | siap | tidak | tidak ada | "Hubungi Kami" ke halaman Kontak |
+| `showcase` Showcase + WA | siap (perilaku mockup sebelumnya) | ya | ya | WhatsApp per layanan |
+| `catalog` Katalog | belum (Gelombang B) | ya | ya | daftar tanya ke WhatsApp |
+| `shop` Semi e-commerce | belum (Gelombang C) | ya | ya | keranjang + checkout ke WhatsApp |
+
+Paket yang belum tersedia atau tidak dikenal ditolak dengan `console.warn` dan jatuh ke `showcase`.
+
+Teks tenant yang berbeda per paket (mis. kalimat yang menyebut harga) ditulis di `packageText.<paket>`
+pada data tenant: `{ tenant, pageText, homeText, trust }`. Objek digabung per kunci, array diganti utuh.
+Paket tanpa entri memakai teks utama. Paket tanpa harga memakai pola SEO bawaan paket
+(`packages.<id>.seo.service`) bila pola tenant masih memuat `{price}`, supaya harga tidak bocor ke judul.
+Alamat `/harga` di paket tanpa halaman harga menampilkan keadaan "tidak tersedia" (noindex).
 
 ## Kustomisasi tenant (`site` di data tenant)
 
 ```js
 site: {
   template: 'classic',                       // wajib: salah satu template di registri
+  package: 'showcase',                       // profile | showcase (catalog dan shop belum tersedia)
   // semua di bawah ini opsional; kosong = ikut bawaan template
   header: 'topbar',                          // standard | topbar
   cardStyle: 'outlined',                     // elevated | outlined | flat
@@ -180,7 +202,8 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 | Mockup | Laravel |
 |---|---|
 | `platform.js` (`routes`, `nav`) | `routes/web.php`, `config/navigation.php` |
-| `platform.js` (`fonts`, `templates`, `sections`, ...) | `config/platform.php` atau tabel referensi (registri) |
+| `platform.js` (`fonts`, `templates`, `sections`, `packages`, ...) | `config/platform.php` atau tabel referensi (registri); `packages` juga menjadi bendera `modules` per tenant |
+| `packageText` | teks tenant per paket (`tenant_texts` dengan kolom paket) |
 | `tenants/<id>.js` → `tenant`, `theme`, `site` | tabel `tenants` + `tenant_settings` (JSON); `site` divalidasi terhadap registri |
 | `tenants/<id>.js` → `services`, `portfolio`, `faqs`, ... | tabel konten per tenant (`tenant_id`) |
 | `homeText` | konten section per tenant |

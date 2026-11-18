@@ -19,7 +19,7 @@
   if (!P || !TN) { console.error('[main.js] platform.js / data tenant belum dimuat (cek data-tenant pada <body>).'); return; }
   /* D = data platform + data tenant (di Laravel: dua sumber terpisah, digabung saat render) */
   var D = Object.assign({}, TN, { routes: P.routes, nav: P.nav });
-  var T = D.tenant;
+  var T = D.tenant;           /* diganti setelah paket dipilih bila tenant punya penimpa teks (applyPackageText) */
 
   /* ------------------------------------------------- konfigurasi tampilan
      Template + opsi tenant, divalidasi terhadap registri platform (platform.js).
@@ -53,13 +53,23 @@
     checkTenant('header', P.headers, ts.header); checkTenant('cardStyle', P.cardStyles, ts.cardStyle); checkTenant('buttonShape', P.buttonShapes, ts.buttonShape);
     checkTenant('fontBody', fontIds, th.fontBody); checkTenant('fontHeading', fontIds, th.fontHeading);
 
+    /* Paket: modul yang aktif (sumbu terpisah dari template). Hanya paket available yang bisa dipilih. */
+    var pkgAll = Object.keys(P.packages), pkgOk = pkgAll.filter(function (k) { return P.packages[k].available; });
+    checkQuery('package', 'paket', pkgAll);
+    var pkgId = firstValid(pkgOk, QS.get('package'), ts.package, P.defaultPackage);
+    [['site.package', ts.package]].forEach(function (c) {
+      if (c[1] != null && pkgOk.indexOf(c[1]) < 0) console.warn('[main.js] ' + c[0] + ' "' + c[1] + '" ' + (pkgAll.indexOf(c[1]) > -1 ? 'belum tersedia (Gelombang ' + P.packages[c[1]].wave + ')' : 'tidak ada di registri platform') + '; dipakai "' + pkgId + '".');
+    });
+    if (QS.get('package') != null && pkgAll.indexOf(QS.get('package')) > -1 && pkgOk.indexOf(QS.get('package')) < 0) console.warn('[main.js] ?package="' + QS.get('package') + '" belum tersedia (Gelombang ' + P.packages[QS.get('package')].wave + '); dipakai "' + pkgId + '".');
+
     var S = {
       template: tplId, templateName: tpl.name, templateDescription: tpl.description,
       header:      firstValid(P.headers, QS.get('header'), ts.header, tpl.header),
       cardStyle:   firstValid(P.cardStyles, QS.get('cards'), ts.cardStyle, tpl.cardStyle),
       buttonShape: firstValid(P.buttonShapes, QS.get('buttons'), ts.buttonShape, tpl.buttonShape),
       fontBody:    firstValid(fontIds, QS.get('font'), th.fontBody, tpl.fonts.body),
-      fontHeading: firstValid(fontIds, QS.get('hfont'), th.fontHeading, tpl.fonts.heading)
+      fontHeading: firstValid(fontIds, QS.get('hfont'), th.fontHeading, tpl.fonts.heading),
+      package: pkgId, packageName: P.packages[pkgId].name, modules: Object.assign({}, P.packages[pkgId].modules)
     };
 
     /* Halaman internal: struktur tetap; hanya varian daftar yang boleh dipilih tenant */
@@ -110,6 +120,57 @@
   var S = resolveSite();
   D.site = S;
 
+  /* Paket menentukan menu: halaman milik modul yang tidak aktif (mis. Harga) tidak ditampilkan */
+  D.nav = P.nav.filter(function (n) { return !(n.module === 'pricing' && !S.modules.pricingPage); });
+
+  /* Teks tenant per paket: TN.packageText[paket] = { tenant, pageText, homeText, trust } menimpa bagian
+     yang berbeda (mis. teks yang menyebut harga). Objek digabung per kunci; array diganti utuh. */
+  function isObj(v) { return v && typeof v === 'object' && !Array.isArray(v); }
+  /* Gabung objek per kunci (array diganti utuh). Nilai bertipe lain dari aslinya diabaikan dengan peringatan. */
+  function merge(base, over, path) {
+    if (!isObj(over)) return base;
+    var out = Object.assign({}, base);
+    Object.keys(over).forEach(function (k) {
+      var b = base && base[k], o = over[k], here = (path || 'packageText') + '.' + k;
+      if (b != null && (o == null || typeof b !== typeof o || Array.isArray(b) !== Array.isArray(o))) {
+        console.warn('[main.js] ' + here + ' harus bertipe sama dengan aslinya (' + (Array.isArray(b) ? 'array' : isObj(b) ? 'objek' : typeof b) + '); diabaikan.'); return;
+      }
+      out[k] = isObj(o) && isObj(b) ? merge(b, o, here) : o;
+    });
+    return out;
+  }
+  (function applyPackageText() {
+    var all = isObj(TN.packageText) ? TN.packageText : {}, pt = all[S.package];
+    if (pt != null && !isObj(pt)) { console.warn('[main.js] packageText.' + S.package + ' harus berupa objek; diabaikan.'); pt = null; }
+    if (!pt) {
+      if (!S.modules.prices) console.warn('[main.js] paket "' + S.package + '" tanpa harga, tetapi tenant tidak punya packageText.' + S.package + ': teks utama yang menyebut harga tetap tampil.');
+      return;
+    }
+    ['tenant', 'pageText', 'homeText'].forEach(function (k) { if (pt[k] !== undefined && !isObj(pt[k])) { console.warn('[main.js] packageText.' + S.package + '.' + k + ' harus berupa objek; diabaikan.'); } });
+    if (pt.trust != null && !Array.isArray(pt.trust)) console.warn('[main.js] packageText.' + S.package + '.trust harus berupa array; diabaikan.');
+    D.tenant = merge(TN.tenant, pt.tenant, 'packageText.tenant'); D.pageText = merge(TN.pageText, pt.pageText, 'packageText.pageText'); D.homeText = merge(TN.homeText, pt.homeText, 'packageText.homeText');
+    if (Array.isArray(pt.trust)) D.trust = pt.trust;
+    T = D.tenant;
+  })();
+
+  /* Varian per item: sebuah item konten (FAQ, langkah, artikel, blok artikel, ...) boleh membawa
+     byPackage.<paket> = { bagian yang berbeda } atau { hidden: true }. Dipakai untuk kalimat yang
+     menyebut harga: item tetap satu, hanya tampilannya berbeda per paket. Laravel: kolom variant JSON. */
+  function variants(list) {
+    if (!Array.isArray(list)) return list;
+    return list.reduce(function (out, el) {
+      var bp = isObj(el) && isObj(el.byPackage) ? el.byPackage[S.package] : null;
+      if (isObj(bp)) {
+        if (bp.hidden === true) return out;
+        var o = Object.assign({}, bp); delete o.hidden; el = merge(el, o, 'byPackage');
+      }
+      out.push(el); return out;
+    }, []);
+  }
+  ['trust', 'categories', 'portfolio', 'steps', 'why', 'testimonials', 'faqs'].forEach(function (k) { D[k] = variants(D[k]); });
+  D.services = variants(D.services); if (Array.isArray(D.services)) D.services = D.services.map(function (s) { return isObj(s) ? Object.assign({}, s, { faqs: variants(s.faqs) }) : s; });
+  D.articles = variants(D.articles); if (Array.isArray(D.articles)) D.articles = D.articles.map(function (a) { return isObj(a) ? Object.assign({}, a, { body: variants(a.body) }) : a; });
+
   /* ---------------------------------------------------------------- util */
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -137,7 +198,7 @@
 
   /* ---------------------------------------------------------------- URL */
   /* Mockup memakai file .html + hash sebagai slug. Di Laravel, ganti dengan route(). */
-  var PREVIEW_KEYS = ['customize', 'template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'];
+  var PREVIEW_KEYS = ['customize', 'package', 'template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'];
   var previewQuery = (function () {          /* khusus mockup: pilihan pratinjau ikut terbawa saat berpindah halaman */
     var q = new URLSearchParams();
     PREVIEW_KEYS.forEach(function (k) { if (QS.has(k)) q.set(k, QS.get(k)); });
@@ -195,6 +256,7 @@
     root.style.setProperty('--font', stack(S.fontBody));
     root.style.setProperty('--font-heading', stack(S.fontHeading));
 
+    root.setAttribute('data-package', S.package);
     root.setAttribute('data-template', S.template);
     root.setAttribute('data-header', S.header);
     root.setAttribute('data-card', S.cardStyle);
@@ -222,10 +284,12 @@
       '<div class="card-body-x">' +
       '<h3><a href="' + url('service', s.slug) + '">' + esc(s.name) + '</a></h3>' +
       '<p>' + esc(s.short) + '</p>' +
-      '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' +
+      (S.modules.prices ? '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' : '') +
       '<div class="card-actions">' +
       '<a class="btn btn-outline-brand btn-sm" href="' + url('service', s.slug) + '" aria-label="Lihat detail ' + esc(s.name) + '">Lihat Detail</a>' +
-      '<a class="btn btn-wa btn-sm btn-icon" data-wa data-wa-service="' + esc(s.slug) + '" aria-label="Tanya ' + esc(s.name) + ' lewat WhatsApp">' + WA_ICON + '</a>' +
+      (S.modules.order === 'contact'
+        ? '<a class="btn btn-brand btn-sm btn-icon" href="' + url('contact') + '" aria-label="Hubungi kami tentang ' + esc(s.name) + '">' + ico('message-square') + '</a>'
+        : '<a class="btn btn-wa btn-sm btn-icon" data-wa data-wa-service="' + esc(s.slug) + '" aria-label="Tanya ' + esc(s.name) + ' lewat WhatsApp">' + WA_ICON + '</a>') +
       '</div></div></article>';
   }
 
@@ -322,7 +386,9 @@
       '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda">' +
       '<img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
       '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>' +
-      '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' Pesan via WhatsApp</a>' +
+      (S.modules.order === 'contact'
+        ? '<a class="btn btn-brand btn-sm header-cta" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
+        : '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' Pesan via WhatsApp</a>') +
       '<button type="button" class="menu-btn" id="menu-open" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu">' + ico('menu', 'i-lg') + '</button>' +
       '</div></div>';
   }
@@ -346,7 +412,9 @@
     return '<div class="mobile-menu-head"><span class="brand"><img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.shortName) + '</span></span></span>' +
       '<button type="button" class="menu-btn" id="menu-close" style="margin-left:0" aria-label="Tutup menu">' + ico('x', 'i-lg') + '</button></div>' +
       '<div class="mobile-menu-body"><ul>' + items + '</ul></div>' +
-      '<div class="mobile-menu-foot"><a class="btn btn-wa w-100" data-wa>' + WA_ICON + ' Pesan via WhatsApp</a>' +
+      '<div class="mobile-menu-foot">' + (S.modules.order === 'contact'
+        ? '<a class="btn btn-brand w-100" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
+        : '<a class="btn btn-wa w-100" data-wa>' + WA_ICON + ' Pesan via WhatsApp</a>') +
       '<p class="form-note text-center mt-2 mb-0">Buka ' + esc(T.hoursSummary) + ' • ' + esc(T.city) + '</p></div>';
   }
 
@@ -359,6 +427,7 @@
       return '<a href="' + esc(s.href) + '" aria-label="' + esc(s.label) + '" target="_blank" rel="noopener noreferrer">' + ico(s.icon) + '</a>';
     }).join('');
     var company = [['home', 'Beranda'], ['about', 'Tentang Kami'], ['pricing', 'Daftar Harga'], ['portfolio', 'Portofolio'], ['blog', 'Artikel'], ['faq', 'FAQ'], ['contact', 'Kontak']]
+      .filter(function (r) { return r[0] !== 'pricing' || S.modules.pricingPage; })
       .map(function (r) { return '<li><a href="' + url(r[0]) + '">' + r[1] + '</a></li>'; }).join('');
     return '<div class="container"><div class="row g-4 g-lg-5">' +
       '<div class="col-lg-4"><a class="brand mb-3" href="' + url('home') + '"><img src="' + esc(T.logoLight) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
@@ -703,7 +772,7 @@
 
   /* API kecil untuk halaman lain (services.html, service-detail.html, dll.) */
   window.PrintSite = {
-    data: D, platform: P, site: S, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); },
+    data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); },
     esc: esc, rupiah: rupiah, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
     components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }

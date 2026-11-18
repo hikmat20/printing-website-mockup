@@ -198,7 +198,10 @@
     return '<section class="section pt-0" aria-label="Pesan lewat WhatsApp"><div class="container"><div class="cta-wa cta-wa--' + variant + '">' +
       '<div class="cta-copy"><h2>' + esc(c.title) + '</h2><p>' + esc(c.text) + '</p></div>' +
       '<div class="cta-actions"><a class="btn btn-wa btn-lg" data-wa>' + WA + ' ' + esc(c.button) + '</a>' +
-      '<a class="btn btn-light-ghost btn-lg" href="' + url('pricing') + '">' + ico('receipt-text') + ' Lihat Daftar Harga</a></div></div></div></section>';
+      (PS.modules.pricingPage
+        ? '<a class="btn btn-light-ghost btn-lg" href="' + url('pricing') + '">' + ico('receipt-text') + ' Lihat Daftar Harga</a>'
+        : '<a class="btn btn-light-ghost btn-lg" href="' + url('services') + '">' + ico('layout-grid') + ' Lihat Layanan Kami</a>') +
+      '</div></div></div></section>';
   };
 
   /* ------------------------------------------------- susun beranda dari data */
