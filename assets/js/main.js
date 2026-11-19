@@ -108,6 +108,7 @@
         if (Number.isInteger(n) && n > 0) x.limit = n;
         else console.warn('[main.js] limit "' + o.limit + '" untuk section "' + x.id + '" harus bilangan bulat positif; dipakai bawaan template.');
       }
+      if (reg.requires && Object.keys(reg.requires).some(function (k) { return S.modules[k] !== reg.requires[k]; })) return false;   /* modul paket belum aktif: dilewati */
       if (o.enabled != null && typeof o.enabled !== 'boolean') console.warn('[main.js] enabled untuk section "' + x.id + '" harus true/false (bukan "' + o.enabled + '"); diabaikan.');
       if (o.enabled === false) {
         if (reg.locked) console.warn('[main.js] section "' + x.id + '" terkunci oleh platform dan tidak bisa dimatikan.');
@@ -289,7 +290,9 @@
       '<a class="btn btn-outline-brand btn-sm" href="' + url('service', s.slug) + '" aria-label="Lihat detail ' + esc(s.name) + '">Lihat Detail</a>' +
       (S.modules.order === 'contact'
         ? '<a class="btn btn-brand btn-sm btn-icon" href="' + url('contact') + '" aria-label="Hubungi kami tentang ' + esc(s.name) + '">' + ico('message-square') + '</a>'
-        : '<a class="btn btn-wa btn-sm btn-icon" data-wa data-wa-service="' + esc(s.slug) + '" aria-label="Tanya ' + esc(s.name) + ' lewat WhatsApp">' + WA_ICON + '</a>') +
+        : S.modules.order === 'inquiry'
+          ? '<button type="button" class="btn btn-brand btn-sm btn-icon" data-inq-add="' + esc(s.slug) + '" title="Tambah ke daftar tanya" aria-label="Tambahkan ' + esc(s.name) + ' ke daftar tanya">' + ico('plus') + '</button>'
+          : '<a class="btn btn-wa btn-sm btn-icon" data-wa data-wa-service="' + esc(s.slug) + '" aria-label="Tanya ' + esc(s.name) + ' lewat WhatsApp">' + WA_ICON + '</a>') +
       '</div></div></article>';
   }
 
@@ -352,8 +355,15 @@
 
   function navDesktop(item, page) {
     if (item.dropdown) {
-      var links, active;
-      if (item.dropdown === 'categories') {
+      var links, active, mega = false;
+      if (item.dropdown === 'categories' && S.header === 'megamenu') {
+        /* Panel lebar: tiap kategori + beberapa layanannya, langsung terlihat tanpa membuka halaman */
+        active = page === 'services'; mega = true;
+        links = '<div class="mega-grid">' + D.categories.map(function (c) {
+          var items = D.services.filter(function (s) { return s.category === c.slug; }).slice(0, 4).map(function (s) { return '<li><a href="' + url('service', s.slug) + '">' + esc(s.name) + '</a></li>'; }).join('');
+          return '<div class="mega-col"><a class="mega-head" href="' + url('category', c.slug) + '">' + ico(c.icon) + '<span>' + esc(c.name) + '</span></a>' + (items ? '<ul>' + items + '</ul>' : '') + '</div>';
+        }).join('') + '</div><a class="dropdown-all" href="' + url('services') + '">Lihat semua layanan ' + ico('arrow-right') + '</a>';
+      } else if (item.dropdown === 'categories') {
         active = page === 'services';
         links = D.categories.map(function (c) { return '<a href="' + url('category', c.slug) + '">' + ico(c.icon) + esc(c.name) + '</a>'; }).join('') +
           '<a class="dropdown-all" href="' + url('services') + '">Lihat semua layanan ' + ico('arrow-right') + '</a>';
@@ -362,8 +372,8 @@
         links = item.dropdown.map(function (c) { return '<a href="' + url(c.route) + '"' + (c.route === page ? ' aria-current="page"' : '') + '>' + esc(c.label) + '</a>'; }).join('');
       }
       var id = 'dd-' + item.label.toLowerCase().replace(/\W+/g, '');
-      return '<li class="has-dropdown"><button type="button" class="nav-toggle' + (active ? ' is-active' : '') + '" aria-expanded="false" aria-controls="' + id + '">' +
-        esc(item.label) + ico('chevron-down') + '</button><div class="dropdown-panel" id="' + id + '">' + links + '</div></li>';
+      return '<li class="has-dropdown' + (mega ? ' has-mega' : '') + '"><button type="button" class="nav-toggle' + (active ? ' is-active' : '') + '" aria-expanded="false" aria-controls="' + id + '">' +
+        esc(item.label) + ico('chevron-down') + '</button><div class="dropdown-panel' + (mega ? ' mega-panel' : '') + '" id="' + id + '">' + links + '</div></li>';
     }
     var is = item.route === page;
     return '<li><a class="nav-link-item' + (is ? ' is-active' : '') + '"' + (is ? ' aria-current="page"' : '') + ' href="' + url(item.route) + '">' + esc(item.label) + '</a></li>';
@@ -380,15 +390,22 @@
       '<span class="topbar-social">' + social + '</span></div></div>';
   }
 
+  /* Tombol pembuka daftar tanya (paket Katalog); isi dan jumlahnya dikelola inquiry.js */
+  function inquiryButton(cls) {
+    return '<button type="button" class="btn btn-outline-brand btn-sm ' + cls + '" data-inq-open aria-haspopup="dialog" aria-label="Buka daftar tanya">' + ico('clipboard-list') +
+      '<span class="inq-label">Daftar Tanya</span><span class="inq-count" data-inq-count hidden>0</span></button>';
+  }
+
   function header() {
     var page = activePage();
     return (S.header === 'topbar' ? topbar() : '') + '<div class="container"><div class="header-inner">' +
       '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda">' +
       '<img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
       '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>' +
+      (S.modules.order === 'inquiry' ? inquiryButton('header-inq') : '') +
       (S.modules.order === 'contact'
         ? '<a class="btn btn-brand btn-sm header-cta" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
-        : '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' Pesan via WhatsApp</a>') +
+        : '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : 'Pesan via WhatsApp') + '</a>') +
       '<button type="button" class="menu-btn" id="menu-open" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu">' + ico('menu', 'i-lg') + '</button>' +
       '</div></div>';
   }
@@ -412,9 +429,9 @@
     return '<div class="mobile-menu-head"><span class="brand"><img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.shortName) + '</span></span></span>' +
       '<button type="button" class="menu-btn" id="menu-close" style="margin-left:0" aria-label="Tutup menu">' + ico('x', 'i-lg') + '</button></div>' +
       '<div class="mobile-menu-body"><ul>' + items + '</ul></div>' +
-      '<div class="mobile-menu-foot">' + (S.modules.order === 'contact'
+      '<div class="mobile-menu-foot">' + (S.modules.order === 'inquiry' ? inquiryButton('w-100 mb-2 header-inq--menu') : '') + (S.modules.order === 'contact'
         ? '<a class="btn btn-brand w-100" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
-        : '<a class="btn btn-wa w-100" data-wa>' + WA_ICON + ' Pesan via WhatsApp</a>') +
+        : '<a class="btn btn-wa w-100" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : 'Pesan via WhatsApp') + '</a>') +
       '<p class="form-note text-center mt-2 mb-0">Buka ' + esc(T.hoursSummary) + ' • ' + esc(T.city) + '</p></div>';
   }
 
@@ -754,7 +771,7 @@
   }
 
   /* ------------------------------------------------------------- boot */
-  var modules = [];                                   /* PrintSite.use(fn): dijalankan sebelum renderAll() */
+  var modules = [], afterBoot = [], booted = false;   /* PrintSite.use(fn): dijalankan sebelum renderAll(); PrintSite.ready(fn): setelah header/footer dirender */
   function boot() {
     applyTheme();
     modules.forEach(function (fn) {      /* satu modul gagal tidak boleh mematikan header, footer, dan modul lain */
@@ -768,11 +785,13 @@
     initLightbox();
     initSliders();
     document.documentElement.classList.add('js-ready');
+    booted = true;
+    afterBoot.forEach(function (fn) { try { fn(window.PrintSite); } catch (e) { console.error('[main.js] modul (ready) gagal dijalankan:', e); } });
   }
 
   /* API kecil untuk halaman lain (services.html, service-detail.html, dll.) */
   window.PrintSite = {
-    data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); },
+    data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); }, ready: function (fn) { if (booted) fn(window.PrintSite); else afterBoot.push(fn); },
     esc: esc, rupiah: rupiah, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
     components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }

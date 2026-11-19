@@ -257,6 +257,24 @@ window.TENANTS['sinar-copy'] = {
         { icon: 'users', title: 'Layanan Ramah', text: 'Konsultasi bahan dan ukuran tanpa dipungut biaya.' },
         { icon: 'message-circle', title: 'Konsultasi via WhatsApp', text: 'Kirim file dan kebutuhan, kami balas dengan cepat.' }
       ]
+    },
+    catalog: {
+      tenant: {
+        hero: {
+          actions: { primary: { label: 'Lihat Katalog', icon: 'layout-grid', route: 'services' }, secondary: { label: 'Chat Sales', icon: 'message-circle', message: 'Halo, saya ingin berkonsultasi dengan tim sales mengenai kebutuhan cetak.' } }
+        }
+      },
+      pageText: {
+        services: { lead: 'Telusuri katalog kami, tambahkan layanan yang Anda butuhkan ke daftar tanya, lalu kirim sekali lewat WhatsApp untuk mendapat penawaran.' },
+        service: {
+          orderTitle: 'Tambahkan ke daftar tanya', orderHint: 'Pilih kebutuhan Anda, tambahkan ke daftar, lalu kirim beberapa layanan sekaligus lewat WhatsApp.',
+          orderButton: 'Tambah ke Daftar Tanya', orderAlt: 'Tanya langsung via WhatsApp'
+        }
+      },
+      homeText: {
+        services: { title: 'Katalog Layanan Unggulan', text: 'Tekan + untuk menambahkan ke daftar tanya. Anda bisa mengirim banyak layanan dalam satu pesan.' },
+        steps: { eyebrow: 'Cara Pemesanan', title: 'Dari Daftar Tanya sampai Pesanan Jadi', text: 'Kumpulkan kebutuhan, kirim sekali, dan kami balas dengan penawaran.' }
+      }
     }
   },
 
@@ -265,6 +283,8 @@ window.TENANTS['sinar-copy'] = {
     services: {
       title: 'Layanan Kami', lead: 'Fotocopy, print, large format, jilid, hingga cetak promosi. Pilih layanan, lihat harga, lalu pesan lewat WhatsApp.',
       listTitle: 'Daftar layanan', searchLabel: 'Cari layanan', searchPlaceholder: 'Cari layanan, mis. banner atau jilid',
+      filterLabel: 'Filter katalog', categoryLabel: 'Kategori',
+      help: { title: 'Butuh bantuan memilih?', text: 'Ceritakan kebutuhan Anda, kami bantu pilihkan bahan dan ukuran.', button: 'Chat Sales' },
       empty: { title: 'Layanan tidak ditemukan', text: 'Coba kata kunci lain, atau tanyakan langsung. Kami bisa mengerjakan banyak kebutuhan cetak di luar daftar ini.', button: 'Tanya lewat WhatsApp' }
     },
     service: {
@@ -328,7 +348,53 @@ window.TENANTS['sinar-copy'] = {
     steps:        { eyebrow: 'Cara Pemesanan', title: 'Pesan Cetak dalam 4 Langkah Mudah', text: 'Tidak perlu antre. Cukup kirim kebutuhan Anda lewat WhatsApp.' },
     testimonials: { eyebrow: 'Testimoni', title: 'Kata Pelanggan Kami', text: 'Pelajar, guru, kantor, dan pelaku UMKM sudah mempercayakan kebutuhan cetak mereka kepada kami.' },
     faq:          { eyebrow: 'FAQ', title: 'Pertanyaan yang Sering Diajukan', cta: { label: 'Lihat semua pertanyaan', route: 'faq' } },
-    location:     { eyebrow: 'Lokasi', title: 'Kunjungi Toko Kami', text: 'Datang langsung untuk konsultasi, cek contoh kertas, atau ambil pesanan.' }
+    location:     { eyebrow: 'Lokasi', title: 'Kunjungi Toko Kami', text: 'Datang langsung untuk konsultasi, cek contoh kertas, atau ambil pesanan.' },
+    /* Section B2B (template Katalog) */
+    clients:      { eyebrow: 'Dipercaya', title: 'Dipercaya Sekolah, Kantor, dan Pelaku Usaha', text: 'Beberapa pelanggan tetap yang rutin memesan cetak kebutuhan mereka.', note: 'Nama pelanggan di atas adalah contoh untuk keperluan demo.' },
+    problems:     { eyebrow: 'Kebutuhan Perusahaan', title: 'Kami Bantu Selesaikan Kendala Cetak Anda', text: 'Pesanan rutin dan berskala besar punya tantangannya sendiri.', problemLabel: 'Masalah', solutionLabel: 'Solusi kami' },
+    industries:   { eyebrow: 'Industri', title: 'Melayani Berbagai Kebutuhan Usaha', text: 'Pilih bidang Anda untuk melihat kategori layanan yang paling sering dipesan.' },
+    coverage:     { eyebrow: 'Jangkauan', title: 'Area Layanan dan Pengiriman', text: 'Pesanan dapat diambil di toko atau diantar sesuai area di bawah ini.', deliveryTitle: 'Cara pengiriman' },
+    inquiry:      { title: 'Punya Daftar Kebutuhan Cetak?', text: 'Kumpulkan beberapa layanan dalam satu daftar, lalu kirim sekali lewat WhatsApp. Tim kami membalas dengan penawaran.', button: 'Buka Daftar Tanya', secondary: { label: 'Lihat Katalog', route: 'services' } }
+  },
+
+  /* ---------- Data section B2B (dipakai template Katalog; nama pelanggan = contoh demo) ---------- */
+  clients: [
+    { name: 'SMA Harapan Bangsa', type: 'Sekolah' },
+    { name: 'Klinik Sehat Sentosa', type: 'Klinik' },
+    { name: 'PT Maju Bersama', type: 'Perusahaan' },
+    { name: 'Kafe Kopi Senja', type: 'Kafe' },
+    { name: 'Koperasi Warga Sejahtera', type: 'Koperasi' },
+    { name: 'CV Karya Mandiri', type: 'Kontraktor' },
+    { name: 'Bimbel Cerdas Utama', type: 'Bimbingan belajar' },
+    { name: 'Toko Kain Nusantara', type: 'Retail' }
+  ],
+  problems: [
+    { icon: 'alarm-clock', problem: 'Tenggat sangat mepet', solution: 'Pesanan ringan selesai dalam hitungan jam, dan jadwal produksi dikonfirmasi sejak awal.' },
+    { icon: 'layers', problem: 'Kebutuhan banyak jenis sekaligus', solution: 'Satu daftar tanya untuk semua layanan, dijawab dalam satu penawaran.' },
+    { icon: 'shield-check', problem: 'Hasil tidak konsisten antar pesanan', solution: 'Spesifikasi dicatat dan dipakai ulang, sehingga pesanan berikutnya sama dengan sebelumnya.' },
+    { icon: 'truck', problem: 'Sulit mengambil sendiri', solution: 'Pesanan dapat diantar ke kantor, sekolah, atau lokasi acara di area layanan kami.' }
+  ],
+  industries: [
+    { icon: 'graduation-cap', name: 'Sekolah & Kampus', text: 'Soal ujian, modul, jilid skripsi, dan buku kenangan.', category: 'finishing' },
+    { icon: 'building-2', name: 'Kantor & Instansi', text: 'Berkas, formulir, kop surat, dan dokumen ukuran besar.', category: 'fotocopy-print' },
+    { icon: 'utensils', name: 'Kafe & Restoran', text: 'Menu, banner pembukaan, dan sticker kemasan.', category: 'digital-printing' },
+    { icon: 'stethoscope', name: 'Klinik & Apotek', text: 'Brosur edukasi, kartu pasien, dan label.', category: 'media-promosi' },
+    { icon: 'party-popper', name: 'Acara & Pernikahan', text: 'Undangan, buku acara, dan spanduk.', category: 'buku-undangan' },
+    { icon: 'store', name: 'Toko & UMKM', text: 'Kartu nama, brosur, dan materi promosi.', category: 'media-promosi' }
+  ],
+  coverage: {
+    areas: [
+      { name: 'Jakarta Timur', text: 'Pulogadung, Cakung, Jatinegara, Duren Sawit', eta: 'Hari yang sama' },
+      { name: 'Jakarta Pusat & Utara', text: 'Cempaka Putih, Kemayoran, Kelapa Gading', eta: '1 hari' },
+      { name: 'Bekasi', text: 'Kota Bekasi dan sekitar Jl. Raya Bekasi', eta: '1 hari' },
+      { name: 'Luar kota', text: 'Dikirim lewat ekspedisi ke seluruh Indonesia', eta: '2–5 hari' }
+    ],
+    delivery: [
+      { icon: 'store', title: 'Ambil di toko', text: 'Siap diambil setelah kami kabari lewat WhatsApp.' },
+      { icon: 'truck', title: 'Antar oleh kurir kami', text: 'Untuk area Jabodetabek, jadwal disepakati saat penawaran.' },
+      { icon: 'package-check', title: 'Ekspedisi', text: 'Pesanan dikemas aman dan resi dikirim lewat WhatsApp.' }
+    ],
+    note: 'Area dan estimasi di atas adalah contoh untuk demo.'
   },
 
   /* ---------- Keunggulan singkat (trust bar) ---------- */

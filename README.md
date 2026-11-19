@@ -31,8 +31,8 @@ Pratinjau template tanpa mengubah kode: tambahkan parameter URL.
 
 ```
 index.html?customize                       panel pratinjau (pilih template, font, warna, dll.)
-index.html?template=modern                 template: classic | modern | bold
-index.html?package=profile                 paket: profile | showcase (catalog dan shop menyusul)
+index.html?template=modern                 template: classic | modern | bold | katalog
+index.html?package=profile                 paket: profile | showcase | catalog (shop menyusul)
 index.html?template=bold&font=roboto&hfont=montserrat
 index.html?primary=%230a7d4f&accent=%23e0a100
 index.html?header=topbar&cards=outlined&buttons=pill
@@ -61,6 +61,7 @@ assets/
     style.css                 Design system + komponen; semua warna lewat token
     variants.css              CSS struktural untuk opsi global dan varian komponen
     pages.css                 CSS halaman internal
+    (variants.css juga memuat mega menu, section B2B, dan laci daftar tanya: tampil di semua halaman)
     templates/<id>.css        Skin visual per template, dibatasi [data-template="<id>"]
   fonts/  vendor/  images/
 ```
@@ -74,6 +75,7 @@ Template = **skin visual** (`templates/<id>.css`) + **susunan beranda bawaan** (
 | `classic` | Rapi, profesional, tampilan asli Sinar Copy | standard | elevated | rounded | Plus Jakarta Sans |
 | `modern` | Lapang, sudut membulat, bayangan lembut, slider | standard | elevated | pill | Poppins / Inter |
 | `bold` | Tegas, kontras tinggi, bayangan keras, huruf kapital | topbar | outlined | square | Montserrat / Open Sans |
+| `katalog` | Katalog B2B: padat informasi, mega menu per kategori, filter di samping, section klien/solusi/industri/jangkauan | megamenu | outlined | square | DM Sans / Inter |
 
 Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `data-card`, `data-buttons`.
 
@@ -114,10 +116,29 @@ Registri: `PLATFORM.packages`; tenant memilih lewat `site.package` (kosong = `sh
 |---|---|---|---|---|
 | `profile` Company Profile | siap | tidak | tidak ada | "Hubungi Kami" ke halaman Kontak |
 | `showcase` Showcase + WA | siap (perilaku mockup sebelumnya) | ya | ya | WhatsApp per layanan |
-| `catalog` Katalog | belum (Gelombang B) | ya | ya | daftar tanya ke WhatsApp |
+| `catalog` Katalog | siap | ya | ya | tombol + per layanan ke **daftar tanya**; seluruh daftar dikirim sekali ke WhatsApp |
 | `shop` Semi e-commerce | belum (Gelombang C) | ya | ya | keranjang + checkout ke WhatsApp |
 
 Paket yang belum tersedia atau tidak dikenal ditolak dengan `console.warn` dan jatuh ke `showcase`.
+
+### Paket Katalog: daftar tanya (`assets/js/inquiry.js`)
+
+Hanya dimuat efektif bila `modules.order === 'inquiry'` (paket lain keluar di baris pertama). Pelanggan menekan `+`
+pada kartu layanan (atau "Tambah ke Daftar Tanya" di detail layanan, lengkap dengan opsi dan jumlah), membuka laci
+Daftar Tanya dari header, mengisi nama + WhatsApp (+ perusahaan dan catatan), lalu **satu pesan WhatsApp** berisi
+seluruh daftar dibuka. Tanpa login dan tanpa pembayaran. Daftar disimpan di `localStorage` (kunci per tenant,
+divalidasi saat dibaca, tetap jalan di memori bila penyimpanan diblokir). Teks laci boleh ditimpa lewat
+`pageText.inquiry`. Laravel: daftar di session, kirim = `POST /daftar-tanya` (validasi + antispam di server,
+simpan lead ke tabel `inquiries`).
+
+### Section dan header baru (Gelombang B)
+
+- Header `megamenu`: menu Layanan berupa panel lebar per kategori (maks. 4 layanan tiap kategori). Pilihan header,
+  terpisah dari template dan paket (`?header=megamenu`).
+- Section B2B: `clients`, `problems`, `industries`, `coverage` (data: `tenant.clients/problems/industries/coverage`,
+  teks: `homeText.<id>`), dan `inquiry` (hanya bila paket memiliki modul daftar tanya: `sections.inquiry.requires`).
+  Data kosong atau salah tipe membuat section dilewati dengan `console.warn`, bukan error.
+- Varian halaman layanan `catalog` (`pages.services.variants`): filter kategori di kiri (sticky di desktop) + kartu di kanan.
 
 Teks tenant yang berbeda per paket (mis. kalimat yang menyebut harga) ditulis di `packageText.<paket>`
 pada data tenant: `{ tenant, pageText, homeText, trust }`. Objek digabung per kunci, array diganti utuh.
@@ -207,6 +228,8 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 | `tenants/<id>.js` → `tenant`, `theme`, `site` | tabel `tenants` + `tenant_settings` (JSON); `site` divalidasi terhadap registri |
 | `tenants/<id>.js` → `services`, `portfolio`, `faqs`, ... | tabel konten per tenant (`tenant_id`) |
 | `homeText` | konten section per tenant |
+| `clients`, `problems`, `industries`, `coverage` | tabel konten section B2B per tenant (`tenant_id`) |
+| `inquiry.js` (daftar tanya) | session + `POST /daftar-tanya`; lead disimpan di tabel `inquiries` |
 | `resolveSite()` di `main.js` | `SiteConfigResolver` (class PHP), validasi sama |
 | `sections.js` (`R.<id>`) | Blade Components `<x-section.services variant="slider" />` |
 | `templates/<id>.css` | aset per template, dimuat sesuai `tenant.template` |

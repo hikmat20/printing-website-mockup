@@ -37,7 +37,7 @@
     '.pv label{display:block;margin:10px 0 3px;font-weight:600;font-size:12px}' +
     '.pv select,.pv input[type=color]{width:100%;height:34px;border:1px solid #c5ccd6;border-radius:8px;background:#fff;font:13px system-ui,sans-serif;padding:0 6px}' +
     '.pv input[type=color]{padding:2px;cursor:pointer}' +
-    '.pv-tpl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}' +
+    '.pv-tpl{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}' +
     '.pv-pkg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}' +
     '.pv-tpl button,.pv-pkg button{padding:.5rem .25rem;border:1.5px solid #c5ccd6;border-radius:8px;background:#fff;font:600 12px system-ui,sans-serif;cursor:pointer}' +
     '.pv-tpl button[aria-pressed=true],.pv-pkg button[aria-pressed=true]{background:#1d2530;border-color:#1d2530;color:#fff}' +
@@ -57,7 +57,7 @@
         return '<button type="button" data-k="package" data-v="' + id + '" aria-pressed="' + (id === S.package) + '"' + (off ? ' disabled' : '') +
           ' title="' + esc(off ? k.name + ' (belum tersedia, Gelombang ' + k.wave + ')' : k.description) + '">' + esc(k.name) + '</button>';
       }).join('') + '</div>' +
-      (Object.keys(P.packages).some(function (id) { return !P.packages[id].available; }) ? '<p class="pv-note">Katalog dan Semi e-commerce menyusul (Gelombang B dan C).</p>' : '') +
+      (Object.keys(P.packages).some(function (id) { return !P.packages[id].available; }) ? '<p class="pv-note">Semi e-commerce menyusul (Gelombang C).</p>' : '') +
       '<label>Template</label><div class="pv-tpl">' + tplIds.map(function (id) {
         return '<button type="button" data-k="template" data-v="' + id + '" aria-pressed="' + (id === S.template) + '" title="' + esc(P.templates[id].description) + '">' + esc(P.templates[id].name) + '</button>';
       }).join('') + '</div>' +

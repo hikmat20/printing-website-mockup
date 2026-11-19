@@ -184,3 +184,19 @@ main .h3, main .h4, main .h5 { font-family: var(--font-heading); font-weight: 70
 .faq-jump li[hidden] { display: none; }
 .faq-jump .chip { max-width: 100%; overflow-wrap: anywhere; }
 .filter-bar .chip { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: left; }
+
+/* ===== Katalog: tata letak daftar layanan dengan filter di samping (varian "catalog") ===== */
+.catalog-layout { display: grid; gap: 1.5rem; }
+.catalog-side { min-width: 0; }
+.catalog-side-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--c-muted); font-weight: 700; margin: 1.25rem 0 .6rem; }
+.catalog-main { min-width: 0; }
+.chip-n { margin-left: .4rem; padding: .05rem .45rem; border-radius: 999px; background: var(--c-surface); color: var(--c-muted); font-size: .75rem; font-weight: 700; }
+.chip[aria-pressed="true"] .chip-n { background: rgba(255, 255, 255, .22); color: inherit; }
+.catalog-help { margin-top: 1.25rem; padding: 1rem; border: 1px dashed var(--c-border); border-radius: var(--r-card); background: var(--c-surface); }
+.catalog-help p { margin: .25rem 0 .75rem; font-size: .875rem; color: var(--c-muted); }
+@media (min-width: 992px) {
+  .catalog-layout { grid-template-columns: 280px minmax(0, 1fr); gap: 2rem; align-items: start; }
+  .catalog-side { position: sticky; top: calc(var(--header-h) + 16px); }
+  .chips--stack { flex-direction: column; flex-wrap: nowrap; overflow: visible; gap: .35rem; }
+  .chips--stack .chip { width: 100%; justify-content: space-between; border-radius: var(--r-btn); white-space: normal; text-align: left; }
+}

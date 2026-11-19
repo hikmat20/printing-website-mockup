@@ -192,6 +192,69 @@
     return wrap('location', head('location') + body, o);
   };
 
+
+  /* ------------------------------------------- section B2B (template Katalog)
+     Data dari tenant: clients, problems, industries, coverage. Data kosong / salah tipe -> section
+     dilewati (peringatan di console), tidak pernah menulis "undefined". */
+  var arr = function (v) { return Array.isArray(v) ? v.filter(function (x) { return x && typeof x === 'object'; }) : []; };
+  function missing(id) { console.warn('[sections.js] section "' + id + '" dilewati: tenant.' + id + ' kosong atau bukan array/objek yang benar.'); return ''; }
+  var initials = function (name) { return String(name || '').replace(/^(PT|CV|UD|Toko|Klinik|SMA|SMK|SD|SMP|Koperasi)\s+/i, '').split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase(); };
+
+  R.clients = function (variant, o) {
+    var list = arr(D.clients).filter(function (c) { return typeof c.name === 'string' && c.name; });
+    if (!list.length) return missing('clients');
+    var chip = function (c) {
+      return '<li class="client"><span class="client-mark" aria-hidden="true">' + esc(initials(c.name)) + '</span><span class="client-name">' + esc(c.name) + (c.type ? '<small>' + esc(c.type) + '</small>' : '') + '</span></li>';
+    };
+    return wrap('clients', head('clients') + '<ul class="clients clients--' + variant + '">' + list.map(chip).join('') + '</ul>' + (tx('clients').note ? '<p class="clients-note">' + esc(tx('clients').note) + '</p>' : ''), o);
+  };
+
+  R.problems = function (variant, o) {
+    var list = arr(D.problems).filter(function (p) { return p.problem && p.solution; });
+    if (!list.length) return missing('problems');
+    var x = tx('problems');
+    return wrap('problems', head('problems') + '<div class="row g-3 g-lg-4">' + cols(list, 'col-12 col-md-6 col-lg-3', function (p) {
+      return '<div class="card-x problem-card"><span class="ico">' + ico(p.icon || 'circle-help', 'i-lg') + '</span>' +
+        '<small class="problem-label">' + esc(x.problemLabel || 'Masalah') + '</small><h3>' + esc(p.problem) + '</h3>' +
+        '<small class="problem-label is-solution">' + esc(x.solutionLabel || 'Solusi kami') + '</small><p>' + esc(p.solution) + '</p></div>';
+    }) + '</div>', o);
+  };
+
+  R.industries = function (variant, o) {
+    var list = arr(D.industries).filter(function (i) { return typeof i.name === 'string' && i.name; });
+    if (!list.length) return missing('industries');
+    var cat = function (slug) { return D.categories.filter(function (c) { return c.slug === slug; })[0]; };
+    return wrap('industries', head('industries') + '<div class="row g-3 g-lg-4 industries industries--' + variant + '">' + cols(list, variant === 'compact' ? 'col-6 col-md-4 col-lg-2' : 'col-12 col-md-6 col-lg-4', function (i) {
+      var c = cat(i.category);
+      return '<div class="card-x industry-card"><span class="ico">' + ico(i.icon || 'building-2', 'i-lg') + '</span><div><h3>' + esc(i.name) + '</h3>' +
+        (variant === 'compact' || !i.text ? '' : '<p>' + esc(i.text) + '</p>') +
+        (c && variant !== 'compact' ? '<a class="link-arrow" href="' + url('category', c.slug) + '">' + esc(c.name) + ' ' + ico('arrow-right') + '</a>' : '') + '</div></div>';
+    }) + '</div>', o);
+  };
+
+  R.coverage = function (variant, o) {
+    var cv = D.coverage && typeof D.coverage === 'object' && !Array.isArray(D.coverage) ? D.coverage : null;
+    var areas = cv ? arr(cv.areas).filter(function (a) { return a.name; }) : [];
+    if (!areas.length) return missing('coverage');
+    var delivery = arr(cv.delivery).filter(function (d) { return d.title; });
+    var left = '<ul class="coverage-list">' + areas.map(function (a) {
+      return '<li><span class="ico">' + ico('map-pin') + '</span><div><strong>' + esc(a.name) + '</strong>' + (a.text ? '<span>' + esc(a.text) + '</span>' : '') + '</div>' + (a.eta ? '<span class="tag-opt">' + esc(a.eta) + '</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+    var right = '<div class="card-x coverage-card"><h3>' + esc(tx('coverage').deliveryTitle || 'Cara pengiriman') + '</h3>' + delivery.map(function (d) {
+      return '<div class="why-item"><span class="ico">' + ico(d.icon || 'truck', 'i-lg') + '</span><div><h4>' + esc(d.title) + '</h4><p>' + esc(d.text) + '</p></div></div>';
+    }).join('') + (cv.note ? '<p class="form-note mb-0">' + esc(cv.note) + '</p>' : '') + '</div>';
+    return wrap('coverage', head('coverage') + '<div class="row g-4 align-items-start"><div class="col-lg-6">' + left + '</div><div class="col-lg-6">' + right + '</div></div>', o);
+  };
+
+  /* Ajakan membuka daftar tanya (hanya paket Katalog: PLATFORM.sections.inquiry.requires) */
+  R.inquiry = function (variant, o) {
+    var x = tx('inquiry'), sec = x.secondary || {};
+    return wrap('inquiry', '<div class="cta-wa cta-wa--solid inquiry-band">' +
+      '<div class="cta-copy"><h2 id="inquiry-title">' + esc(x.title) + '</h2><p>' + esc(x.text) + '</p></div>' +
+      '<div class="cta-actions"><button type="button" class="btn btn-wa btn-lg" data-inq-open aria-haspopup="dialog">' + ico('clipboard-list') + ' ' + esc(x.button) + '</button>' +
+      (sec.route && P.routes[sec.route] ? '<a class="btn btn-light-ghost btn-lg" href="' + url(sec.route) + '">' + ico('layout-grid') + ' ' + esc(sec.label) + '</a>' : '') + '</div></div>', o);
+  };
+
   /* ------------------------------------------------------------------ cta */
   R.cta = function (variant) {
     var c = T.cta;
@@ -213,9 +276,10 @@
     var band = 0;
     main.innerHTML = PS.site.home.map(function (s) {
       var reg = P.sections[s.id];
-      var alt = false;
-      if (reg.banded) alt = (band++ % 2) === 1;           /* putih, abu-abu, putih, ... otomatis, walau urutan/aktif berubah */
-      return R[s.id](s.variant, { alt: alt, limit: s.limit });
+      var alt = reg.banded && (band % 2) === 1;           /* putih, abu-abu, putih, ... otomatis, walau urutan/aktif berubah */
+      var html = R[s.id](s.variant, { alt: alt, limit: s.limit });
+      if (reg.banded && html) band++;                     /* section yang dilewati (data kosong) tidak menggeser selang-seling */
+      return html;
     }).join('');
   });
 })();

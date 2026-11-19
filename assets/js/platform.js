@@ -62,13 +62,15 @@ window.PLATFORM = {
   },
 
   /* ---------- Opsi komponen global ---------- */
-  headers:      ['standard', 'topbar'],               // varian header
+  headers:      ['standard', 'topbar', 'megamenu'],   // varian header (megamenu: menu Layanan berupa panel lebar per kategori)
   cardStyles:   ['elevated', 'outlined', 'flat'],     // gaya kartu
   buttonShapes: ['rounded', 'pill', 'square'],        // bentuk tombol
 
   /* ---------- Section beranda ----------
      locked : tidak bisa dimatikan tenant (hero tetap paling atas, CTA paling bawah)
      banded : ikut selang-seling latar putih / abu-abu otomatis
+     requires: modul paket yang harus aktif agar section tampil (mis. inquiry hanya untuk paket Katalog);
+               bila tidak terpenuhi section dilewati diam-diam (bukan kesalahan tenant)
      variants[0] = varian default */
   sections: {
     hero:         { locked: true,  variants: ['split', 'centered', 'dark'] },
@@ -82,17 +84,23 @@ window.PLATFORM = {
     testimonials: { banded: true,  variants: ['scroll', 'slider', 'grid'], anchor: 'testimoni' },
     faq:          { banded: true,  variants: ['list', 'columns'],      anchor: 'faq' },
     location:     { banded: true,  variants: ['split', 'stacked'],     anchor: 'lokasi' },
+    /* Section untuk penjualan B2B (template Katalog); datanya: tenant.clients / problems / industries / coverage */
+    clients:      { banded: true,  variants: ['strip', 'grid'],        anchor: 'klien' },
+    problems:     { banded: true,  variants: ['cards'],                anchor: 'solusi' },
+    industries:   { banded: true,  variants: ['grid', 'compact'],      anchor: 'industri' },
+    coverage:     { banded: true,  variants: ['split'],                anchor: 'jangkauan' },
+    inquiry:      { banded: true,  variants: ['band'],                 anchor: 'daftar-tanya', requires: { order: 'inquiry' } },
     cta:          { locked: true,  variants: ['gradient', 'solid'] }
   },
 
   /* ---------- Paket (fungsi yang dijual) ----------
      SUMBU TERPISAH dari template: template = tampilan, paket = modul yang aktif.
      Tenant memilih lewat site.package. Paket yang available:false belum dikerjakan
-     (Gelombang B dan C) dan tidak bisa dipilih: nilainya jatuh ke defaultPackage.
+     (Gelombang C) dan tidak bisa dipilih: nilainya jatuh ke defaultPackage.
      modules.prices      : harga tampil di kartu, detail layanan, dan data terstruktur
      modules.pricingPage : halaman /harga ada (menu, footer, tombol CTA mengikuti)
      modules.order       : contact (arahkan ke halaman Kontak) | whatsapp (per item)
-                           | inquiry (daftar tanya, Gelombang B) | cart (keranjang, Gelombang C)
+                           | inquiry (daftar tanya: beberapa layanan, satu pesan WhatsApp) | cart (keranjang, Gelombang C)
      seo.service         : pola judul/deskripsi detail layanan bila harga tidak tampil
                            dan pola tenant masih memakai token {price}
      Laravel: config/platform.php (packages) + bendera modules per tenant. */
@@ -111,7 +119,7 @@ window.PLATFORM = {
       seo: {}
     },
     catalog: {
-      name: 'Katalog', available: false, wave: 'B',
+      name: 'Katalog', available: true,
       description: 'Katalog produk dengan filter dan daftar tanya yang dikirim sekali lewat WhatsApp.',
       modules: { prices: true, pricingPage: true, order: 'inquiry' },
       seo: {}
@@ -131,7 +139,7 @@ window.PLATFORM = {
   /* Halaman internal: STRUKTUR TETAP (dikunci platform). Tenant hanya boleh memilih varian daftar di bawah ini,
      lewat site.pages.<halaman>.variant. Bawaan tiap template ada di templates.<id>.pages. */
   pages: {
-    services: { variants: ['grid', 'list'] },
+    services: { variants: ['grid', 'list', 'catalog'] },   // catalog: filter kategori di sisi kiri + kartu di kanan
     blog:     { variants: ['grid', 'list'] }
   },
 
@@ -197,6 +205,30 @@ window.PLATFORM = {
         { id: 'faq', variant: 'list' },
         { id: 'location', variant: 'split' },
         { id: 'cta', variant: 'gradient' }
+      ]
+    },
+    katalog: {
+      name: 'Katalog B2B',
+      description: 'Katalog untuk penjualan ke perusahaan, sekolah, dan instansi: menu besar per kategori, filter di samping, klien, solusi, dan daftar tanya.',
+      header: 'megamenu', cardStyle: 'outlined', buttonShape: 'square',
+      fonts: { heading: 'dm-sans', body: 'inter' },
+      pages: { services: 'catalog', blog: 'grid' },
+      home: [
+        { id: 'hero', variant: 'split' },
+        { id: 'trust', variant: 'bar' },
+        { id: 'categories', variant: 'grid' },
+        { id: 'services', variant: 'grid', limit: 8 },
+        { id: 'clients', variant: 'strip' },
+        { id: 'problems', variant: 'cards' },
+        { id: 'industries', variant: 'grid' },
+        { id: 'why', variant: 'grid' },
+        { id: 'portfolio', variant: 'grid', limit: 6 },
+        { id: 'steps', variant: 'cards' },
+        { id: 'testimonials', variant: 'grid' },
+        { id: 'coverage', variant: 'split' },
+        { id: 'inquiry', variant: 'band' },
+        { id: 'faq', variant: 'columns' },
+        { id: 'cta', variant: 'solid' }
       ]
     }
   }

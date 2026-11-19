@@ -1,0 +1,53 @@
+/* ==========================================================================
+   templates/katalog.css — Template "Katalog B2B"
+   Karakter: rapi dan padat informasi untuk penjualan ke perusahaan, sekolah, dan instansi:
+   sudut kecil, bingkai tipis, latar abu-abu muda, judul section rata kiri, menu besar per
+   kategori. Warna & font tetap milik tenant. Susunan beranda bawaan: PLATFORM.templates.katalog
+   Bingkai berlaku bila gaya kartu = "outlined" (bawaan Katalog); pilihan tenant tetap dihormati.
+   ========================================================================== */
+
+[data-template="katalog"] {
+  --r-card: 8px;
+  --r-media: 10px;
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--c-primary) 8%, transparent);
+  --shadow-md: 0 4px 14px color-mix(in srgb, var(--c-primary) 10%, transparent);
+  --shadow-lg: 0 14px 34px color-mix(in srgb, var(--c-primary) 16%, transparent);
+  --section-y: 3rem;
+}
+@media (min-width: 768px)  { [data-template="katalog"] { --section-y: 4rem; } }
+@media (min-width: 1200px) { [data-template="katalog"] { --section-y: 4.75rem; } }
+
+/* Tipografi */
+[data-template="katalog"] h1,
+[data-template="katalog"] h2,
+[data-template="katalog"] h3 { letter-spacing: -.015em; }
+[data-template="katalog"] .eyebrow { padding: 0; background: none; color: var(--c-accent-dark); letter-spacing: .1em; font-weight: 800; }
+
+/* Judul section rata kiri, berdampingan dengan isi */
+[data-template="katalog"] .section-head { text-align: left; margin-left: 0; max-width: 720px; }
+[data-template="katalog"] .section-foot { text-align: left; }
+[data-template="katalog"] .section--faq .row.justify-content-center { justify-content: flex-start; }
+
+/* Header: garis bawah tipis, menu aktif bergaris */
+[data-template="katalog"] .site-header { border-bottom: 1px solid var(--c-border); }
+[data-template="katalog"] .nav-link-item.is-active,
+[data-template="katalog"] .nav-toggle.is-active { border-radius: 0; }
+
+/* Hero: latar polos dengan garis bawah; judul tidak berlebihan */
+[data-template="katalog"] .hero { background: var(--c-surface); border-bottom: 1px solid var(--c-border); }
+[data-template="katalog"] .hero::before { display: none; }
+[data-template="katalog"] .hero h1 { font-weight: 800; }
+[data-template="katalog"] .hero-visual img { border-radius: var(--r-media); }
+
+/* Kartu: bingkai tipis, tanpa angkat saat disorot */
+[data-template="katalog"] .card-x,
+[data-template="katalog"] .client,
+[data-template="katalog"] .coverage-list li,
+[data-template="katalog"] .inq-item { box-shadow: none; }
+[data-template="katalog"] .card-x:hover { transform: none; }
+[data-template="katalog"] .service-card .card-media { aspect-ratio: 4 / 3; }
+[data-template="katalog"] .tag { border-radius: 4px; }
+[data-template="katalog"] .chip { border-radius: var(--r-btn); }
+
+/* Tombol: huruf tebal agar terbaca seperti label katalog */
+[data-template="katalog"] .btn { font-weight: 700; letter-spacing: .01em; }
