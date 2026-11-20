@@ -136,6 +136,16 @@ window.PLATFORM = {
     }
   },
 
+  /* ---------- Contoh siap lihat (demo.html) ----------
+     Kombinasi paket x template yang direkomendasikan untuk ditunjukkan ke calon client.
+     Paket dan template tetap sumbu terpisah: kombinasi lain tetap bisa dipilih di demo.html. */
+  demos: [
+    { package: 'profile',  template: 'modern',  title: 'Profil usaha yang rapi',         audience: 'Percetakan yang ingin tampil profesional dan dihubungi lewat halaman Kontak.' },
+    { package: 'showcase', template: 'classic', title: 'Etalase dengan harga + WhatsApp', audience: 'Toko fotocopy dan percetakan lokal yang menerima pesanan lewat WhatsApp.' },
+    { package: 'catalog',  template: 'katalog', title: 'Katalog untuk pelanggan korporat', audience: 'Percetakan B2B: banyak produk, minta penawaran lewat daftar tanya.' },
+    { package: 'shop',     template: 'toko',    title: 'Toko dengan keranjang',           audience: 'Digital printing yang ingin pelanggan memilih, memasukkan keranjang, lalu checkout.' }
+  ],
+
   /* ---------- Template standar ----------
      Tiap template = skin visual (assets/css/templates/<id>.css) + susunan beranda
      bawaan. Tenant mewarisi semuanya dan boleh menimpa sebagian lewat `site`

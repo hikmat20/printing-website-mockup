@@ -46,6 +46,7 @@ Parameter URL hanya untuk pratinjau. Di produksi pengaturan ini disimpan di data
 index.html                    Cangkang beranda: <main id="main"> diisi dari data
 services.html service-detail.html pricing.html portfolio.html about.html contact.html blog.html article-detail.html faq.html
                               Cangkang halaman internal (9 halaman)
+demo.html                      Halaman demo/penjualan platform: pilih paket x template x halaman x perangkat (assets/js/demo.js, assets/css/demo.css)
 keranjang.html status-pesanan.html
                               Cangkang paket Semi e-commerce (di paket lain: keadaan "tidak tersedia", noindex)
 assets/
@@ -173,6 +174,15 @@ pada data tenant: `{ tenant, pageText, homeText, trust }`. Objek digabung per ku
 Paket tanpa entri memakai teks utama. Paket tanpa harga memakai pola SEO bawaan paket
 (`packages.<id>.seo.service`) bila pola tenant masih memuat `{price}`, supaya harga tidak bocor ke judul.
 Alamat `/harga` di paket tanpa halaman harga menampilkan keadaan "tidak tersedia" (noindex).
+
+## Halaman demo (`demo.html`)
+
+Materi penjualan untuk ditunjukkan ke calon client; **bukan halaman tenant** (tidak memakai header/footer tenant, noindex).
+Membaca registri `PLATFORM`: empat kartu "Contoh siap lihat" (`PLATFORM.demos`: kombinasi paket + template yang direkomendasikan,
+beserta untuk siapa), pemilih paket, template, halaman (hanya halaman yang aktif di paket itu), dan perangkat (desktop dipratinjau
+selebar 1280px lalu diperkecil, tablet 820px, ponsel 390px) dalam iframe, tabel perbandingan paket, dan kartu template.
+Pilihan tersimpan di URL (`demo.html?package=&template=&page=&device=`) sehingga tautan bisa dibagikan; nilai tak dikenal jatuh ke bawaan.
+Paket dan template tetap bebas dipadukan; `demos` hanya rekomendasi. Laravel: rute `/demo` di aplikasi marketing, membaca registri yang sama.
 
 ## Kustomisasi tenant (`site` di data tenant)
 
