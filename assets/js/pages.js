@@ -65,6 +65,7 @@
   function crumbMeta(items) {
     return items.map(function (c) { return { name: c.label, route: c.route, slug: c.slug }; });
   }
+  PS.pageKit = { crumbs: crumbs, pageHead: pageHead, crumbMeta: crumbMeta, ctaBand: ctaBand };   /* dipakai shop.js untuk halaman keranjang dan status pesanan */
 
   /* ------------------------------------------------------------ /layanan */
   R.services = function () {
@@ -141,7 +142,11 @@
     window.addEventListener('hashchange', function () { if (isAnchor()) return; var s = hashSlug(); select(chips.some(function (b) { return b.getAttribute('data-cat') === s; }) ? s : 'all', false); });
     apply();
   }
-  function initServicesFilter() { initFilter({ list: 'svc-list', search: 'svc-search', count: 'svc-count', empty: 'svc-empty', noun: 'layanan' }); }
+  function initServicesFilter() {
+    initFilter({ list: 'svc-list', search: 'svc-search', count: 'svc-count', empty: 'svc-empty', noun: 'layanan' });
+    var q = PS.query.get('q'), input = document.getElementById('svc-search');      /* kotak cari di header (varian store) mengirim ?q= */
+    if (q && input) { input.value = q.slice(0, 80); input.dispatchEvent(new Event('input')); }
+  }
 
   /* ------------------------------------------------------ /layanan/{slug} */
   function msgOrder(s, root) {
@@ -193,6 +198,11 @@
       '<p class="form-note">' + esc(x.orderHint) + '</p>' +
       (contactOnly
         ? '<a class="btn btn-brand btn-lg w-100" href="' + url('contact') + '">' + ico('message-square') + ' ' + esc(x.orderButton) + '</a></aside>'
+        : PS.modules.order === 'cart'
+          ? selects +
+            '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" value="1" inputmode="numeric" data-qty></div>' +
+            '<button type="button" class="btn btn-brand btn-lg w-100" data-cart-add="' + esc(s.slug) + '" data-cart-form>' + ico('shopping-cart') + ' ' + esc(x.orderButton) + '</button>' +
+            '<button type="button" class="btn btn-outline-brand btn-lg w-100 mt-2" data-cart-add="' + esc(s.slug) + '" data-cart-form data-cart-go>' + esc(x.orderAlt || 'Beli Sekarang') + '</button></aside>'
         : PS.modules.order === 'inquiry'
           ? selects +
             '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" inputmode="numeric" placeholder="Opsional" data-qty></div>' +

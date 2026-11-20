@@ -232,6 +232,16 @@
     }) + '</div>', o);
   };
 
+  /* promo: ubin pintasan ke kategori/layanan (template Toko). Tautan tidak valid dilewati. */
+  R.promo = function (variant, o) {
+    var list = arr(D.promos).filter(function (p) { return typeof p.title === 'string' && p.title && typeof p.route === 'string' && D.routes[p.route]; });
+    if (!list.length) return missing('promos');
+    return wrap('promo', head('promo') + '<div class="row g-3 g-lg-4 promo-tiles">' + cols(list, 'col-12 col-md-4', function (p) {
+      return '<a class="promo-tile" href="' + esc(url(p.route, p.slug)) + '"><span class="ico">' + ico(p.icon || 'tag', 'i-lg') + '</span><span class="promo-body">' +
+        (p.badge ? '<span class="promo-badge">' + esc(p.badge) + '</span>' : '') + '<strong>' + esc(p.title) + '</strong>' + (p.text ? '<span>' + esc(p.text) + '</span>' : '') + '</span>' + ico('arrow-right', 'promo-go') + '</a>';
+    }) + '</div>', o);
+  };
+
   R.coverage = function (variant, o) {
     var cv = D.coverage && typeof D.coverage === 'object' && !Array.isArray(D.coverage) ? D.coverage : null;
     var areas = cv ? arr(cv.areas).filter(function (a) { return a.name; }) : [];

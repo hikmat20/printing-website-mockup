@@ -57,7 +57,7 @@
         return '<button type="button" data-k="package" data-v="' + id + '" aria-pressed="' + (id === S.package) + '"' + (off ? ' disabled' : '') +
           ' title="' + esc(off ? k.name + ' (belum tersedia, Gelombang ' + k.wave + ')' : k.description) + '">' + esc(k.name) + '</button>';
       }).join('') + '</div>' +
-      (Object.keys(P.packages).some(function (id) { return !P.packages[id].available; }) ? '<p class="pv-note">Semi e-commerce menyusul (Gelombang C).</p>' : '') +
+      (function () { var off = Object.keys(P.packages).filter(function (id) { return !P.packages[id].available; }).map(function (id) { return P.packages[id].name; }); return off.length ? '<p class="pv-note">' + esc(off.join(', ')) + ' menyusul.</p>' : ''; })() +
       '<label>Template</label><div class="pv-tpl">' + tplIds.map(function (id) {
         return '<button type="button" data-k="template" data-v="' + id + '" aria-pressed="' + (id === S.template) + '" title="' + esc(P.templates[id].description) + '">' + esc(P.templates[id].name) + '</button>';
       }).join('') + '</div>' +

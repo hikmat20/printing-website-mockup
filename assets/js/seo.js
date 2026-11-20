@@ -159,7 +159,7 @@
   function applyPage() {
     var m = PS.pageMeta;
     if (!m) return;
-    var o = { route: m.route, breadcrumbs: m.crumbs, faqs: m.faqs, pageLd: m.pageLd };
+    var o = { route: m.route, breadcrumbs: m.crumbs, faqs: m.faqs, pageLd: m.pageLd, robots: m.robots };
     if (m.notFound) {
       o.title = 'Halaman tidak ditemukan | ' + T.name; o.description = seo.defaultDescription; o.robots = 'noindex, follow'; o.path = pathFor(m.route || 'service', '');
     } else if (m.key === 'service') {

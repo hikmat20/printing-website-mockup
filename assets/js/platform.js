@@ -20,7 +20,9 @@ window.PLATFORM = {
     blog:        { mockup: 'blog.html',           laravel: '/artikel' },
     article:     { mockup: 'article-detail.html', laravel: '/artikel/{slug}', hash: true },
     contact:     { mockup: 'contact.html',        laravel: '/kontak' },
-    faq:         { mockup: 'faq.html',            laravel: '/faq' }
+    faq:         { mockup: 'faq.html',            laravel: '/faq' },
+    cart:        { mockup: 'keranjang.html',      laravel: '/keranjang',       module: 'cart' },
+    orderStatus: { mockup: 'status-pesanan.html', laravel: '/status-pesanan',  module: 'cart' }
   },
 
   /* ---------- Navigasi ---------- */
@@ -32,7 +34,8 @@ window.PLATFORM = {
     { label: 'Informasi', dropdown: [
         { label: 'Tentang Kami', route: 'about' },
         { label: 'Artikel', route: 'blog' },
-        { label: 'FAQ', route: 'faq' }
+        { label: 'FAQ', route: 'faq' },
+        { label: 'Lacak Pesanan', route: 'orderStatus', module: 'cart' }
     ] },
     { label: 'Kontak', route: 'contact' }
   ],
@@ -62,7 +65,7 @@ window.PLATFORM = {
   },
 
   /* ---------- Opsi komponen global ---------- */
-  headers:      ['standard', 'topbar', 'megamenu'],   // varian header (megamenu: menu Layanan berupa panel lebar per kategori)
+  headers:      ['standard', 'topbar', 'megamenu', 'store'],   // varian header (megamenu: panel lebar per kategori; store: pencarian + keranjang, menu di baris kedua)
   cardStyles:   ['elevated', 'outlined', 'flat'],     // gaya kartu
   buttonShapes: ['rounded', 'pill', 'square'],        // bentuk tombol
 
@@ -89,6 +92,7 @@ window.PLATFORM = {
     problems:     { banded: true,  variants: ['cards'],                anchor: 'solusi' },
     industries:   { banded: true,  variants: ['grid', 'compact'],      anchor: 'industri' },
     coverage:     { banded: true,  variants: ['split'],                anchor: 'jangkauan' },
+    promo:        { banded: true,  variants: ['tiles'],              anchor: 'promo' },        /* toko: kotak promo; data tenant.promos */
     inquiry:      { banded: true,  variants: ['band'],                 anchor: 'daftar-tanya', requires: { order: 'inquiry' } },
     cta:          { locked: true,  variants: ['gradient', 'solid'] }
   },
@@ -96,11 +100,11 @@ window.PLATFORM = {
   /* ---------- Paket (fungsi yang dijual) ----------
      SUMBU TERPISAH dari template: template = tampilan, paket = modul yang aktif.
      Tenant memilih lewat site.package. Paket yang available:false belum dikerjakan
-     (Gelombang C) dan tidak bisa dipilih: nilainya jatuh ke defaultPackage.
+     dan tidak bisa dipilih: nilainya jatuh ke defaultPackage.
      modules.prices      : harga tampil di kartu, detail layanan, dan data terstruktur
      modules.pricingPage : halaman /harga ada (menu, footer, tombol CTA mengikuti)
      modules.order       : contact (arahkan ke halaman Kontak) | whatsapp (per item)
-                           | inquiry (daftar tanya: beberapa layanan, satu pesan WhatsApp) | cart (keranjang, Gelombang C)
+                           | inquiry (daftar tanya: beberapa layanan, satu pesan WhatsApp) | cart (keranjang + checkout berujung pesan WhatsApp)
      seo.service         : pola judul/deskripsi detail layanan bila harga tidak tampil
                            dan pola tenant masih memakai token {price}
      Laravel: config/platform.php (packages) + bendera modules per tenant. */
@@ -125,7 +129,7 @@ window.PLATFORM = {
       seo: {}
     },
     shop: {
-      name: 'Semi e-commerce', available: false, wave: 'C',
+      name: 'Semi e-commerce', available: true,
       description: 'Keranjang dan checkout yang berujung pesan WhatsApp; pembayaran dan akun dibuat di Laravel.',
       modules: { prices: true, pricingPage: true, order: 'cart' },
       seo: {}
@@ -227,6 +231,25 @@ window.PLATFORM = {
         { id: 'testimonials', variant: 'grid' },
         { id: 'coverage', variant: 'split' },
         { id: 'inquiry', variant: 'band' },
+        { id: 'faq', variant: 'columns' },
+        { id: 'cta', variant: 'solid' }
+      ]
+    },
+    toko: {
+      name: 'Toko',
+      description: 'Etalase toko online: pencarian dan keranjang di header, kotak promo, produk terlaris dengan harga menonjol.',
+      header: 'store', cardStyle: 'elevated', buttonShape: 'rounded',
+      fonts: { heading: 'poppins', body: 'inter' },
+      pages: { services: 'grid', blog: 'grid' },
+      home: [
+        { id: 'hero', variant: 'split' },
+        { id: 'trust', variant: 'bar' },
+        { id: 'categories', variant: 'compact' },
+        { id: 'promo', variant: 'tiles' },
+        { id: 'services', variant: 'grid', limit: 8 },
+        { id: 'why', variant: 'grid' },
+        { id: 'steps', variant: 'cards' },
+        { id: 'testimonials', variant: 'slider' },
         { id: 'faq', variant: 'columns' },
         { id: 'cta', variant: 'solid' }
       ]

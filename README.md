@@ -46,6 +46,8 @@ Parameter URL hanya untuk pratinjau. Di produksi pengaturan ini disimpan di data
 index.html                    Cangkang beranda: <main id="main"> diisi dari data
 services.html service-detail.html pricing.html portfolio.html about.html contact.html blog.html article-detail.html faq.html
                               Cangkang halaman internal (9 halaman)
+keranjang.html status-pesanan.html
+                              Cangkang paket Semi e-commerce (di paket lain: keadaan "tidak tersedia", noindex)
 assets/
   js/
     platform.js               DATA PLATFORM: rute, navigasi, registri (font, header, kartu,
@@ -76,6 +78,7 @@ Template = **skin visual** (`templates/<id>.css`) + **susunan beranda bawaan** (
 | `modern` | Lapang, sudut membulat, bayangan lembut, slider | standard | elevated | pill | Poppins / Inter |
 | `bold` | Tegas, kontras tinggi, bayangan keras, huruf kapital | topbar | outlined | square | Montserrat / Open Sans |
 | `katalog` | Katalog B2B: padat informasi, mega menu per kategori, filter di samping, section klien/solusi/industri/jangkauan | megamenu | outlined | square | DM Sans / Inter |
+| `toko` | Etalase online (referensi anugerahprint.com): bilah promo, kotak cari + keranjang di header, ubin promo, kartu produk dengan tombol keranjang | store | elevated | rounded | Poppins / Inter |
 
 Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `data-card`, `data-buttons`.
 
@@ -117,9 +120,9 @@ Registri: `PLATFORM.packages`; tenant memilih lewat `site.package` (kosong = `sh
 | `profile` Company Profile | siap | tidak | tidak ada | "Hubungi Kami" ke halaman Kontak |
 | `showcase` Showcase + WA | siap (perilaku mockup sebelumnya) | ya | ya | WhatsApp per layanan |
 | `catalog` Katalog | siap | ya | ya | tombol + per layanan ke **daftar tanya**; seluruh daftar dikirim sekali ke WhatsApp |
-| `shop` Semi e-commerce | belum (Gelombang C) | ya | ya | keranjang + checkout ke WhatsApp |
+| `shop` Semi e-commerce | siap | ya | ya | tombol keranjang per layanan; checkout satu pesan WhatsApp; halaman lacak pesanan contoh |
 
-Paket yang belum tersedia atau tidak dikenal ditolak dengan `console.warn` dan jatuh ke `showcase`.
+Paket yang belum tersedia (`available: false`) atau tidak dikenal ditolak dengan `console.warn` dan jatuh ke `showcase`.
 
 ### Paket Katalog: daftar tanya (`assets/js/inquiry.js`)
 
@@ -130,6 +133,31 @@ seluruh daftar dibuka. Tanpa login dan tanpa pembayaran. Daftar disimpan di `loc
 divalidasi saat dibaca, tetap jalan di memori bila penyimpanan diblokir). Teks laci boleh ditimpa lewat
 `pageText.inquiry`. Laravel: daftar di session, kirim = `POST /daftar-tanya` (validasi + antispam di server,
 simpan lead ke tabel `inquiries`).
+
+### Paket Semi e-commerce: keranjang, checkout, lacak pesanan (`assets/js/shop.js`)
+
+Aktif hanya bila `modules.order === 'cart'`. Tombol keranjang ada di kartu layanan; di detail layanan tersedia pilihan
+opsi, jumlah, "Tambah ke Keranjang", dan "Beli Sekarang". Halaman `keranjang.html`: daftar item (ubah jumlah 1-99999,
+hapus, kosongkan), **estimasi total** (harga "mulai dari" x jumlah; harga final dan ongkir dikonfirmasi admin),
+form pemesan (nama, WhatsApp, ambil di toko / antar ke alamat, catatan, honeypot), lalu **satu pesan WhatsApp** berisi
+kode pesanan (`<singkatan>-YYYYMMDD-NNNN`), butir bernomor dengan opsi, jumlah x harga = subtotal, estimasi total,
+pengambilan/alamat, dan catatan. Setelah itu keranjang dikosongkan, pesanan disimpan di perangkat, dan muncul panel
+sukses dengan tautan WhatsApp cadangan serta tautan lacak. `status-pesanan.html`: masukkan kode, lihat tahapan
+(`tenant.orderStatus.steps`; kode contoh `DEMO-001..003` dari `orderStatus.examples`, plus pesanan yang dibuat di
+perangkat ini = tahap awal). Keranjang dan status bernoindex. **Tidak ada pembayaran, akun, atau login di mockup.**
+Data `localStorage` (`ps-cart:<tenant>`, `ps-orders:<tenant>`) tidak dipercaya: divalidasi dan dinormalkan saat dibaca.
+Di paket lain `/keranjang` dan `/status-pesanan` menampilkan "Halaman tidak tersedia" dan tidak ada elemen keranjang yang dibuat.
+Laravel: keranjang = session (tamu) atau tabel `carts`; checkout = `POST /keranjang/checkout` (validasi + antispam di server)
+membuat `orders` + `order_items` dengan kode unik, lalu mengarahkan ke WhatsApp atau gateway pembayaran; status =
+`GET /status-pesanan?kode=` dari tabel `orders` (status diubah admin). Pembayaran dan login hanya ada di Laravel.
+
+### Header `store`, section `promo`, pencarian
+
+- Header `store` (bawaan template Toko, bisa dipilih lewat `?header=store`): baris promo (`tenant.promoBar`, bisa per paket
+  lewat `packageText.<paket>.tenant`), logo, kotak cari (kirim `?q=` ke halaman Layanan yang mengisi kolom pencarian),
+  keranjang (hanya bila paket punya keranjang), dan menu pada baris sendiri (desktop). Di mobile menu masuk ke menu hamburger.
+- Section `promo` (varian `tiles`): ubin pintasan dari `tenant.promos` `[{ icon, title, text, badge?, route, slug? }]`.
+  Rute tidak dikenal dibuang; daftar kosong membuat section dilewati dengan `console.warn`.
 
 ### Section dan header baru (Gelombang B)
 
@@ -230,6 +258,8 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 | `homeText` | konten section per tenant |
 | `clients`, `problems`, `industries`, `coverage` | tabel konten section B2B per tenant (`tenant_id`) |
 | `inquiry.js` (daftar tanya) | session + `POST /daftar-tanya`; lead disimpan di tabel `inquiries` |
+| `shop.js` (keranjang, checkout, lacak) | session/`carts` + `POST /keranjang/checkout` → `orders`, `order_items`; `GET /status-pesanan` dari `orders` |
+| `promos`, `orderStatus` | tabel promo per tenant; status pesanan = kolom/tabel status di `orders` |
 | `resolveSite()` di `main.js` | `SiteConfigResolver` (class PHP), validasi sama |
 | `sections.js` (`R.<id>`) | Blade Components `<x-section.services variant="slider" />` |
 | `templates/<id>.css` | aset per template, dimuat sesuai `tenant.template` |

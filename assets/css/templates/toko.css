@@ -1,0 +1,39 @@
+/* ==========================================================================
+   templates/toko.css — Template "Toko" (paket Semi e-commerce)
+   Karakter: etalase online yang ramai dan jelas: kartu produk berbingkai dengan bayangan lembut,
+   tombol bulat, bilah promo di atas, hero dua kolom, judul section rata kiri dengan garis aksen.
+   Warna & font tetap milik tenant. Susunan beranda bawaan: PLATFORM.templates.toko
+   ========================================================================== */
+
+[data-template="toko"] {
+  --r-card: 14px;
+  --r-media: 14px;
+  --shadow-sm: 0 1px 3px color-mix(in srgb, var(--c-primary) 10%, transparent);
+  --shadow-md: 0 6px 18px color-mix(in srgb, var(--c-primary) 12%, transparent);
+  --shadow-lg: 0 16px 36px color-mix(in srgb, var(--c-primary) 18%, transparent);
+  --section-y: 2.75rem;
+}
+@media (min-width: 768px)  { [data-template="toko"] { --section-y: 3.5rem; } }
+@media (min-width: 1200px) { [data-template="toko"] { --section-y: 4.25rem; } }
+
+[data-template="toko"] .section-head { text-align: left; margin-left: 0; max-width: 720px; }
+[data-template="toko"] .section-head h2 { position: relative; padding-bottom: .6rem; }
+[data-template="toko"] .section-head h2::after { content: ""; position: absolute; left: 0; bottom: 0; width: 44px; height: 4px; border-radius: 4px; background: var(--c-accent); }
+[data-template="toko"] .section-foot { text-align: left; }
+[data-template="toko"] .eyebrow { padding: 0; background: none; color: var(--c-accent-dark); font-weight: 800; letter-spacing: .08em; }
+
+/* Header: bayangan halus, menu pada baris sendiri */
+[data-template="toko"] .site-header { border-bottom: 1px solid var(--c-border); }
+[data-template="toko"] .store-nav { background: var(--c-surface); }
+[data-template="toko"] .store-search .form-control { border-radius: 999px; }
+[data-template="toko"] .store-search .btn { border-radius: 999px; }
+
+/* Hero: latar lembut, tanpa dekorasi berlebih */
+[data-template="toko"] .hero { background: linear-gradient(180deg, var(--c-surface), var(--c-card)); }
+[data-template="toko"] .hero h1 { font-weight: 800; letter-spacing: -.02em; }
+
+/* Kartu produk: tombol keranjang menonjol */
+[data-template="toko"] .service-card .btn-brand { border-radius: 999px; }
+[data-template="toko"] .service-card:hover { transform: translateY(-4px); }
+[data-template="toko"] .promo-tile { border-radius: var(--r-card); }
+[data-template="toko"] .cart-summary, [data-template="toko"] .cart-item { border-radius: var(--r-card); }

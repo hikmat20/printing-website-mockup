@@ -122,7 +122,10 @@
   D.site = S;
 
   /* Paket menentukan menu: halaman milik modul yang tidak aktif (mis. Harga) tidak ditampilkan */
-  D.nav = P.nav.filter(function (n) { return !(n.module === 'pricing' && !S.modules.pricingPage); });
+  var moduleOn = function (m) { return !m || (m === 'pricing' ? S.modules.pricingPage : m === 'cart' ? S.modules.order === 'cart' : true); };
+  D.nav = P.nav.filter(function (n) { return moduleOn(n.module); }).map(function (n) {
+    return Array.isArray(n.dropdown) ? Object.assign({}, n, { dropdown: n.dropdown.filter(function (c) { return moduleOn(c.module); }) }) : n;
+  });
 
   /* Teks tenant per paket: TN.packageText[paket] = { tenant, pageText, homeText, trust } menimpa bagian
      yang berbeda (mis. teks yang menyebut harga). Objek digabung per kunci; array diganti utuh. */
@@ -290,6 +293,8 @@
       '<a class="btn btn-outline-brand btn-sm" href="' + url('service', s.slug) + '" aria-label="Lihat detail ' + esc(s.name) + '">Lihat Detail</a>' +
       (S.modules.order === 'contact'
         ? '<a class="btn btn-brand btn-sm btn-icon" href="' + url('contact') + '" aria-label="Hubungi kami tentang ' + esc(s.name) + '">' + ico('message-square') + '</a>'
+        : S.modules.order === 'cart'
+          ? '<button type="button" class="btn btn-brand btn-sm btn-icon" data-cart-add="' + esc(s.slug) + '" title="Tambah ke keranjang" aria-label="Tambahkan ' + esc(s.name) + ' ke keranjang">' + ico('shopping-cart') + '</button>'
         : S.modules.order === 'inquiry'
           ? '<button type="button" class="btn btn-brand btn-sm btn-icon" data-inq-add="' + esc(s.slug) + '" title="Tambah ke daftar tanya" aria-label="Tambahkan ' + esc(s.name) + ' ke daftar tanya">' + ico('plus') + '</button>'
           : '<a class="btn btn-wa btn-sm btn-icon" data-wa data-wa-service="' + esc(s.slug) + '" aria-label="Tanya ' + esc(s.name) + ' lewat WhatsApp">' + WA_ICON + '</a>') +
@@ -396,18 +401,35 @@
       '<span class="inq-label">Daftar Tanya</span><span class="inq-count" data-inq-count hidden>0</span></button>';
   }
 
+  /* Tautan keranjang (paket Semi e-commerce); isi dan jumlahnya dikelola shop.js */
+  function cartLink(cls) {
+    return '<a class="btn btn-outline-brand btn-sm ' + cls + '" href="' + url('cart') + '" aria-label="Keranjang">' + ico('shopping-cart') +
+      '<span class="inq-label">Keranjang</span><span class="inq-count" data-cart-count hidden>0</span></a>';
+  }
+
+  /* Kotak cari (varian header "store"): GET ke halaman layanan, ?q= mengisi pencarian di sana */
+  function searchForm() {
+    var keep = PREVIEW_KEYS.filter(function (k) { return QS.has(k); }).map(function (k) { return '<input type="hidden" name="' + esc(k) + '" value="' + esc(QS.get(k)) + '">'; }).join('');   /* GET membuang query pada action: pilihan pratinjau dibawa lewat input tersembunyi */
+    return '<form class="store-search" role="search" action="' + esc(D.routes.services.mockup) + '" method="get">' + keep + '<label class="visually-hidden" for="hdr-q">Cari layanan</label>' + ico('search') +
+      '<input id="hdr-q" name="q" type="search" class="form-control" placeholder="Cari layanan, mis. banner atau jilid" maxlength="80" autocomplete="off">' +
+      '<button type="submit" class="btn btn-brand btn-sm">Cari</button></form>';
+  }
+
   function header() {
-    var page = activePage();
-    return (S.header === 'topbar' ? topbar() : '') + '<div class="container"><div class="header-inner">' +
+    var page = activePage(), store = S.header === 'store';
+    var nav = '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>';
+    return (S.header === 'topbar' ? topbar() : '') + (store ? '<div class="promo-bar"><div class="container"><span>' + ico('truck') + ' ' + esc(T.promoBar || ('Buka ' + T.hoursSummary + ' • ' + T.city)) + '</span></div></div>' : '') +
+      '<div class="container"><div class="header-inner">' +
       '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda">' +
       '<img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
-      '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>' +
+      (store ? searchForm() : nav) +
+      (S.modules.order === 'cart' ? cartLink('header-inq header-cart') : '') +
       (S.modules.order === 'inquiry' ? inquiryButton('header-inq') : '') +
       (S.modules.order === 'contact'
         ? '<a class="btn btn-brand btn-sm header-cta" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
-        : '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : 'Pesan via WhatsApp') + '</a>') +
+        : '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : S.modules.order === 'cart' ? 'Chat Admin' : 'Pesan via WhatsApp') + '</a>') +
       '<button type="button" class="menu-btn" id="menu-open" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu">' + ico('menu', 'i-lg') + '</button>' +
-      '</div></div>';
+      '</div></div>' + (store ? '<div class="store-nav"><div class="container">' + nav + '</div></div>' : '');
   }
 
   /* --- layout/mobile-menu ------------------------------------------ */
@@ -429,9 +451,9 @@
     return '<div class="mobile-menu-head"><span class="brand"><img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.shortName) + '</span></span></span>' +
       '<button type="button" class="menu-btn" id="menu-close" style="margin-left:0" aria-label="Tutup menu">' + ico('x', 'i-lg') + '</button></div>' +
       '<div class="mobile-menu-body"><ul>' + items + '</ul></div>' +
-      '<div class="mobile-menu-foot">' + (S.modules.order === 'inquiry' ? inquiryButton('w-100 mb-2 header-inq--menu') : '') + (S.modules.order === 'contact'
+      '<div class="mobile-menu-foot">' + (S.modules.order === 'inquiry' ? inquiryButton('w-100 mb-2 header-inq--menu') : '') + (S.modules.order === 'cart' ? cartLink('w-100 mb-2 header-inq--menu') : '') + (S.modules.order === 'contact'
         ? '<a class="btn btn-brand w-100" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
-        : '<a class="btn btn-wa w-100" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : 'Pesan via WhatsApp') + '</a>') +
+        : '<a class="btn btn-wa w-100" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : S.modules.order === 'cart' ? 'Chat Admin' : 'Pesan via WhatsApp') + '</a>') +
       '<p class="form-note text-center mt-2 mb-0">Buka ' + esc(T.hoursSummary) + ' • ' + esc(T.city) + '</p></div>';
   }
 
@@ -444,6 +466,7 @@
       return '<a href="' + esc(s.href) + '" aria-label="' + esc(s.label) + '" target="_blank" rel="noopener noreferrer">' + ico(s.icon) + '</a>';
     }).join('');
     var company = [['home', 'Beranda'], ['about', 'Tentang Kami'], ['pricing', 'Daftar Harga'], ['portfolio', 'Portofolio'], ['blog', 'Artikel'], ['faq', 'FAQ'], ['contact', 'Kontak']]
+      .concat(S.modules.order === 'cart' ? [['cart', 'Keranjang'], ['orderStatus', 'Lacak Pesanan']] : [])
       .filter(function (r) { return r[0] !== 'pricing' || S.modules.pricingPage; })
       .map(function (r) { return '<li><a href="' + url(r[0]) + '">' + r[1] + '</a></li>'; }).join('');
     return '<div class="container"><div class="row g-4 g-lg-5">' +

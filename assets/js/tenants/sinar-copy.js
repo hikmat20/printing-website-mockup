@@ -144,6 +144,14 @@ window.TENANTS['sinar-copy'] = {
           title: 'FAQ: Pertanyaan Seputar Fotocopy, Print & Pemesanan | Sinar Copy & Printing',
           description: 'Jawaban atas pertanyaan yang sering diajukan: cara memesan, pembayaran, antar, waktu pengerjaan print, banner, jilid, laminating, dan undangan.'
         },
+        cart: {
+          title: 'Keranjang | Sinar Copy & Printing',
+          description: 'Keranjang pesanan Sinar Copy & Printing. Periksa pesanan, isi data singkat, lalu kirim lewat WhatsApp.'
+        },
+        orderStatus: {
+          title: 'Lacak Pesanan | Sinar Copy & Printing',
+          description: 'Cek tahapan pesanan Anda di Sinar Copy & Printing dengan kode pesanan.'
+        },
         /* Pola untuk halaman bertoken {name} {short} {price} {unit} {category} {site} {city}.
            Detail artikel: {name} = judul, {short} = ringkasan, {category} = kategori artikel. */
         article: {
@@ -275,6 +283,26 @@ window.TENANTS['sinar-copy'] = {
         services: { title: 'Katalog Layanan Unggulan', text: 'Tekan + untuk menambahkan ke daftar tanya. Anda bisa mengirim banyak layanan dalam satu pesan.' },
         steps: { eyebrow: 'Cara Pemesanan', title: 'Dari Daftar Tanya sampai Pesanan Jadi', text: 'Kumpulkan kebutuhan, kirim sekali, dan kami balas dengan penawaran.' }
       }
+    },
+    shop: {
+      tenant: {
+        promoBar: 'Antar ke Jabodetabek • Ambil di toko • Konfirmasi harga lewat WhatsApp',
+        hero: {
+          actions: { primary: { label: 'Belanja Sekarang', icon: 'shopping-bag', route: 'services' }, secondary: { label: 'Chat Admin', icon: 'message-circle', message: 'Halo, saya ingin bertanya sebelum memesan.' } },
+          points: ['Pilih layanan, masukkan keranjang', 'Checkout cukup lewat WhatsApp', 'Lacak pesanan dengan kode']
+        }
+      },
+      pageText: {
+        services: { lead: 'Pilih layanan, tekan tombol keranjang, lalu selesaikan pesanan lewat WhatsApp.' },
+        service: {
+          orderTitle: 'Pesan layanan ini', orderHint: 'Pilih kebutuhan dan jumlah, masukkan ke keranjang, lalu checkout lewat WhatsApp.',
+          orderButton: 'Tambah ke Keranjang', orderAlt: 'Beli Sekarang'
+        }
+      },
+      homeText: {
+        services: { eyebrow: 'Produk Terlaris', title: 'Layanan yang Paling Sering Dipesan', text: 'Tekan ikon keranjang untuk menambahkan. Harga final dikonfirmasi admin.' },
+        steps: { eyebrow: 'Cara Belanja', title: 'Dari Keranjang sampai Pesanan Jadi', text: 'Pilih, checkout lewat WhatsApp, lalu lacak pesanan dengan kode.' }
+      }
     }
   },
 
@@ -334,6 +362,16 @@ window.TENANTS['sinar-copy'] = {
       title: 'Daftar Harga', lead: 'Harga per satuan untuk layanan yang paling sering dipesan. Harga jelas di awal, tanpa biaya tersembunyi.',
       note: 'Harga dapat berubah untuk jumlah besar, ukuran khusus, atau file yang perlu penyesuaian. Kirim kebutuhan Anda lewat WhatsApp untuk penawaran pasti.',
       jumpLabel: 'Lompat ke kategori', columns: { service: 'Layanan', spec: 'Spesifikasi', unit: 'Satuan', price: 'Harga', note: 'Catatan' }
+    },
+    /* Paket Semi e-commerce (modules.order = 'cart'): keranjang, checkout ke WhatsApp, lacak pesanan */
+    cart: {
+      title: 'Keranjang', lead: 'Periksa pesanan Anda, isi data singkat, lalu kirim lewat WhatsApp. Pembayaran dan harga final dikonfirmasi oleh admin.',
+      emptyTitle: 'Keranjang masih kosong', emptyText: 'Pilih layanan yang Anda butuhkan, lalu tekan tombol keranjang.', emptyButton: 'Lihat Layanan',
+      successText: 'WhatsApp akan terbuka dengan rincian pesanan. Jika tidak terbuka, tekan tombol di bawah ini. Simpan kode pesanan untuk melacak status.'
+    },
+    orderStatus: {
+      title: 'Lacak Pesanan', lead: 'Masukkan kode pesanan yang Anda terima saat checkout untuk melihat tahapannya.',
+      sample: 'Halaman contoh untuk demo. Pesanan yang Anda buat di perangkat ini dan kode contoh di atas bisa dicek. Di sistem sebenarnya, status dibaca dari database dan diperbarui admin.'
     }
   },
 
@@ -349,6 +387,7 @@ window.TENANTS['sinar-copy'] = {
     testimonials: { eyebrow: 'Testimoni', title: 'Kata Pelanggan Kami', text: 'Pelajar, guru, kantor, dan pelaku UMKM sudah mempercayakan kebutuhan cetak mereka kepada kami.' },
     faq:          { eyebrow: 'FAQ', title: 'Pertanyaan yang Sering Diajukan', cta: { label: 'Lihat semua pertanyaan', route: 'faq' } },
     location:     { eyebrow: 'Lokasi', title: 'Kunjungi Toko Kami', text: 'Datang langsung untuk konsultasi, cek contoh kertas, atau ambil pesanan.' },
+    promo:        { eyebrow: 'Promo & Pilihan', title: 'Pilihan untuk Kebutuhan Anda', text: 'Pintasan ke layanan yang paling sering dicari.' },
     /* Section B2B (template Katalog) */
     clients:      { eyebrow: 'Dipercaya', title: 'Dipercaya Sekolah, Kantor, dan Pelaku Usaha', text: 'Beberapa pelanggan tetap yang rutin memesan cetak kebutuhan mereka.', note: 'Nama pelanggan di atas adalah contoh untuk keperluan demo.' },
     problems:     { eyebrow: 'Kebutuhan Perusahaan', title: 'Kami Bantu Selesaikan Kendala Cetak Anda', text: 'Pesanan rutin dan berskala besar punya tantangannya sendiri.', problemLabel: 'Masalah', solutionLabel: 'Solusi kami' },
@@ -395,6 +434,30 @@ window.TENANTS['sinar-copy'] = {
       { icon: 'package-check', title: 'Ekspedisi', text: 'Pesanan dikemas aman dan resi dikirim lewat WhatsApp.' }
     ],
     note: 'Area dan estimasi di atas adalah contoh untuk demo.'
+  },
+
+  /* ---------- Section promo (template Toko / paket Semi e-commerce) ----------
+     Tiap ubin menaut ke kategori atau layanan: { icon, title, text, badge?, route, slug? } */
+  promos: [
+    { icon: 'ruler', title: 'Banner & Spanduk', text: 'Cetak ukuran besar untuk acara dan toko.', badge: 'Terlaris', route: 'category', slug: 'large-format' },
+    { icon: 'book-open-check', title: 'Jilid Skripsi', text: 'Hard cover emas, siap sidang.', badge: 'Musim Sidang', route: 'service', slug: 'jilid-buku' },
+    { icon: 'megaphone', title: 'Kartu Nama & Brosur', text: 'Materi promosi untuk usaha Anda.', route: 'category', slug: 'media-promosi' }
+  ],
+
+  /* ---------- Contoh status pesanan (paket Semi e-commerce) ----------
+     Mockup: contoh statis + pesanan yang dibuat di perangkat ini. Laravel: tabel orders + status, diperbarui admin. */
+  orderStatus: {
+    steps: [
+      { title: 'Menunggu konfirmasi', text: 'Pesanan diterima. Admin mengecek spesifikasi dan harga final.' },
+      { title: 'Dikonfirmasi', text: 'Harga final dan jadwal selesai sudah disepakati lewat WhatsApp.' },
+      { title: 'Sedang dikerjakan', text: 'Pesanan sedang dicetak dan difinishing.' },
+      { title: 'Siap diambil / dikirim', text: 'Pesanan selesai. Kami kabari lewat WhatsApp.' }
+    ],
+    examples: [
+      { code: 'DEMO-001', step: 1, items: ['Banner Flexi 3x1 m (1 pcs)'], total: 270000 },
+      { code: 'DEMO-002', step: 2, items: ['Print Dokumen A4 (120 lembar)', 'Jilid Buku & Skripsi (2 buku)'], total: 150000 },
+      { code: 'DEMO-003', step: 3, items: ['Kartu Nama (5 box)'], total: 225000 }
+    ]
   },
 
   /* ---------- Keunggulan singkat (trust bar) ---------- */
