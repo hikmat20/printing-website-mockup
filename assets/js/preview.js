@@ -37,9 +37,12 @@
     '.pv label{display:block;margin:10px 0 3px;font-weight:600;font-size:12px}' +
     '.pv select,.pv input[type=color]{width:100%;height:34px;border:1px solid #c5ccd6;border-radius:8px;background:#fff;font:13px system-ui,sans-serif;padding:0 6px}' +
     '.pv input[type=color]{padding:2px;cursor:pointer}' +
-    '.pv-tpl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}' +
-    '.pv-tpl button{padding:.5rem .25rem;border:1.5px solid #c5ccd6;border-radius:8px;background:#fff;font:600 12px system-ui,sans-serif;cursor:pointer}' +
-    '.pv-tpl button[aria-pressed=true]{background:#1d2530;border-color:#1d2530;color:#fff}' +
+    '.pv-tpl{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}' +
+    '.pv-pkg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}' +
+    '.pv-tpl button,.pv-pkg button{padding:.5rem .25rem;border:1.5px solid #c5ccd6;border-radius:8px;background:#fff;font:600 12px system-ui,sans-serif;cursor:pointer}' +
+    '.pv-tpl button[aria-pressed=true],.pv-pkg button[aria-pressed=true]{background:#1d2530;border-color:#1d2530;color:#fff}' +
+    '.pv-pkg button:disabled{opacity:.5;cursor:not-allowed}' +
+    '.pv-note{margin:.35rem 0 0;font:12px/1.4 system-ui,sans-serif;color:#5b6675}' +
     '.pv-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
     '.pv-reset{margin-top:12px;width:100%;padding:.5rem;border:1.5px solid #c5ccd6;border-radius:8px;background:#f5f7fa;font:600 12px system-ui,sans-serif;cursor:pointer}';
   document.head.appendChild(css);
@@ -49,6 +52,12 @@
   box.innerHTML =
     '<div class="pv-panel" id="pv-panel" role="group" aria-label="Pratinjau kustomisasi">' +
       '<h2>Pratinjau kustomisasi</h2><p>Hanya di mockup. Pilihan dibatasi registri platform (platform.js).</p>' +
+      '<label>Paket</label><div class="pv-pkg">' + Object.keys(P.packages).map(function (id) {
+        var k = P.packages[id], off = !k.available;
+        return '<button type="button" data-k="package" data-v="' + id + '" aria-pressed="' + (id === S.package) + '"' + (off ? ' disabled' : '') +
+          ' title="' + esc(off ? k.name + ' (belum tersedia, Gelombang ' + k.wave + ')' : k.description) + '">' + esc(k.name) + '</button>';
+      }).join('') + '</div>' +
+      (function () { var off = Object.keys(P.packages).filter(function (id) { return !P.packages[id].available; }).map(function (id) { return P.packages[id].name; }); return off.length ? '<p class="pv-note">' + esc(off.join(', ')) + ' menyusul.</p>' : ''; })() +
       '<label>Template</label><div class="pv-tpl">' + tplIds.map(function (id) {
         return '<button type="button" data-k="template" data-v="' + id + '" aria-pressed="' + (id === S.template) + '" title="' + esc(P.templates[id].description) + '">' + esc(P.templates[id].name) + '</button>';
       }).join('') + '</div>' +
@@ -77,9 +86,10 @@
     window.location.search = q.toString();
   }
   box.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-k="template"]');
+    var b = e.target.closest('[data-k="template"]'), pk = e.target.closest('[data-k="package"]');
     if (b) go(function (q) { q.set('template', b.getAttribute('data-v')); });
-    if (e.target.closest('[data-reset]')) go(function (q) { ['template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'].forEach(function (k) { q.delete(k); }); });
+    if (pk && !pk.disabled) go(function (q) { q.set('package', pk.getAttribute('data-v')); });
+    if (e.target.closest('[data-reset]')) go(function (q) { ['package', 'template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'].forEach(function (k) { q.delete(k); }); });
   });
   box.addEventListener('change', function (e) {
     var el = e.target.closest('select[data-k], input[data-k]');

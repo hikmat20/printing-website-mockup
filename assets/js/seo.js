@@ -58,7 +58,7 @@
       logo: abs(T.logo),
       telephone: '+' + T.phone,
       email: T.email,
-      priceRange: seo.priceRange,
+      priceRange: PS.modules.prices ? seo.priceRange : undefined,
       address: { '@type': 'PostalAddress', streetAddress: a.street, addressLocality: a.locality, addressRegion: a.region, postalCode: a.postalCode, addressCountry: a.country },
       geo: { '@type': 'GeoCoordinates', latitude: T.geo.lat, longitude: T.geo.lng },
       openingHoursSpecification: T.hours.map(function (h) {
@@ -104,8 +104,8 @@
       url: pageUrl,
       areaServed: { '@type': 'City', name: T.city },
       provider: { '@type': 'LocalBusiness', name: T.name, url: abs('/'), telephone: '+' + T.phone },
-      offers: { '@type': 'Offer', priceCurrency: 'IDR', price: String(s.priceFrom), url: pageUrl,
-        priceSpecification: { '@type': 'UnitPriceSpecification', priceCurrency: 'IDR', price: String(s.priceFrom), unitText: s.unit } }
+      offers: PS.modules.prices ? { '@type': 'Offer', priceCurrency: 'IDR', price: String(s.priceFrom), url: pageUrl,
+        priceSpecification: { '@type': 'UnitPriceSpecification', priceCurrency: 'IDR', price: String(s.priceFrom), unitText: s.unit } } : undefined
     };
   }
 
@@ -159,11 +159,14 @@
   function applyPage() {
     var m = PS.pageMeta;
     if (!m) return;
-    var o = { route: m.route, breadcrumbs: m.crumbs, faqs: m.faqs, pageLd: m.pageLd };
+    var o = { route: m.route, breadcrumbs: m.crumbs, faqs: m.faqs, pageLd: m.pageLd, robots: m.robots };
     if (m.notFound) {
       o.title = 'Halaman tidak ditemukan | ' + T.name; o.description = seo.defaultDescription; o.robots = 'noindex, follow'; o.path = pathFor(m.route || 'service', '');
     } else if (m.key === 'service') {
       var s = m.service, pat = (seo.pages && seo.pages.service) || {};
+      /* Paket tanpa harga: pola tenant yang masih memuat {price} diganti pola bawaan paket supaya harga tidak bocor ke judul/deskripsi */
+      var fb = PS.platform.packages[PS.site.package].seo.service;
+      if (!PS.modules.prices && fb && /\{price\}/.test(String(pat.title) + String(pat.description))) pat = fb;
       var vars = { name: s.name, short: s.short, price: PS.rupiah(s.priceFrom).replace(/\u00a0/g, ' '), unit: s.unit, category: m.category ? m.category.name : '', site: T.name, city: T.city };
       o.title = fill(pat.title, vars); o.description = fill(pat.description, vars);
       o.slug = s.slug; o.service = s; o.category = m.category;

@@ -65,6 +65,7 @@
   function crumbMeta(items) {
     return items.map(function (c) { return { name: c.label, route: c.route, slug: c.slug }; });
   }
+  PS.pageKit = { crumbs: crumbs, pageHead: pageHead, crumbMeta: crumbMeta, ctaBand: ctaBand };   /* dipakai shop.js untuk halaman keranjang dan status pesanan */
 
   /* ------------------------------------------------------------ /layanan */
   R.services = function () {
@@ -74,22 +75,32 @@
       D.categories.map(function (c) {
         return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + '</button>';
       }).join('');
-    var colCls = variant === 'list' ? 'col-12' : 'col-12 col-md-6 col-lg-4';
+    var catalog = variant === 'catalog';           /* filter di sisi kiri + kartu di kanan (template Katalog B2B) */
+    if (catalog) chips = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (active === 'all') + '">Semua <span class="chip-n">' + D.services.length + '</span></button>' +
+      D.categories.map(function (c) {
+        var n = D.services.filter(function (s) { return s.category === c.slug; }).length;
+        return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + ' <span class="chip-n">' + n + '</span></button>';
+      }).join('');
+    var colCls = variant === 'list' ? 'col-12' : catalog ? 'col-12 col-md-6 col-xl-4' : 'col-12 col-md-6 col-lg-4';
     var items = D.services.map(function (s) {
       var cat = byKey(D.categories, 'slug', s.category);
       var q = (s.name + ' ' + s.short + ' ' + (cat ? cat.name : '')).toLowerCase();
       return '<div class="' + colCls + '" data-item data-category="' + esc(s.category) + '" data-q="' + esc(q) + '">' + C.serviceCard(s) + '</div>';
     }).join('');
     var empty = x.empty || {};
-    var body =
-      '<div class="filter-bar">' +
-        '<div class="search-input"><label class="visually-hidden" for="svc-search">' + esc(x.searchLabel || 'Cari layanan') + '</label>' + ico('search') +
-        '<input id="svc-search" type="search" class="form-control" placeholder="' + esc(x.searchPlaceholder || '') + '" autocomplete="off"></div>' +
-        '<div class="chips" role="group" aria-label="Filter kategori">' + chips + '</div></div>' +
-      '<p class="result-count" id="svc-count" role="status" aria-live="polite"></p>' +
+    var search = '<div class="search-input"><label class="visually-hidden" for="svc-search">' + esc(x.searchLabel || 'Cari layanan') + '</label>' + ico('search') +
+        '<input id="svc-search" type="search" class="form-control" placeholder="' + esc(x.searchPlaceholder || '') + '" autocomplete="off"></div>';
+    var listHtml = '<p class="result-count" id="svc-count" role="status" aria-live="polite"></p>' +
       '<div class="row g-3 g-lg-4 svc-list svc-list--' + variant + '" id="svc-list">' + items + '</div>' +
       '<div class="empty-state" id="svc-empty" hidden><span class="ico">' + ico('search-x', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
       '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
+    var help = x.help || {};
+    var body = catalog
+      ? '<div class="catalog-layout"><aside class="catalog-side" aria-label="' + esc(x.filterLabel || 'Filter katalog') + '">' + search +
+          '<h3 class="catalog-side-title">' + esc(x.categoryLabel || 'Kategori') + '</h3><div class="chips chips--stack" role="group" aria-label="Filter kategori">' + chips + '</div>' +
+          (help.title ? '<div class="catalog-help"><strong>' + esc(help.title) + '</strong><p>' + esc(help.text) + '</p><a class="btn btn-wa btn-sm w-100" data-wa>' + WA + ' ' + esc(help.button) + '</a></div>' : '') +
+        '</aside><div class="catalog-main">' + listHtml + '</div></div>'
+      : '<div class="filter-bar">' + search + '<div class="chips" role="group" aria-label="Filter kategori">' + chips + '</div></div>' + listHtml;
     var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
     return {
       html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-labelledby="svc-list-title"><div class="container"><h2 class="visually-hidden" id="svc-list-title">' + esc(x.listTitle || x.title) + '</h2>' + body + '</div></section>' + ctaBand(),
@@ -131,15 +142,20 @@
     window.addEventListener('hashchange', function () { if (isAnchor()) return; var s = hashSlug(); select(chips.some(function (b) { return b.getAttribute('data-cat') === s; }) ? s : 'all', false); });
     apply();
   }
-  function initServicesFilter() { initFilter({ list: 'svc-list', search: 'svc-search', count: 'svc-count', empty: 'svc-empty', noun: 'layanan' }); }
+  function initServicesFilter() {
+    initFilter({ list: 'svc-list', search: 'svc-search', count: 'svc-count', empty: 'svc-empty', noun: 'layanan' });
+    var q = PS.query.get('q'), input = document.getElementById('svc-search');      /* kotak cari di header (varian store) mengirim ?q= */
+    if (q && input) { input.value = q.slice(0, 80); input.dispatchEvent(new Event('input')); }
+  }
 
   /* ------------------------------------------------------ /layanan/{slug} */
   function msgOrder(s, root) {
+    var ask = PS.modules.order === 'inquiry';
     var parts = [];
     Array.prototype.slice.call(root.querySelectorAll('[data-opt]')).forEach(function (sel) { parts.push(sel.getAttribute('data-opt') + ': ' + sel.value); });
     var qty = root.querySelector('[data-qty]');
     if (qty && qty.value) parts.push('Jumlah: ' + qty.value + ' ' + s.unit);
-    return 'Halo ' + T.shortName + ', saya ingin memesan ' + s.name + (parts.length ? ' dengan pilihan: ' + parts.join(', ') : '') + '. Mohon informasi harga dan estimasi selesai.';
+    return 'Halo ' + T.shortName + ', saya ingin ' + (ask ? 'bertanya mengenai ' : 'memesan ') + s.name + (parts.length ? ' dengan pilihan: ' + parts.join(', ') : '') + '. Mohon informasi harga dan estimasi selesai.';
   }
 
   R.service = function () {
@@ -163,7 +179,8 @@
     var optsInfo = op.length ? '<ul class="opt-list">' + op.map(function (o) {
       return '<li><strong>' + esc(o.label) + '</strong>' + o.choices.map(function (c) { return '<span class="tag-opt">' + esc(c) + '</span>'; }).join('') + '</li>';
     }).join('') + '</ul>' : '';
-    var prices = !pr.length ? '' : '<h2 class="h4 mt-5" id="pricing-title">' + esc(x.pricingTitle) + '</h2><table class="price-table"><caption class="visually-hidden">Daftar harga ' + esc(s.name) + '</caption><thead><tr>' +
+    var showPrices = PS.modules.prices;
+    var prices = !pr.length || !showPrices ? '' : '<h2 class="h4 mt-5" id="pricing-title">' + esc(x.pricingTitle) + '</h2><table class="price-table"><caption class="visually-hidden">Daftar harga ' + esc(s.name) + '</caption><thead><tr>' +
       '<th scope="col">Spesifikasi</th><th scope="col">Satuan</th><th scope="col">Harga</th><th scope="col">Catatan</th></tr></thead><tbody>' +
       pr.map(function (r) {
         return '<tr><td data-label="Spesifikasi">' + esc(r.spec) + '</td><td data-label="Satuan">' + esc(r.unit) + '</td><td class="price" data-label="Harga">' + rupiah(r.price) + '</td><td data-label="Catatan">' + esc(r.note || '-') + '</td></tr>';
@@ -174,12 +191,26 @@
       return '<div class="mb-3"><label class="form-label" for="opt-' + i + '">' + esc(o.label) + '</label><select class="form-select" id="opt-' + i + '" data-opt="' + esc(o.label) + '">' +
         o.choices.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select></div>';
     }).join('');
+    var contactOnly = PS.modules.order === 'contact';       /* paket Company Profile: tanpa pilihan dan tombol pesan per layanan */
     var order = '<aside class="order-card" aria-labelledby="order-title"><h2 id="order-title" class="h5">' + esc(x.orderTitle) + '</h2>' +
-      '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' +
+      (showPrices ? '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' : '') +
       '<p class="eta">' + ico('clock') + '<span>' + esc(s.eta) + '</span></p>' +
-      '<p class="form-note">' + esc(x.orderHint) + '</p>' + selects +
-      '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" inputmode="numeric" placeholder="Opsional" data-qty></div>' +
-      '<a class="btn btn-wa btn-lg w-100" id="order-wa" data-wa data-wa-msg="' + esc(msgOrder(s, document.createElement('div'))) + '">' + WA + ' ' + esc(x.orderButton) + '</a></aside>';
+      '<p class="form-note">' + esc(x.orderHint) + '</p>' +
+      (contactOnly
+        ? '<a class="btn btn-brand btn-lg w-100" href="' + url('contact') + '">' + ico('message-square') + ' ' + esc(x.orderButton) + '</a></aside>'
+        : PS.modules.order === 'cart'
+          ? selects +
+            '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" value="1" inputmode="numeric" data-qty></div>' +
+            '<button type="button" class="btn btn-brand btn-lg w-100" data-cart-add="' + esc(s.slug) + '" data-cart-form>' + ico('shopping-cart') + ' ' + esc(x.orderButton) + '</button>' +
+            '<button type="button" class="btn btn-outline-brand btn-lg w-100 mt-2" data-cart-add="' + esc(s.slug) + '" data-cart-form data-cart-go>' + esc(x.orderAlt || 'Beli Sekarang') + '</button></aside>'
+        : PS.modules.order === 'inquiry'
+          ? selects +
+            '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" inputmode="numeric" placeholder="Opsional" data-qty></div>' +
+            '<button type="button" class="btn btn-brand btn-lg w-100" data-inq-add="' + esc(s.slug) + '" data-inq-form>' + ico('plus') + ' ' + esc(x.orderButton) + '</button>' +
+            '<a class="btn btn-outline-wa w-100 mt-2" id="order-wa" data-wa data-wa-msg="' + esc(msgOrder(s, document.createElement('div'))) + '">' + WA + ' ' + esc(x.orderAlt || 'Tanya langsung via WhatsApp') + '</a></aside>'
+          : selects +
+          '<div class="mb-3"><label class="form-label" for="opt-qty">Jumlah (' + esc(s.unit) + ')</label><input class="form-control" id="opt-qty" type="number" min="1" inputmode="numeric" placeholder="Opsional" data-qty></div>' +
+          '<a class="btn btn-wa btn-lg w-100" id="order-wa" data-wa data-wa-msg="' + esc(msgOrder(s, document.createElement('div'))) + '">' + WA + ' ' + esc(x.orderButton) + '</a></aside>');
 
     var related = list(s.related).map(function (sl) { return byKey(D.services, 'slug', sl); }).filter(Boolean);
     var relatedHtml = related.length ? '<section class="section section-alt" aria-labelledby="related-title"><div class="container"><h2 id="related-title" class="h3 mb-4">' + esc(x.relatedTitle) + '</h2>' +
@@ -211,6 +242,15 @@
   /* --------------------------------------------------------------- /harga */
   R.pricing = function () {
     var x = PT.pricing || {}, col = x.columns || {};
+    if (!PS.modules.pricingPage) {                       /* paket tanpa halaman harga: alamat langsung tidak boleh menampilkan harga */
+      var na = x.unavailable || { title: 'Halaman tidak tersedia', text: 'Informasi harga tidak ditampilkan di situs ini. Hubungi kami untuk penawaran sesuai kebutuhan Anda.', button: 'Hubungi Kami' };
+      return {
+        html: crumbs([{ label: 'Beranda', route: 'home' }, { label: na.title }]) +
+          '<section class="section"><div class="container"><div class="empty-state"><span class="ico">' + ico('file-question', 'i-lg') + '</span>' +
+          '<h1 id="page-title">' + esc(na.title) + '</h1><p>' + esc(na.text) + '</p><a class="btn btn-brand" href="' + url('contact') + '">' + esc(na.button) + '</a></div></div></section>',
+        meta: { key: 'pricing', route: 'pricing', notFound: true }
+      };
+    }
     var groups = D.categories.map(function (c) {
       var inCat = D.services.filter(function (s) { return s.category === c.slug && Array.isArray(s.pricing) && s.pricing.length; });
       return inCat.length ? { cat: c, list: inCat } : null;

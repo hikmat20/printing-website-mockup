@@ -319,7 +319,8 @@ p { margin-bottom: 1rem; }
 .card-media .tag { position: absolute; left: .75rem; top: .75rem; background: rgba(255, 255, 255, .95); box-shadow: var(--shadow-sm); }
 .price-from { margin-top: auto; margin-bottom: .85rem; font-size: .8125rem; color: var(--c-muted); }
 .price-from strong { display: block; color: var(--c-primary); font-size: 1.125rem; font-weight: 800; line-height: 1.2; }
-.card-actions { display: flex; gap: .5rem; position: relative; z-index: 2; }
+.card-actions { display: flex; gap: .5rem; position: relative; z-index: 2; margin-top: auto; }
+.price-from + .card-actions { margin-top: 0; }   /* tanpa harga (paket Company Profile), tombol tetap rata bawah */
 .card-actions .btn:first-child { flex: 1; }
 
 /* Kategori */

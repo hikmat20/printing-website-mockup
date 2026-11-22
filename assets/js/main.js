@@ -19,7 +19,7 @@
   if (!P || !TN) { console.error('[main.js] platform.js / data tenant belum dimuat (cek data-tenant pada <body>).'); return; }
   /* D = data platform + data tenant (di Laravel: dua sumber terpisah, digabung saat render) */
   var D = Object.assign({}, TN, { routes: P.routes, nav: P.nav });
-  var T = D.tenant;
+  var T = D.tenant;           /* diganti setelah paket dipilih bila tenant punya penimpa teks (applyPackageText) */
 
   /* ------------------------------------------------- konfigurasi tampilan
      Template + opsi tenant, divalidasi terhadap registri platform (platform.js).
@@ -53,13 +53,23 @@
     checkTenant('header', P.headers, ts.header); checkTenant('cardStyle', P.cardStyles, ts.cardStyle); checkTenant('buttonShape', P.buttonShapes, ts.buttonShape);
     checkTenant('fontBody', fontIds, th.fontBody); checkTenant('fontHeading', fontIds, th.fontHeading);
 
+    /* Paket: modul yang aktif (sumbu terpisah dari template). Hanya paket available yang bisa dipilih. */
+    var pkgAll = Object.keys(P.packages), pkgOk = pkgAll.filter(function (k) { return P.packages[k].available; });
+    checkQuery('package', 'paket', pkgAll);
+    var pkgId = firstValid(pkgOk, QS.get('package'), ts.package, P.defaultPackage);
+    [['site.package', ts.package]].forEach(function (c) {
+      if (c[1] != null && pkgOk.indexOf(c[1]) < 0) console.warn('[main.js] ' + c[0] + ' "' + c[1] + '" ' + (pkgAll.indexOf(c[1]) > -1 ? 'belum tersedia (Gelombang ' + P.packages[c[1]].wave + ')' : 'tidak ada di registri platform') + '; dipakai "' + pkgId + '".');
+    });
+    if (QS.get('package') != null && pkgAll.indexOf(QS.get('package')) > -1 && pkgOk.indexOf(QS.get('package')) < 0) console.warn('[main.js] ?package="' + QS.get('package') + '" belum tersedia (Gelombang ' + P.packages[QS.get('package')].wave + '); dipakai "' + pkgId + '".');
+
     var S = {
       template: tplId, templateName: tpl.name, templateDescription: tpl.description,
       header:      firstValid(P.headers, QS.get('header'), ts.header, tpl.header),
       cardStyle:   firstValid(P.cardStyles, QS.get('cards'), ts.cardStyle, tpl.cardStyle),
       buttonShape: firstValid(P.buttonShapes, QS.get('buttons'), ts.buttonShape, tpl.buttonShape),
       fontBody:    firstValid(fontIds, QS.get('font'), th.fontBody, tpl.fonts.body),
-      fontHeading: firstValid(fontIds, QS.get('hfont'), th.fontHeading, tpl.fonts.heading)
+      fontHeading: firstValid(fontIds, QS.get('hfont'), th.fontHeading, tpl.fonts.heading),
+      package: pkgId, packageName: P.packages[pkgId].name, modules: Object.assign({}, P.packages[pkgId].modules)
     };
 
     /* Halaman internal: struktur tetap; hanya varian daftar yang boleh dipilih tenant */
@@ -98,6 +108,7 @@
         if (Number.isInteger(n) && n > 0) x.limit = n;
         else console.warn('[main.js] limit "' + o.limit + '" untuk section "' + x.id + '" harus bilangan bulat positif; dipakai bawaan template.');
       }
+      if (reg.requires && Object.keys(reg.requires).some(function (k) { return S.modules[k] !== reg.requires[k]; })) return false;   /* modul paket belum aktif: dilewati */
       if (o.enabled != null && typeof o.enabled !== 'boolean') console.warn('[main.js] enabled untuk section "' + x.id + '" harus true/false (bukan "' + o.enabled + '"); diabaikan.');
       if (o.enabled === false) {
         if (reg.locked) console.warn('[main.js] section "' + x.id + '" terkunci oleh platform dan tidak bisa dimatikan.');
@@ -109,6 +120,60 @@
   }
   var S = resolveSite();
   D.site = S;
+
+  /* Paket menentukan menu: halaman milik modul yang tidak aktif (mis. Harga) tidak ditampilkan */
+  var moduleOn = function (m) { return !m || (m === 'pricing' ? S.modules.pricingPage : m === 'cart' ? S.modules.order === 'cart' : true); };
+  D.nav = P.nav.filter(function (n) { return moduleOn(n.module); }).map(function (n) {
+    return Array.isArray(n.dropdown) ? Object.assign({}, n, { dropdown: n.dropdown.filter(function (c) { return moduleOn(c.module); }) }) : n;
+  });
+
+  /* Teks tenant per paket: TN.packageText[paket] = { tenant, pageText, homeText, trust } menimpa bagian
+     yang berbeda (mis. teks yang menyebut harga). Objek digabung per kunci; array diganti utuh. */
+  function isObj(v) { return v && typeof v === 'object' && !Array.isArray(v); }
+  /* Gabung objek per kunci (array diganti utuh). Nilai bertipe lain dari aslinya diabaikan dengan peringatan. */
+  function merge(base, over, path) {
+    if (!isObj(over)) return base;
+    var out = Object.assign({}, base);
+    Object.keys(over).forEach(function (k) {
+      var b = base && base[k], o = over[k], here = (path || 'packageText') + '.' + k;
+      if (b != null && (o == null || typeof b !== typeof o || Array.isArray(b) !== Array.isArray(o))) {
+        console.warn('[main.js] ' + here + ' harus bertipe sama dengan aslinya (' + (Array.isArray(b) ? 'array' : isObj(b) ? 'objek' : typeof b) + '); diabaikan.'); return;
+      }
+      out[k] = isObj(o) && isObj(b) ? merge(b, o, here) : o;
+    });
+    return out;
+  }
+  (function applyPackageText() {
+    var all = isObj(TN.packageText) ? TN.packageText : {}, pt = all[S.package];
+    if (pt != null && !isObj(pt)) { console.warn('[main.js] packageText.' + S.package + ' harus berupa objek; diabaikan.'); pt = null; }
+    if (!pt) {
+      if (!S.modules.prices) console.warn('[main.js] paket "' + S.package + '" tanpa harga, tetapi tenant tidak punya packageText.' + S.package + ': teks utama yang menyebut harga tetap tampil.');
+      return;
+    }
+    ['tenant', 'pageText', 'homeText'].forEach(function (k) { if (pt[k] !== undefined && !isObj(pt[k])) { console.warn('[main.js] packageText.' + S.package + '.' + k + ' harus berupa objek; diabaikan.'); } });
+    if (pt.trust != null && !Array.isArray(pt.trust)) console.warn('[main.js] packageText.' + S.package + '.trust harus berupa array; diabaikan.');
+    D.tenant = merge(TN.tenant, pt.tenant, 'packageText.tenant'); D.pageText = merge(TN.pageText, pt.pageText, 'packageText.pageText'); D.homeText = merge(TN.homeText, pt.homeText, 'packageText.homeText');
+    if (Array.isArray(pt.trust)) D.trust = pt.trust;
+    T = D.tenant;
+  })();
+
+  /* Varian per item: sebuah item konten (FAQ, langkah, artikel, blok artikel, ...) boleh membawa
+     byPackage.<paket> = { bagian yang berbeda } atau { hidden: true }. Dipakai untuk kalimat yang
+     menyebut harga: item tetap satu, hanya tampilannya berbeda per paket. Laravel: kolom variant JSON. */
+  function variants(list) {
+    if (!Array.isArray(list)) return list;
+    return list.reduce(function (out, el) {
+      var bp = isObj(el) && isObj(el.byPackage) ? el.byPackage[S.package] : null;
+      if (isObj(bp)) {
+        if (bp.hidden === true) return out;
+        var o = Object.assign({}, bp); delete o.hidden; el = merge(el, o, 'byPackage');
+      }
+      out.push(el); return out;
+    }, []);
+  }
+  ['trust', 'categories', 'portfolio', 'steps', 'why', 'testimonials', 'faqs'].forEach(function (k) { D[k] = variants(D[k]); });
+  D.services = variants(D.services); if (Array.isArray(D.services)) D.services = D.services.map(function (s) { return isObj(s) ? Object.assign({}, s, { faqs: variants(s.faqs) }) : s; });
+  D.articles = variants(D.articles); if (Array.isArray(D.articles)) D.articles = D.articles.map(function (a) { return isObj(a) ? Object.assign({}, a, { body: variants(a.body) }) : a; });
 
   /* ---------------------------------------------------------------- util */
   var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -137,7 +202,7 @@
 
   /* ---------------------------------------------------------------- URL */
   /* Mockup memakai file .html + hash sebagai slug. Di Laravel, ganti dengan route(). */
-  var PREVIEW_KEYS = ['customize', 'template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'];
+  var PREVIEW_KEYS = ['customize', 'package', 'template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'];
   var previewQuery = (function () {          /* khusus mockup: pilihan pratinjau ikut terbawa saat berpindah halaman */
     var q = new URLSearchParams();
     PREVIEW_KEYS.forEach(function (k) { if (QS.has(k)) q.set(k, QS.get(k)); });
@@ -195,6 +260,7 @@
     root.style.setProperty('--font', stack(S.fontBody));
     root.style.setProperty('--font-heading', stack(S.fontHeading));
 
+    root.setAttribute('data-package', S.package);
     root.setAttribute('data-template', S.template);
     root.setAttribute('data-header', S.header);
     root.setAttribute('data-card', S.cardStyle);
@@ -214,18 +280,25 @@
   }
 
   /* --- card/service ------------------------------------------------ */
+  var isNew = function (s) { return Array.isArray(s.tags) && s.tags.indexOf('baru') > -1; };   /* service.tags: ['baru'] -> lencana "Baru" (tampil di template yang memunculkannya) dan tab "Baru" */
   function serviceCard(s) {
     var cat = findBy(D.categories, 'slug', s.category);
     return '<article class="card-x service-card" data-name="' + esc(s.name.toLowerCase()) + '" data-category="' + esc(s.category) + '">' +
       '<div class="card-media"><img src="' + esc(s.image) + '" alt="' + esc(s.imageAlt) + '" width="800" height="600" loading="lazy">' +
-      (cat ? '<span class="tag">' + esc(cat.name) + '</span>' : '') + '</div>' +
+      (cat ? '<span class="tag">' + esc(cat.name) + '</span>' : '') + (isNew(s) ? '<span class="flag-new">Baru</span>' : '') + '</div>' +
       '<div class="card-body-x">' +
       '<h3><a href="' + url('service', s.slug) + '">' + esc(s.name) + '</a></h3>' +
       '<p>' + esc(s.short) + '</p>' +
-      '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' +
+      (S.modules.prices ? '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' : '') +
       '<div class="card-actions">' +
       '<a class="btn btn-outline-brand btn-sm" href="' + url('service', s.slug) + '" aria-label="Lihat detail ' + esc(s.name) + '">Lihat Detail</a>' +
-      '<a class="btn btn-wa btn-sm btn-icon" data-wa data-wa-service="' + esc(s.slug) + '" aria-label="Tanya ' + esc(s.name) + ' lewat WhatsApp">' + WA_ICON + '</a>' +
+      (S.modules.order === 'contact'
+        ? '<a class="btn btn-brand btn-sm btn-icon" href="' + url('contact') + '" aria-label="Hubungi kami tentang ' + esc(s.name) + '">' + ico('message-square') + '</a>'
+        : S.modules.order === 'cart'
+          ? '<button type="button" class="btn btn-brand btn-sm btn-icon" data-cart-add="' + esc(s.slug) + '" title="Tambah ke keranjang" aria-label="Tambahkan ' + esc(s.name) + ' ke keranjang">' + ico('shopping-cart') + '</button>'
+        : S.modules.order === 'inquiry'
+          ? '<button type="button" class="btn btn-brand btn-sm btn-icon" data-inq-add="' + esc(s.slug) + '" title="Tambah ke daftar tanya" aria-label="Tambahkan ' + esc(s.name) + ' ke daftar tanya">' + ico('plus') + '</button>'
+          : '<a class="btn btn-wa btn-sm btn-icon" data-wa data-wa-service="' + esc(s.slug) + '" aria-label="Tanya ' + esc(s.name) + ' lewat WhatsApp">' + WA_ICON + '</a>') +
       '</div></div></article>';
   }
 
@@ -287,10 +360,18 @@
   }
 
   function navDesktop(item, page) {
+    var lead = item.icon && S.header === 'market' ? ico(item.icon, 'nav-ico') : '';     /* ikon di depan menu hanya pada header "market" */
     if (item.dropdown) {
-      var links, active;
-      if (item.dropdown === 'categories') {
-        active = page === 'services';
+      var links, active, mega = false;
+      if (item.dropdown === 'categories' && S.header === 'megamenu') {
+        /* Panel lebar: tiap kategori + beberapa layanannya, langsung terlihat tanpa membuka halaman */
+        active = page === 'services'; mega = true;
+        links = '<div class="mega-grid">' + D.categories.map(function (c) {
+          var items = D.services.filter(function (s) { return s.category === c.slug; }).slice(0, 4).map(function (s) { return '<li><a href="' + url('service', s.slug) + '">' + esc(s.name) + '</a></li>'; }).join('');
+          return '<div class="mega-col"><a class="mega-head" href="' + url('category', c.slug) + '">' + ico(c.icon) + '<span>' + esc(c.name) + '</span></a>' + (items ? '<ul>' + items + '</ul>' : '') + '</div>';
+        }).join('') + '</div><a class="dropdown-all" href="' + url('services') + '">Lihat semua layanan ' + ico('arrow-right') + '</a>';
+      } else if (item.dropdown === 'categories') {
+        active = page === 'services' && !item.plain;
         links = D.categories.map(function (c) { return '<a href="' + url('category', c.slug) + '">' + ico(c.icon) + esc(c.name) + '</a>'; }).join('') +
           '<a class="dropdown-all" href="' + url('services') + '">Lihat semua layanan ' + ico('arrow-right') + '</a>';
       } else {
@@ -298,11 +379,11 @@
         links = item.dropdown.map(function (c) { return '<a href="' + url(c.route) + '"' + (c.route === page ? ' aria-current="page"' : '') + '>' + esc(c.label) + '</a>'; }).join('');
       }
       var id = 'dd-' + item.label.toLowerCase().replace(/\W+/g, '');
-      return '<li class="has-dropdown"><button type="button" class="nav-toggle' + (active ? ' is-active' : '') + '" aria-expanded="false" aria-controls="' + id + '">' +
-        esc(item.label) + ico('chevron-down') + '</button><div class="dropdown-panel" id="' + id + '">' + links + '</div></li>';
+      return '<li class="has-dropdown' + (mega ? ' has-mega' : '') + (item.cls ? ' ' + item.cls : '') + '"><button type="button" class="nav-toggle' + (active ? ' is-active' : '') + '" aria-expanded="false" aria-controls="' + id + '">' +
+        lead + esc(item.label) + ico('chevron-down') + '</button><div class="dropdown-panel' + (mega ? ' mega-panel' : '') + '" id="' + id + '">' + links + '</div></li>';
     }
     var is = item.route === page;
-    return '<li><a class="nav-link-item' + (is ? ' is-active' : '') + '"' + (is ? ' aria-current="page"' : '') + ' href="' + url(item.route) + '">' + esc(item.label) + '</a></li>';
+    return '<li><a class="nav-link-item' + (is ? ' is-active' : '') + '"' + (is ? ' aria-current="page"' : '') + ' href="' + url(item.route) + '">' + lead + esc(item.label) + '</a></li>';
   }
 
   /* Baris info di atas header (varian "topbar"); ikut hilang saat halaman digulir */
@@ -316,15 +397,46 @@
       '<span class="topbar-social">' + social + '</span></div></div>';
   }
 
+  /* Tombol pembuka daftar tanya (paket Katalog); isi dan jumlahnya dikelola inquiry.js */
+  function inquiryButton(cls) {
+    return '<button type="button" class="btn btn-outline-brand btn-sm ' + cls + '" data-inq-open aria-haspopup="dialog" aria-label="Buka daftar tanya">' + ico('clipboard-list') +
+      '<span class="inq-label">Daftar Tanya</span><span class="inq-count" data-inq-count hidden>0</span></button>';
+  }
+
+  /* Tautan keranjang (paket Semi e-commerce); isi dan jumlahnya dikelola shop.js */
+  function cartLink(cls, withTotal) {
+    return '<a class="btn btn-outline-brand btn-sm ' + cls + '" href="' + url('cart') + '" aria-label="Keranjang">' + ico('shopping-cart') +
+      '<span class="inq-label">Keranjang</span><span class="inq-count" data-cart-count hidden>0</span>' +
+      (withTotal ? '<span class="cart-sum" data-cart-total>' + rupiah(0) + '</span>' : '') + '</a>';   /* total berjalan diisi shop.js */
+  }
+
+  /* Kotak cari (varian header "store"): GET ke halaman layanan, ?q= mengisi pencarian di sana */
+  function searchForm(market) {
+    var keep = PREVIEW_KEYS.filter(function (k) { return QS.has(k); }).map(function (k) { return '<input type="hidden" name="' + esc(k) + '" value="' + esc(QS.get(k)) + '">'; }).join('');   /* GET membuang query pada action: pilihan pratinjau dibawa lewat input tersembunyi */
+    return '<form class="store-search' + (market ? ' store-search--market' : '') + '" role="search" action="' + esc(D.routes.services.mockup) + '" method="get">' + keep + '<label class="visually-hidden" for="hdr-q">Cari layanan</label>' + (market ? '' : ico('search')) +
+      '<input id="hdr-q" name="q" type="search" class="form-control" placeholder="' + (market ? 'Cari produk cetak, mis. banner atau jilid' : 'Cari layanan, mis. banner atau jilid') + '" maxlength="80" autocomplete="off">' +
+      '<button type="submit" class="btn btn-brand btn-sm"' + (market ? ' aria-label="Cari">' + ico('arrow-right') : '>Cari') + '</button></form>';
+  }
+
   function header() {
-    var page = activePage();
-    return (S.header === 'topbar' ? topbar() : '') + '<div class="container"><div class="header-inner">' +
+    var page = activePage(), market = S.header === 'market', store = S.header === 'store' || market;
+    /* market: tombol "Kategori" (daftar kategori) di depan, lalu menu berikon; "Layanan" menjadi tautan "Semua Produk" */
+    var items = market
+      ? [{ label: 'Kategori', icon: 'layout-grid', dropdown: 'categories', plain: true, cls: 'nav-kategori' }].concat(D.nav.map(function (n) { return n.dropdown === 'categories' ? { label: n.marketLabel || n.label, route: n.route, icon: n.icon } : n; }))
+      : D.nav;
+    var nav = '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + items.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>';
+    return (S.header === 'topbar' ? topbar() : '') + (S.header === 'store' ? '<div class="promo-bar"><div class="container"><span>' + ico('truck') + ' ' + esc(T.promoBar || ('Buka ' + T.hoursSummary + ' • ' + T.city)) + '</span></div></div>' : '') +
+      '<div class="container"><div class="header-inner">' +
       '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda">' +
       '<img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
-      '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>' +
-      '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' Pesan via WhatsApp</a>' +
+      (store ? searchForm(market) : nav) +
+      (S.modules.order === 'cart' ? cartLink('header-inq header-cart', market) : '') +
+      (S.modules.order === 'inquiry' ? inquiryButton('header-inq') : '') +
+      (S.modules.order === 'contact'
+        ? '<a class="btn btn-brand btn-sm header-cta" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
+        : '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : S.modules.order === 'cart' ? 'Chat Admin' : 'Pesan via WhatsApp') + '</a>') +
       '<button type="button" class="menu-btn" id="menu-open" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu">' + ico('menu', 'i-lg') + '</button>' +
-      '</div></div>';
+      '</div></div>' + (store ? '<div class="store-nav' + (market ? ' market-nav' : '') + '"><div class="container">' + nav + '</div></div>' : '');
   }
 
   /* --- layout/mobile-menu ------------------------------------------ */
@@ -346,7 +458,9 @@
     return '<div class="mobile-menu-head"><span class="brand"><img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.shortName) + '</span></span></span>' +
       '<button type="button" class="menu-btn" id="menu-close" style="margin-left:0" aria-label="Tutup menu">' + ico('x', 'i-lg') + '</button></div>' +
       '<div class="mobile-menu-body"><ul>' + items + '</ul></div>' +
-      '<div class="mobile-menu-foot"><a class="btn btn-wa w-100" data-wa>' + WA_ICON + ' Pesan via WhatsApp</a>' +
+      '<div class="mobile-menu-foot">' + (S.modules.order === 'inquiry' ? inquiryButton('w-100 mb-2 header-inq--menu') : '') + (S.modules.order === 'cart' ? cartLink('w-100 mb-2 header-inq--menu') : '') + (S.modules.order === 'contact'
+        ? '<a class="btn btn-brand w-100" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
+        : '<a class="btn btn-wa w-100" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : S.modules.order === 'cart' ? 'Chat Admin' : 'Pesan via WhatsApp') + '</a>') +
       '<p class="form-note text-center mt-2 mb-0">Buka ' + esc(T.hoursSummary) + ' • ' + esc(T.city) + '</p></div>';
   }
 
@@ -359,8 +473,13 @@
       return '<a href="' + esc(s.href) + '" aria-label="' + esc(s.label) + '" target="_blank" rel="noopener noreferrer">' + ico(s.icon) + '</a>';
     }).join('');
     var company = [['home', 'Beranda'], ['about', 'Tentang Kami'], ['pricing', 'Daftar Harga'], ['portfolio', 'Portofolio'], ['blog', 'Artikel'], ['faq', 'FAQ'], ['contact', 'Kontak']]
+      .concat(S.modules.order === 'cart' ? [['cart', 'Keranjang'], ['orderStatus', 'Lacak Pesanan']] : [])
+      .filter(function (r) { return r[0] !== 'pricing' || S.modules.pricingPage; })
       .map(function (r) { return '<li><a href="' + url(r[0]) + '">' + r[1] + '</a></li>'; }).join('');
-    return '<div class="container"><div class="row g-4 g-lg-5">' +
+    /* Strip kepercayaan (header "market"): keunggulan yang sama dengan section trust, diulang di atas footer */
+    var strip = S.header === 'market' && Array.isArray(D.trust) && D.trust.length
+      ? '<div class="footer-trust"><div class="container"><ul>' + D.trust.map(function (t) { return '<li>' + ico(t.icon) + '<span><strong>' + esc(t.title) + '</strong>' + esc(t.text) + '</span></li>'; }).join('') + '</ul></div></div>' : '';
+    return strip + '<div class="container"><div class="row g-4 g-lg-5">' +
       '<div class="col-lg-4"><a class="brand mb-3" href="' + url('home') + '"><img src="' + esc(T.logoLight) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
       '<p class="mt-3 mb-0">' + esc(T.seo.defaultDescription) + '</p><div class="social">' + social + '</div></div>' +
       '<div class="col-6 col-lg-2"><h2>Layanan</h2><ul class="footer-links">' + svc + '</ul></div>' +
@@ -685,7 +804,7 @@
   }
 
   /* ------------------------------------------------------------- boot */
-  var modules = [];                                   /* PrintSite.use(fn): dijalankan sebelum renderAll() */
+  var modules = [], afterBoot = [], booted = false;   /* PrintSite.use(fn): dijalankan sebelum renderAll(); PrintSite.ready(fn): setelah header/footer dirender */
   function boot() {
     applyTheme();
     modules.forEach(function (fn) {      /* satu modul gagal tidak boleh mematikan header, footer, dan modul lain */
@@ -699,12 +818,14 @@
     initLightbox();
     initSliders();
     document.documentElement.classList.add('js-ready');
+    booted = true;
+    afterBoot.forEach(function (fn) { try { fn(window.PrintSite); } catch (e) { console.error('[main.js] modul (ready) gagal dijalankan:', e); } });
   }
 
   /* API kecil untuk halaman lain (services.html, service-detail.html, dll.) */
   window.PrintSite = {
-    data: D, platform: P, site: S, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); },
-    esc: esc, rupiah: rupiah, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
+    data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); }, ready: function (fn) { if (booted) fn(window.PrintSite); else afterBoot.push(fn); },
+    esc: esc, rupiah: rupiah, isNew: isNew, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
     components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }
   };
