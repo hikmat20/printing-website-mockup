@@ -100,7 +100,8 @@
   }
   function badge() {
     $$('[data-cart-count]').forEach(function (b) { b.textContent = String(cart.length); b.hidden = !cart.length; });
-    $$('.header-cart').forEach(function (a) { a.setAttribute('aria-label', 'Keranjang, ' + cart.length + ' item'); });
+    $$('.header-cart').forEach(function (a) { a.setAttribute('aria-label', 'Keranjang, ' + cart.length + ' item' + (cart.length ? ', total ' + rupiah(total()) : '')); });
+    $$('[data-cart-total]').forEach(function (b) { b.textContent = rupiah(total()); });    /* total berjalan di header "market" */
   }
   function icons(root) { if (window.lucide && window.lucide.createIcons && $('[data-lucide]', root)) window.lucide.createIcons(); }
 
@@ -188,6 +189,7 @@
   function refreshTotals() {
     var t = $('#cart-total'); if (t) t.textContent = rupiah(total());
     $$('.cart-item', root).forEach(function (li) { var it = cart[parseInt(li.getAttribute('data-i'), 10)]; if (it) $('[data-line]', li).textContent = rupiah(lineTotal(it)); });
+    badge();                                           /* total berjalan di header ikut berubah saat jumlah diubah */
   }
 
   /* ------------------------------------------------------------ pesan + checkout */

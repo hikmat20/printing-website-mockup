@@ -63,6 +63,7 @@
 
   /* ---------------------------------------------------------------- hero */
   R.hero = function (variant) {
+    if (variant === 'banner') { var bh = bannerHero(); if (bh) return bh; variant = 'split'; }   /* banner kosong/tidak valid: kembali ke split */
     var h = T.hero, a = h.actions || {}, p1 = a.primary || {}, p2 = a.secondary || {};
     var copy = '<span class="hero-badge">' + ico('map-pin') + '<span>' + esc(h.eyebrow) + '</span></span>' +
       '<h1 id="hero-title">' + esc(h.headline) + '</h1>' +
@@ -92,12 +93,14 @@
 
   /* ---------------------------------------------------------- categories */
   R.categories = function (variant, o) {
+    if (variant === 'mosaic') return mosaic(o);
     return wrap('categories', head('categories') +
       '<div class="row g-3 g-lg-4 cat-list cat-list--' + variant + '">' + cols(D.categories, 'col-12 col-sm-6 col-lg-4', C.categoryCard) + '</div>', o);
   };
 
   /* ------------------------------------------------------------ services */
   R.services = function (variant, o) {
+    if (variant === 'tabs') return serviceTabs(o);
     var list = D.services.filter(function (s) { return s.featured; });
     if (o.limit) list = list.slice(0, o.limit);
     var body = variant === 'slider'
@@ -206,6 +209,10 @@
     var chip = function (c) {
       return '<li class="client"><span class="client-mark" aria-hidden="true">' + esc(initials(c.name)) + '</span><span class="client-name">' + esc(c.name) + (c.type ? '<small>' + esc(c.type) + '</small>' : '') + '</span></li>';
     };
+    if (variant === 'marquee') {   /* dua deret identik berjalan bersambung; deret kedua disembunyikan dari pembaca layar */
+      var row = list.map(chip).join('');
+      return wrap('clients', head('clients') + '<div class="marquee"><ul class="marquee-track">' + row + '</ul><ul class="marquee-track" aria-hidden="true">' + row + '</ul></div><button type="button" class="marquee-toggle" data-marquee-toggle aria-pressed="false">Jeda gerakan</button>' + (tx('clients').note ? '<p class="clients-note">' + esc(tx('clients').note) + '</p>' : ''), o);
+    }
     return wrap('clients', head('clients') + '<ul class="clients clients--' + variant + '">' + list.map(chip).join('') + '</ul>' + (tx('clients').note ? '<p class="clients-note">' + esc(tx('clients').note) + '</p>' : ''), o);
   };
 
@@ -264,6 +271,126 @@
       '<div class="cta-actions"><button type="button" class="btn btn-wa btn-lg" data-inq-open aria-haspopup="dialog">' + ico('clipboard-list') + ' ' + esc(x.button) + '</button>' +
       (sec.route && P.routes[sec.route] ? '<a class="btn btn-light-ghost btn-lg" href="' + url(sec.route) + '">' + ico('layout-grid') + ' ' + esc(sec.label) + '</a>' : '') + '</div></div>', o);
   };
+
+  /* ------------------------------------------------ section template Grafika
+     Hero banner (tenant.banners), mosaik kategori, produk bertab (service.tags), jelajah per kategori, artikel terbaru.
+     Semua tahan data kosong: banner kosong -> hero split; tab kosong dibuang; kategori tanpa layanan dilewati. */
+  function tabList(id, tabs) {
+    return '<div class="tab-list" role="tablist" aria-label="' + esc(tx(id).title || id) + '">' + tabs.map(function (t, i) {
+      return '<button type="button" class="tab-btn" role="tab" id="' + id + '-tab-' + i + '" aria-controls="' + id + '-panel-' + i + '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' +
+        esc(t.label) + (t.count != null ? ' <span class="tab-count">' + t.count + '</span>' : '') + '</button>';
+    }).join('') + '</div>';
+  }
+  function tabPanels(id, htmls) {
+    return htmls.map(function (h, i) {
+      return '<div class="tab-panel" role="tabpanel" id="' + id + '-panel-' + i + '" aria-labelledby="' + id + '-tab-' + i + '"' + (i ? ' hidden' : '') + '>' + h + '</div>';
+    }).join('');
+  }
+
+  function bannerHero() {
+    var list = arr(D.banners).filter(function (b) {
+      return typeof b.title === 'string' && b.title && typeof b.image === 'string' && b.image && b.cta && typeof b.cta.label === 'string' && b.cta.label && typeof b.cta.route === 'string' && D.routes[b.cta.route];
+    });
+    if (!list.length) { console.warn('[sections.js] hero "banner" dilewati: tenant.banners kosong atau tidak valid; dipakai varian "split".'); return ''; }
+    var slides = list.map(function (b, i) {
+      return '<div class="slide banner-slide banner-tone-' + (i % 3) + '" role="group" aria-roledescription="slide" aria-label="Banner ' + (i + 1) + ' dari ' + list.length + '">' +
+        '<div class="banner-copy">' + (b.eyebrow ? '<span class="banner-eyebrow">' + esc(b.eyebrow) + '</span>' : '') + '<h2>' + esc(b.title) + '</h2>' + (b.text ? '<p>' + esc(b.text) + '</p>' : '') +
+        '<a class="btn btn-brand btn-lg" href="' + esc(url(b.cta.route, b.cta.slug)) + '">' + esc(b.cta.label) + ' ' + ico('arrow-right') + '</a></div>' +
+        '<div class="banner-art"><img src="' + esc(b.image) + '" alt="' + esc(b.imageAlt || '') + '" width="800" height="600"' + (i ? ' loading="lazy"' : ' fetchpriority="high"') + '></div></div>';
+    }).join('');
+    var dots = list.map(function (b, i) { return '<button type="button" class="banner-dot" data-banner-go="' + i + '" aria-label="Banner ' + (i + 1) + '" aria-current="' + (i === 0) + '"></button>'; }).join('');
+    return '<section class="hero hero--banner" aria-labelledby="hero-title"><div class="container">' +
+      '<h1 id="hero-title" class="visually-hidden">' + esc(T.hero.headline) + '</h1>' +
+      '<div class="slider banner" data-slider data-banner><div class="slider-track" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Banner promosi, geser untuk melihat lainnya">' + slides + '</div>' +
+      (list.length > 1
+        ? '<div class="slider-nav banner-nav"><button type="button" class="slider-btn" data-slider-prev aria-label="Banner sebelumnya">' + ico('chevron-left') + '</button>' +
+          '<div class="banner-dots" role="group" aria-label="Pilih banner">' + dots + '</div>' +
+          '<button type="button" class="slider-btn" data-slider-next aria-label="Banner berikutnya">' + ico('chevron-right') + '</button></div>'
+        : '') + '</div></div></section>';
+  }
+
+  /* Mosaik kategori: dua ubin besar, lalu ubin kecil. Gambar = gambar layanan pertama kategori (dekoratif). */
+  function mosaic(o) {
+    var tiles = D.categories.map(function (c, i) {
+      var first = D.services.filter(function (s) { return s.category === c.slug; })[0];
+      var n = D.services.filter(function (s) { return s.category === c.slug; }).length;
+      return '<a class="mosaic-tile' + (i < 2 ? ' is-lg' : '') + '" href="' + esc(url('category', c.slug)) + '">' +
+        (first ? '<img class="mosaic-img" src="' + esc(first.image) + '" alt="" width="800" height="600" loading="lazy">' : '') +
+        '<span class="mosaic-ico">' + ico(c.icon, 'i-lg') + '</span>' +
+        '<span class="mosaic-body"><strong>' + esc(c.name) + '</strong><span>' + n + ' layanan</span></span>' + ico('arrow-right', 'mosaic-go') + '</a>';
+    }).join('');
+    return wrap('categories', head('categories') + '<div class="mosaic">' + tiles + '</div>', o);
+  }
+
+  /* Produk bertab: Terlaris (featured), Baru (tags), Semua. Tab tanpa isi dibuang; satu tab saja = tanpa bilah tab. */
+  function serviceTabs(o) {
+    var x = tx('services'), names = x.tabs || {}, pool = D.services, lim = function (l) { return o.limit ? l.slice(0, o.limit) : l; };
+    var defs = [
+      { label: names.featured || 'Terlaris', list: pool.filter(function (s) { return s.featured; }) },
+      { label: names['new'] || 'Baru', list: pool.filter(PS.isNew) },
+      { label: names.all || 'Semua', list: pool }
+    ].filter(function (d) { return d.list.length; });
+    if (!defs.length) return missing('services');
+    var grid = function (l) { return '<div class="row g-3 g-lg-4">' + cols(lim(l), 'col-12 col-sm-6 col-lg-3', C.serviceCard) + '</div>'; };
+    var bar = defs.length > 1 ? tabList('services', defs) : '';
+    return wrap('services', '<div data-tabs><div class="sec-row">' + head('services', true) + bar + '</div>' +
+      tabPanels('services', defs.map(function (d) { return grid(d.list); })) + '</div>' + foot('services', 'link'), o);
+  }
+
+  /* Jelajah per kategori: chip kategori, banner samping, kartu produk kategori terpilih. */
+  R.catshow = function (variant, o) {
+    var cats = D.categories.map(function (c) { return { c: c, list: D.services.filter(function (s) { return s.category === c.slug; }) }; }).filter(function (e) { return e.list.length; });
+    if (!cats.length) return missing('catshow');
+    var panel = function (e) {
+      return '<div class="row g-3 g-lg-4"><div class="col-lg-3"><a class="catshow-banner" href="' + esc(url('category', e.c.slug)) + '">' +
+        '<span class="ico">' + ico(e.c.icon, 'i-lg') + '</span><strong>' + esc(e.c.name) + '</strong><span class="catshow-desc">' + esc(e.c.description || '') + '</span>' +
+        '<span class="link-arrow">Lihat semua (' + e.list.length + ') ' + ico('arrow-right') + '</span></a></div>' +
+        '<div class="col-lg-9"><div class="row g-3 g-lg-4">' + cols(e.list.slice(0, 6), 'col-12 col-sm-6 col-lg-4', C.serviceCard) + '</div></div></div>';
+    };
+    return wrap('catshow', '<div data-tabs><div class="sec-row">' + head('catshow', true) + '</div>' +
+      tabList('catshow', cats.map(function (e) { return { label: e.c.name, count: e.list.length }; })) +
+      tabPanels('catshow', cats.map(panel)) + '</div>' + foot('catshow', 'link'), o);
+  };
+
+  /* Artikel terbaru: tanggal terbaru dulu, 3 secara bawaan. */
+  R.articles = function (variant, o) {
+    var list = arr(D.articles).filter(function (a) { return a.slug && a.title; }).sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+    if (!list.length) return missing('articles');
+    return wrap('articles', head('articles') + '<div class="row g-3 g-lg-4">' + cols(list.slice(0, o.limit || 3), 'col-12 col-md-6 col-lg-4', C.articleCard) + '</div>' + foot('articles', 'link'), o);
+  };
+
+  /* Interaksi: tab (klik + panah/Home/End) dan titik penanda banner. Delegasi di dokumen; hanya ada di beranda. */
+  function selectTab(b, focus) {
+    var root = b.closest('[data-tabs]'); if (!root) return;
+    Array.prototype.forEach.call(root.querySelectorAll('[role="tab"]'), function (t) { var on = t === b; t.setAttribute('aria-selected', String(on)); t.setAttribute('tabindex', on ? '0' : '-1'); });
+    Array.prototype.forEach.call(root.querySelectorAll('[role="tabpanel"]'), function (p) { p.hidden = p.id !== b.getAttribute('aria-controls'); });
+    if (focus) b.focus();
+  }
+  document.addEventListener('click', function (e) { var b = e.target.closest && e.target.closest('[data-tabs] [role="tab"]'); if (b) selectTab(b, false); });
+  document.addEventListener('click', function (e) {      /* jeda gerakan deret klien (WCAG 2.2.2) */
+    var t = e.target.closest && e.target.closest('[data-marquee-toggle]'); if (!t) return;
+    var m = t.previousElementSibling, on = t.getAttribute('aria-pressed') !== 'true';
+    if (m) m.classList.toggle('is-paused', on);
+    t.setAttribute('aria-pressed', String(on)); t.textContent = on ? 'Putar gerakan' : 'Jeda gerakan';
+  });
+  document.addEventListener('keydown', function (e) {
+    var b = e.target.closest && e.target.closest('[data-tabs] [role="tab"]'); if (!b) return;
+    var tabs = Array.prototype.slice.call(b.parentNode.querySelectorAll('[role="tab"]')), i = tabs.indexOf(b), n;
+    if (e.key === 'ArrowRight') n = (i + 1) % tabs.length; else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') n = 0; else if (e.key === 'End') n = tabs.length - 1; else return;
+    e.preventDefault(); selectTab(tabs[n], true);
+  });
+  PS.ready(function () {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-banner]'), function (sl) {
+      var track = sl.querySelector('.slider-track'), dots = Array.prototype.slice.call(sl.querySelectorAll('[data-banner-go]')), ticking = false;
+      if (!track) return;
+      function stride() { var f = track.children[0]; return f ? f.getBoundingClientRect().width + (parseFloat(window.getComputedStyle(track).columnGap) || 0) : track.clientWidth; }
+      function mark() { var i = Math.round(track.scrollLeft / (stride() || 1)); dots.forEach(function (d, k) { d.setAttribute('aria-current', String(k === i)); }); ticking = false; }
+      track.addEventListener('scroll', function () { if (!ticking) { ticking = true; window.requestAnimationFrame(mark); } }, { passive: true });
+      dots.forEach(function (d) { d.addEventListener('click', function () { track.scrollTo({ left: parseInt(d.getAttribute('data-banner-go'), 10) * stride(), behavior: 'smooth' }); }); });
+      mark();
+    });
+  });
 
   /* ------------------------------------------------------------------ cta */
   R.cta = function (variant) {

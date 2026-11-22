@@ -280,11 +280,12 @@
   }
 
   /* --- card/service ------------------------------------------------ */
+  var isNew = function (s) { return Array.isArray(s.tags) && s.tags.indexOf('baru') > -1; };   /* service.tags: ['baru'] -> lencana "Baru" (tampil di template yang memunculkannya) dan tab "Baru" */
   function serviceCard(s) {
     var cat = findBy(D.categories, 'slug', s.category);
     return '<article class="card-x service-card" data-name="' + esc(s.name.toLowerCase()) + '" data-category="' + esc(s.category) + '">' +
       '<div class="card-media"><img src="' + esc(s.image) + '" alt="' + esc(s.imageAlt) + '" width="800" height="600" loading="lazy">' +
-      (cat ? '<span class="tag">' + esc(cat.name) + '</span>' : '') + '</div>' +
+      (cat ? '<span class="tag">' + esc(cat.name) + '</span>' : '') + (isNew(s) ? '<span class="flag-new">Baru</span>' : '') + '</div>' +
       '<div class="card-body-x">' +
       '<h3><a href="' + url('service', s.slug) + '">' + esc(s.name) + '</a></h3>' +
       '<p>' + esc(s.short) + '</p>' +
@@ -359,6 +360,7 @@
   }
 
   function navDesktop(item, page) {
+    var lead = item.icon && S.header === 'market' ? ico(item.icon, 'nav-ico') : '';     /* ikon di depan menu hanya pada header "market" */
     if (item.dropdown) {
       var links, active, mega = false;
       if (item.dropdown === 'categories' && S.header === 'megamenu') {
@@ -369,7 +371,7 @@
           return '<div class="mega-col"><a class="mega-head" href="' + url('category', c.slug) + '">' + ico(c.icon) + '<span>' + esc(c.name) + '</span></a>' + (items ? '<ul>' + items + '</ul>' : '') + '</div>';
         }).join('') + '</div><a class="dropdown-all" href="' + url('services') + '">Lihat semua layanan ' + ico('arrow-right') + '</a>';
       } else if (item.dropdown === 'categories') {
-        active = page === 'services';
+        active = page === 'services' && !item.plain;
         links = D.categories.map(function (c) { return '<a href="' + url('category', c.slug) + '">' + ico(c.icon) + esc(c.name) + '</a>'; }).join('') +
           '<a class="dropdown-all" href="' + url('services') + '">Lihat semua layanan ' + ico('arrow-right') + '</a>';
       } else {
@@ -377,11 +379,11 @@
         links = item.dropdown.map(function (c) { return '<a href="' + url(c.route) + '"' + (c.route === page ? ' aria-current="page"' : '') + '>' + esc(c.label) + '</a>'; }).join('');
       }
       var id = 'dd-' + item.label.toLowerCase().replace(/\W+/g, '');
-      return '<li class="has-dropdown' + (mega ? ' has-mega' : '') + '"><button type="button" class="nav-toggle' + (active ? ' is-active' : '') + '" aria-expanded="false" aria-controls="' + id + '">' +
-        esc(item.label) + ico('chevron-down') + '</button><div class="dropdown-panel' + (mega ? ' mega-panel' : '') + '" id="' + id + '">' + links + '</div></li>';
+      return '<li class="has-dropdown' + (mega ? ' has-mega' : '') + (item.cls ? ' ' + item.cls : '') + '"><button type="button" class="nav-toggle' + (active ? ' is-active' : '') + '" aria-expanded="false" aria-controls="' + id + '">' +
+        lead + esc(item.label) + ico('chevron-down') + '</button><div class="dropdown-panel' + (mega ? ' mega-panel' : '') + '" id="' + id + '">' + links + '</div></li>';
     }
     var is = item.route === page;
-    return '<li><a class="nav-link-item' + (is ? ' is-active' : '') + '"' + (is ? ' aria-current="page"' : '') + ' href="' + url(item.route) + '">' + esc(item.label) + '</a></li>';
+    return '<li><a class="nav-link-item' + (is ? ' is-active' : '') + '"' + (is ? ' aria-current="page"' : '') + ' href="' + url(item.route) + '">' + lead + esc(item.label) + '</a></li>';
   }
 
   /* Baris info di atas header (varian "topbar"); ikut hilang saat halaman digulir */
@@ -402,34 +404,39 @@
   }
 
   /* Tautan keranjang (paket Semi e-commerce); isi dan jumlahnya dikelola shop.js */
-  function cartLink(cls) {
+  function cartLink(cls, withTotal) {
     return '<a class="btn btn-outline-brand btn-sm ' + cls + '" href="' + url('cart') + '" aria-label="Keranjang">' + ico('shopping-cart') +
-      '<span class="inq-label">Keranjang</span><span class="inq-count" data-cart-count hidden>0</span></a>';
+      '<span class="inq-label">Keranjang</span><span class="inq-count" data-cart-count hidden>0</span>' +
+      (withTotal ? '<span class="cart-sum" data-cart-total>' + rupiah(0) + '</span>' : '') + '</a>';   /* total berjalan diisi shop.js */
   }
 
   /* Kotak cari (varian header "store"): GET ke halaman layanan, ?q= mengisi pencarian di sana */
-  function searchForm() {
+  function searchForm(market) {
     var keep = PREVIEW_KEYS.filter(function (k) { return QS.has(k); }).map(function (k) { return '<input type="hidden" name="' + esc(k) + '" value="' + esc(QS.get(k)) + '">'; }).join('');   /* GET membuang query pada action: pilihan pratinjau dibawa lewat input tersembunyi */
-    return '<form class="store-search" role="search" action="' + esc(D.routes.services.mockup) + '" method="get">' + keep + '<label class="visually-hidden" for="hdr-q">Cari layanan</label>' + ico('search') +
-      '<input id="hdr-q" name="q" type="search" class="form-control" placeholder="Cari layanan, mis. banner atau jilid" maxlength="80" autocomplete="off">' +
-      '<button type="submit" class="btn btn-brand btn-sm">Cari</button></form>';
+    return '<form class="store-search' + (market ? ' store-search--market' : '') + '" role="search" action="' + esc(D.routes.services.mockup) + '" method="get">' + keep + '<label class="visually-hidden" for="hdr-q">Cari layanan</label>' + (market ? '' : ico('search')) +
+      '<input id="hdr-q" name="q" type="search" class="form-control" placeholder="' + (market ? 'Cari produk cetak, mis. banner atau jilid' : 'Cari layanan, mis. banner atau jilid') + '" maxlength="80" autocomplete="off">' +
+      '<button type="submit" class="btn btn-brand btn-sm"' + (market ? ' aria-label="Cari">' + ico('arrow-right') : '>Cari') + '</button></form>';
   }
 
   function header() {
-    var page = activePage(), store = S.header === 'store';
-    var nav = '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>';
-    return (S.header === 'topbar' ? topbar() : '') + (store ? '<div class="promo-bar"><div class="container"><span>' + ico('truck') + ' ' + esc(T.promoBar || ('Buka ' + T.hoursSummary + ' • ' + T.city)) + '</span></div></div>' : '') +
+    var page = activePage(), market = S.header === 'market', store = S.header === 'store' || market;
+    /* market: tombol "Kategori" (daftar kategori) di depan, lalu menu berikon; "Layanan" menjadi tautan "Semua Produk" */
+    var items = market
+      ? [{ label: 'Kategori', icon: 'layout-grid', dropdown: 'categories', plain: true, cls: 'nav-kategori' }].concat(D.nav.map(function (n) { return n.dropdown === 'categories' ? { label: n.marketLabel || n.label, route: n.route, icon: n.icon } : n; }))
+      : D.nav;
+    var nav = '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + items.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>';
+    return (S.header === 'topbar' ? topbar() : '') + (S.header === 'store' ? '<div class="promo-bar"><div class="container"><span>' + ico('truck') + ' ' + esc(T.promoBar || ('Buka ' + T.hoursSummary + ' • ' + T.city)) + '</span></div></div>' : '') +
       '<div class="container"><div class="header-inner">' +
       '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda">' +
       '<img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
-      (store ? searchForm() : nav) +
-      (S.modules.order === 'cart' ? cartLink('header-inq header-cart') : '') +
+      (store ? searchForm(market) : nav) +
+      (S.modules.order === 'cart' ? cartLink('header-inq header-cart', market) : '') +
       (S.modules.order === 'inquiry' ? inquiryButton('header-inq') : '') +
       (S.modules.order === 'contact'
         ? '<a class="btn btn-brand btn-sm header-cta" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
         : '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : S.modules.order === 'cart' ? 'Chat Admin' : 'Pesan via WhatsApp') + '</a>') +
       '<button type="button" class="menu-btn" id="menu-open" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu">' + ico('menu', 'i-lg') + '</button>' +
-      '</div></div>' + (store ? '<div class="store-nav"><div class="container">' + nav + '</div></div>' : '');
+      '</div></div>' + (store ? '<div class="store-nav' + (market ? ' market-nav' : '') + '"><div class="container">' + nav + '</div></div>' : '');
   }
 
   /* --- layout/mobile-menu ------------------------------------------ */
@@ -469,7 +476,10 @@
       .concat(S.modules.order === 'cart' ? [['cart', 'Keranjang'], ['orderStatus', 'Lacak Pesanan']] : [])
       .filter(function (r) { return r[0] !== 'pricing' || S.modules.pricingPage; })
       .map(function (r) { return '<li><a href="' + url(r[0]) + '">' + r[1] + '</a></li>'; }).join('');
-    return '<div class="container"><div class="row g-4 g-lg-5">' +
+    /* Strip kepercayaan (header "market"): keunggulan yang sama dengan section trust, diulang di atas footer */
+    var strip = S.header === 'market' && Array.isArray(D.trust) && D.trust.length
+      ? '<div class="footer-trust"><div class="container"><ul>' + D.trust.map(function (t) { return '<li>' + ico(t.icon) + '<span><strong>' + esc(t.title) + '</strong>' + esc(t.text) + '</span></li>'; }).join('') + '</ul></div></div>' : '';
+    return strip + '<div class="container"><div class="row g-4 g-lg-5">' +
       '<div class="col-lg-4"><a class="brand mb-3" href="' + url('home') + '"><img src="' + esc(T.logoLight) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
       '<p class="mt-3 mb-0">' + esc(T.seo.defaultDescription) + '</p><div class="social">' + social + '</div></div>' +
       '<div class="col-6 col-lg-2"><h2>Layanan</h2><ul class="footer-links">' + svc + '</ul></div>' +
@@ -815,7 +825,7 @@
   /* API kecil untuk halaman lain (services.html, service-detail.html, dll.) */
   window.PrintSite = {
     data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); }, ready: function (fn) { if (booted) fn(window.PrintSite); else afterBoot.push(fn); },
-    esc: esc, rupiah: rupiah, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
+    esc: esc, rupiah: rupiah, isNew: isNew, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
     components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }
   };

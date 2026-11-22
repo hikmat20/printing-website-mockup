@@ -379,7 +379,7 @@ window.TENANTS['sinar-copy'] = {
   homeText: {
     trust:        { title: 'Keunggulan kami' },
     categories:   { eyebrow: 'Kategori Layanan', title: 'Cari Layanan Sesuai Kebutuhan', text: 'Dari lembar tugas sampai spanduk acara, pilih kategori yang Anda butuhkan.' },
-    services:     { eyebrow: 'Layanan Unggulan', title: 'Layanan yang Paling Sering Dipesan', text: 'Harga jelas dan bisa dipesan langsung lewat WhatsApp.', cta: { label: 'Lihat Semua Layanan', route: 'services' } },
+    services:     { eyebrow: 'Layanan Unggulan', title: 'Layanan yang Paling Sering Dipesan', text: 'Harga jelas dan bisa dipesan langsung lewat WhatsApp.', tabs: { featured: 'Terlaris', new: 'Baru', all: 'Semua' }, cta: { label: 'Lihat Semua Layanan', route: 'services' } },
     about:        { eyebrow: 'Tentang Kami', cta: { label: 'Selengkapnya', route: 'about' } },
     why:          { eyebrow: 'Mengapa Memilih Kami', title: 'Hasil Rapi, Harga Jelas, Pengerjaan Cepat' },
     portfolio:    { eyebrow: 'Portofolio', title: 'Hasil Pekerjaan Kami', text: 'Beberapa pesanan yang sudah kami selesaikan. Klik gambar untuk memperbesar.', cta: { label: 'Lihat Semua Portofolio', route: 'portfolio' } },
@@ -389,6 +389,8 @@ window.TENANTS['sinar-copy'] = {
     location:     { eyebrow: 'Lokasi', title: 'Kunjungi Toko Kami', text: 'Datang langsung untuk konsultasi, cek contoh kertas, atau ambil pesanan.' },
     promo:        { eyebrow: 'Promo & Pilihan', title: 'Pilihan untuk Kebutuhan Anda', text: 'Pintasan ke layanan yang paling sering dicari.' },
     /* Section B2B (template Katalog) */
+    catshow:      { eyebrow: 'Jelajahi', title: 'Jelajahi per Kategori', text: 'Pilih kategori, lihat produk pilihannya langsung di sini.', cta: { label: 'Lihat Semua Produk', route: 'services' } },
+    articles:     { eyebrow: 'Artikel', title: 'Tips & Panduan Cetak', text: 'Bacaan singkat agar hasil cetak sesuai harapan dan biaya tetap terkendali.', cta: { label: 'Lihat Semua Artikel', route: 'blog' } },
     clients:      { eyebrow: 'Dipercaya', title: 'Dipercaya Sekolah, Kantor, dan Pelaku Usaha', text: 'Beberapa pelanggan tetap yang rutin memesan cetak kebutuhan mereka.', note: 'Nama pelanggan di atas adalah contoh untuk keperluan demo.' },
     problems:     { eyebrow: 'Kebutuhan Perusahaan', title: 'Kami Bantu Selesaikan Kendala Cetak Anda', text: 'Pesanan rutin dan berskala besar punya tantangannya sendiri.', problemLabel: 'Masalah', solutionLabel: 'Solusi kami' },
     industries:   { eyebrow: 'Industri', title: 'Melayani Berbagai Kebutuhan Usaha', text: 'Pilih bidang Anda untuk melihat kategori layanan yang paling sering dipesan.' },
@@ -442,6 +444,15 @@ window.TENANTS['sinar-copy'] = {
     { icon: 'ruler', title: 'Banner & Spanduk', text: 'Cetak ukuran besar untuk acara dan toko.', badge: 'Terlaris', route: 'category', slug: 'large-format' },
     { icon: 'book-open-check', title: 'Jilid Skripsi', text: 'Hard cover emas, siap sidang.', badge: 'Musim Sidang', route: 'service', slug: 'jilid-buku' },
     { icon: 'megaphone', title: 'Kartu Nama & Brosur', text: 'Materi promosi untuk usaha Anda.', route: 'category', slug: 'media-promosi' }
+  ],
+
+  /* ---------- Banner beranda (hero varian "banner", template Grafika) ----------
+     Tiap banner: { eyebrow?, title, text?, image, imageAlt, cta: { label, route, slug? } }. Teks tanpa harga agar aman untuk paket Company Profile.
+     Laravel: tabel banners (urutan, aktif, jadwal tayang), dikelola tenant. Banner tidak valid dilewati; tanpa banner, hero memakai varian "split". */
+  banners: [
+    { eyebrow: 'Cetak Ukuran Besar', title: 'Banner & Spanduk Tahan Cuaca', text: 'Flexi 280 dan 340 gsm, mata ayam siap pasang untuk toko, acara, dan sekolah.', image: 'assets/images/services/cetak-banner.svg', imageAlt: 'Banner promosi berwarna dengan mata ayam di sudut', cta: { label: 'Lihat Banner', route: 'service', slug: 'cetak-banner' } },
+    { eyebrow: 'Musim Sidang', title: 'Jilid Skripsi Hard Cover Emas', text: 'Rapi, kuat, dan siap sidang. Jilid standar bisa selesai di hari yang sama.', image: 'assets/images/services/jilid-buku.svg', imageAlt: 'Skripsi berjilid hard cover dengan tulisan emas', cta: { label: 'Lihat Jilid Buku', route: 'service', slug: 'jilid-buku' } },
+    { eyebrow: 'Promosi Usaha', title: 'Kartu Nama & Brosur Profesional', text: 'Materi cetak yang membuat usaha Anda terlihat meyakinkan sejak pertama bertemu.', image: 'assets/images/services/cetak-brosur.svg', imageAlt: 'Brosur lipat tiga berwarna', cta: { label: 'Lihat Kategori', route: 'category', slug: 'media-promosi' } }
   ],
 
   /* ---------- Contoh status pesanan (paket Semi e-commerce) ----------
@@ -636,7 +647,7 @@ window.TENANTS['sinar-copy'] = {
       related: ['fotocopy', 'jilid-buku', 'kartu-nama']
     },
     {
-      slug: 'cetak-sticker', name: 'Cetak Sticker', category: 'digital-printing', featured: true,
+      slug: 'cetak-sticker', tags: ['baru'], name: 'Cetak Sticker', category: 'digital-printing', featured: true,
       image: 'assets/images/services/cetak-sticker.svg', imageAlt: 'Lembar sticker berbagai bentuk dan warna',
       short: 'Sticker label, kemasan, dan branding dengan potong custom (kiss cut).',
       description: 'Sticker untuk label produk, kemasan, dan branding. Bahan vinyl tahan air atau chromo, potong bentuk mengikuti desain (die cut atau kiss cut). Cocok untuk pelaku UMKM.',
@@ -695,7 +706,7 @@ window.TENANTS['sinar-copy'] = {
       related: ['kartu-nama', 'cetak-sticker', 'digital-printing']
     },
     {
-      slug: 'kartu-nama', name: 'Kartu Nama', category: 'media-promosi', featured: false,
+      slug: 'kartu-nama', tags: ['baru'], name: 'Kartu Nama', category: 'media-promosi', featured: false,
       image: 'assets/images/services/kartu-nama.svg', imageAlt: 'Tiga kartu nama berwarna dengan logo dan teks',
       short: 'Kartu nama profesional untuk usaha dan perusahaan, satu atau dua sisi.',
       description: 'Kartu nama dengan pilihan Art Carton 260 gsm, laminasi doff atau glossy, dan sudut tumpul. Satu box berisi 100 kartu.',
@@ -714,7 +725,7 @@ window.TENANTS['sinar-copy'] = {
       related: ['cetak-brosur', 'laminating', 'cetak-undangan']
     },
     {
-      slug: 'cetak-undangan', name: 'Cetak Undangan', category: 'buku-undangan', featured: false,
+      slug: 'cetak-undangan', tags: ['baru'], name: 'Cetak Undangan', category: 'buku-undangan', featured: false,
       image: 'assets/images/services/cetak-undangan.svg', imageAlt: 'Undangan dalam amplop krem dengan segel biru',
       short: 'Undangan pernikahan, ulang tahun, dan acara dengan pilihan kertas dan amplop.',
       description: 'Cetak undangan pernikahan, khitanan, ulang tahun, dan acara kantor. Pilihan kertas mulai dari Art Carton hingga kertas tekstur, lengkap dengan amplop.',

@@ -1,0 +1,42 @@
+/* ==========================================================================
+   templates/grafika.css — Template "Grafika" (marketplace cetak)
+   Karakter: bersih dan rapat seperti etalase marketplace: latar abu lembut, kartu putih bersudut 16px,
+   tombol pil, judul section tebal rata kiri, lencana "Baru" pada produk, header dua baris (pencarian + menu berikon).
+   Struktur tiap section ada di variants.css; berkas ini hanya kulit. Warna & font tetap milik tenant.
+   Susunan beranda bawaan: PLATFORM.templates.grafika
+   ========================================================================== */
+
+[data-template="grafika"] {
+  --r-card: 16px;
+  --r-media: 20px;
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--c-primary) 10%, transparent);
+  --shadow-md: 0 6px 18px color-mix(in srgb, var(--c-primary) 11%, transparent);
+  --shadow-lg: 0 16px 34px color-mix(in srgb, var(--c-primary) 16%, transparent);
+  --section-y: 2.5rem;
+}
+@media (min-width: 768px)  { [data-template="grafika"] { --section-y: 3.25rem; } }
+@media (min-width: 1200px) { [data-template="grafika"] { --section-y: 3.75rem; } }
+
+[data-template="grafika"] h1, [data-template="grafika"] h2, [data-template="grafika"] h3 { letter-spacing: -.015em; }
+[data-template="grafika"] .section-head { text-align: left; margin-left: 0; max-width: 720px; }
+[data-template="grafika"] .section-head h2 { font-weight: 800; }
+[data-template="grafika"] .section-foot { text-align: left; }
+[data-template="grafika"] .eyebrow { padding: 0; background: none; color: var(--c-accent-dark); font-weight: 800; letter-spacing: .09em; }
+
+/* Header: dua baris, garis bawah tipis */
+[data-template="grafika"] .site-header { border-bottom: 1px solid var(--c-border); }
+[data-template="grafika"] .market-nav { border-top: 1px solid var(--c-border); }
+
+/* Beranda: latar abu lembut dengan kartu putih */
+[data-template="grafika"] .section-alt { background: var(--c-surface); }
+[data-template="grafika"] .trust { background: var(--c-card); color: var(--c-text); border-bottom: 1px solid var(--c-border); }
+[data-template="grafika"] .trust-item h3 { color: var(--c-primary); }
+[data-template="grafika"] .trust-item p { color: var(--c-muted); }
+[data-template="grafika"] .trust-item .ico { background: var(--c-accent-tint); color: var(--c-accent-dark); }
+
+/* Kartu produk */
+[data-template="grafika"] .service-card .card-media { aspect-ratio: 1 / 1; }
+[data-template="grafika"] .service-card .price-from strong { color: var(--c-accent-dark); }
+[data-template="grafika"] .service-card:hover { transform: translateY(-4px); }
+[data-template="grafika"] .flag-new { display: inline-block; position: absolute; right: .75rem; top: .75rem; padding: .2rem .6rem; border-radius: 999px; background: var(--c-accent); color: var(--c-on-accent); font-size: .6875rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+[data-template="grafika"] .card-body-x h3 { font-weight: 700; }

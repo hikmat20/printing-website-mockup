@@ -80,6 +80,7 @@ Template = **skin visual** (`templates/<id>.css`) + **susunan beranda bawaan** (
 | `bold` | Tegas, kontras tinggi, bayangan keras, huruf kapital | topbar | outlined | square | Montserrat / Open Sans |
 | `katalog` | Katalog B2B: padat informasi, mega menu per kategori, filter di samping, section klien/solusi/industri/jangkauan | megamenu | outlined | square | DM Sans / Inter |
 | `toko` | Etalase online (referensi anugerahprint.com): bilah promo, kotak cari + keranjang di header, ubin promo, kartu produk dengan tombol keranjang | store | elevated | rounded | Poppins / Inter |
+| `grafika` | Marketplace cetak (referensi primagraphia.co.id): banner promo bergeser, mosaik kategori bergambar, produk bertab (Terlaris / Baru / Semua), jelajah per kategori, deret merek berjalan, artikel terbaru; header dua baris dengan pencarian pil dan total keranjang | market | elevated | pill | Montserrat / Inter |
 
 Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `data-card`, `data-buttons`.
 
@@ -168,6 +169,25 @@ membuat `orders` + `order_items` dengan kode unik, lalu mengarahkan ke WhatsApp 
   teks: `homeText.<id>`), dan `inquiry` (hanya bila paket memiliki modul daftar tanya: `sections.inquiry.requires`).
   Data kosong atau salah tipe membuat section dilewati dengan `console.warn`, bukan error.
 - Varian halaman layanan `catalog` (`pages.services.variants`): filter kategori di kiri (sticky di desktop) + kartu di kanan.
+
+### Template Grafika: header `market` dan section baru (Gelombang E)
+
+- Header `market` (bawaan template Grafika, `?header=market`): seperti `store` tanpa baris promo. Baris atas: logo, pencarian
+  berbentuk pil (tombol panah), keranjang dengan **total berjalan** (`[data-cart-total]`, diisi `shop.js`, hanya bila paket
+  punya keranjang), dan Chat Admin. Baris bawah: tombol **Kategori** (dropdown kategori) lalu menu berikon
+  (`PLATFORM.nav[].icon`); menu Layanan menjadi tautan "Semua Produk" (`nav[].marketLabel`). **Strip kepercayaan di footer**
+  (`tenant.trust`) ikut aktif bersama header ini; di Laravel jadikan partial footer yang dipanggil bila `header === 'market'`.
+- Hero `banner`: slider dari `tenant.banners` `[{ eyebrow?, title, text?, image, imageAlt, cta: { label, route, slug? } }]`
+  (satu `<h1>` tersembunyi dari `hero.headline`, tombol sebelumnya/berikutnya + titik). Banner tidak valid dilewati; tanpa
+  banner hero kembali ke `split` dengan `console.warn`. Teks banner jangan memuat harga (aman untuk paket Company Profile).
+- Kategori `mosaic`: dua ubin besar lalu ubin kecil, gambar = gambar layanan pertama kategori.
+- Layanan `tabs`: Terlaris (`featured`), Baru (`service.tags` memuat `'baru'`, juga memunculkan lencana "Baru" di template
+  Grafika), Semua; label dari `homeText.services.tabs`. Tab kosong dibuang; satu tab saja = tanpa bilah tab.
+- Section `catshow` ("Jelajahi per kategori": chip kategori + banner samping + kartu produk) dan `articles` (3 artikel
+  terbaru); teks dari `homeText.catshow` / `homeText.articles`. Klien `marquee` (dengan tombol jeda; statis bila pengguna
+  memilih gerak dikurangi) dan CTA `card`.
+- Tab memakai pola ARIA (`tablist`/`tab`/`tabpanel`, panah, Home, End). Pendamping Laravel: `banners` (urutan, aktif, jadwal),
+  `services.tags` (pivot tag) dan komponen `<x-section.catshow />`, `<x-section.articles />`.
 
 Teks tenant yang berbeda per paket (mis. kalimat yang menyebut harga) ditulis di `packageText.<paket>`
 pada data tenant: `{ tenant, pageText, homeText, trust }`. Objek digabung per kunci, array diganti utuh.
@@ -270,6 +290,7 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 | `inquiry.js` (daftar tanya) | session + `POST /daftar-tanya`; lead disimpan di tabel `inquiries` |
 | `shop.js` (keranjang, checkout, lacak) | session/`carts` + `POST /keranjang/checkout` → `orders`, `order_items`; `GET /status-pesanan` dari `orders` |
 | `promos`, `orderStatus` | tabel promo per tenant; status pesanan = kolom/tabel status di `orders` |
+| `banners`, `services[].tags` | tabel `banners` (urutan, aktif, jadwal tayang) dan tag layanan per tenant |
 | `resolveSite()` di `main.js` | `SiteConfigResolver` (class PHP), validasi sama |
 | `sections.js` (`R.<id>`) | Blade Components `<x-section.services variant="slider" />` |
 | `templates/<id>.css` | aset per template, dimuat sesuai `tenant.template` |

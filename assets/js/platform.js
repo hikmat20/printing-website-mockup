@@ -26,18 +26,19 @@ window.PLATFORM = {
   },
 
   /* ---------- Navigasi ---------- */
+  /* icon: dipakai varian header "market" (ikon di depan menu); marketLabel: nama menu di header market */
   nav: [
-    { label: 'Beranda', route: 'home' },
-    { label: 'Layanan', route: 'services', dropdown: 'categories' },
-    { label: 'Harga', route: 'pricing', module: 'pricing' },
-    { label: 'Portofolio', route: 'portfolio' },
-    { label: 'Informasi', dropdown: [
+    { label: 'Beranda', route: 'home', icon: 'house' },
+    { label: 'Layanan', route: 'services', dropdown: 'categories', icon: 'layout-grid', marketLabel: 'Semua Produk' },
+    { label: 'Harga', route: 'pricing', module: 'pricing', icon: 'receipt-text' },
+    { label: 'Portofolio', route: 'portfolio', icon: 'images' },
+    { label: 'Informasi', icon: 'info', dropdown: [
         { label: 'Tentang Kami', route: 'about' },
         { label: 'Artikel', route: 'blog' },
         { label: 'FAQ', route: 'faq' },
         { label: 'Lacak Pesanan', route: 'orderStatus', module: 'cart' }
     ] },
-    { label: 'Kontak', route: 'contact' }
+    { label: 'Kontak', route: 'contact', icon: 'phone' }
   ],
 
   /* ======================================================================
@@ -65,7 +66,7 @@ window.PLATFORM = {
   },
 
   /* ---------- Opsi komponen global ---------- */
-  headers:      ['standard', 'topbar', 'megamenu', 'store'],   // varian header (megamenu: panel lebar per kategori; store: pencarian + keranjang, menu di baris kedua)
+  headers:      ['standard', 'topbar', 'megamenu', 'store', 'market'],   // varian header (megamenu: panel lebar per kategori; store: pencarian + keranjang, menu di baris kedua; market: seperti store tanpa baris promo, tombol Kategori, menu berikon, total keranjang, dan strip kepercayaan di footer)
   cardStyles:   ['elevated', 'outlined', 'flat'],     // gaya kartu
   buttonShapes: ['rounded', 'pill', 'square'],        // bentuk tombol
 
@@ -76,10 +77,10 @@ window.PLATFORM = {
                bila tidak terpenuhi section dilewati diam-diam (bukan kesalahan tenant)
      variants[0] = varian default */
   sections: {
-    hero:         { locked: true,  variants: ['split', 'centered', 'dark'] },
+    hero:         { locked: true,  variants: ['split', 'centered', 'dark', 'banner'] },     /* banner: slider spanduk dari tenant.banners */
     trust:        {                variants: ['bar', 'cards'] },
-    categories:   { banded: true,  variants: ['grid', 'compact'],      anchor: 'kategori' },
-    services:     { banded: true,  variants: ['grid', 'slider'],       anchor: 'layanan' },
+    categories:   { banded: true,  variants: ['grid', 'compact', 'mosaic'], anchor: 'kategori' },   /* mosaic: ubin bergambar, dua besar lalu kecil */
+    services:     { banded: true,  variants: ['grid', 'slider', 'tabs'], anchor: 'layanan' },    /* tabs: Terlaris / Baru / Semua (service.tags) */
     about:        { banded: true,  variants: ['split', 'reverse'],     anchor: 'tentang' },
     why:          { banded: true,  variants: ['split', 'grid'],        anchor: 'keunggulan' },
     portfolio:    { banded: true,  variants: ['grid', 'slider'],       anchor: 'portofolio' },
@@ -88,13 +89,16 @@ window.PLATFORM = {
     faq:          { banded: true,  variants: ['list', 'columns'],      anchor: 'faq' },
     location:     { banded: true,  variants: ['split', 'stacked'],     anchor: 'lokasi' },
     /* Section untuk penjualan B2B (template Katalog); datanya: tenant.clients / problems / industries / coverage */
-    clients:      { banded: true,  variants: ['strip', 'grid'],        anchor: 'klien' },
+    clients:      { banded: true,  variants: ['strip', 'grid', 'marquee'], anchor: 'klien' },    /* marquee: deret merek berjalan (diam bila gerak dikurangi) */
     problems:     { banded: true,  variants: ['cards'],                anchor: 'solusi' },
     industries:   { banded: true,  variants: ['grid', 'compact'],      anchor: 'industri' },
     coverage:     { banded: true,  variants: ['split'],                anchor: 'jangkauan' },
     promo:        { banded: true,  variants: ['tiles'],              anchor: 'promo' },        /* toko: kotak promo; data tenant.promos */
     inquiry:      { banded: true,  variants: ['band'],                 anchor: 'daftar-tanya', requires: { order: 'inquiry' } },
-    cta:          { locked: true,  variants: ['gradient', 'solid'] }
+    /* Section template Grafika (data: tenant.banners, service.tags, tenant.articles) */
+    catshow:      { banded: true,  variants: ['chips'],                anchor: 'jelajah' },       /* jelajahi per kategori: chip + banner samping + kartu produk */
+    articles:     { banded: true,  variants: ['cards'],                anchor: 'artikel-terbaru' },   /* artikel terbaru (limit bawaan 3) */
+    cta:          { locked: true,  variants: ['gradient', 'solid', 'card'] }
   },
 
   /* ---------- Paket (fungsi yang dijual) ----------
@@ -143,7 +147,8 @@ window.PLATFORM = {
     { package: 'profile',  template: 'modern',  title: 'Profil usaha yang rapi',         audience: 'Percetakan yang ingin tampil profesional dan dihubungi lewat halaman Kontak.' },
     { package: 'showcase', template: 'classic', title: 'Etalase dengan harga + WhatsApp', audience: 'Toko fotocopy dan percetakan lokal yang menerima pesanan lewat WhatsApp.' },
     { package: 'catalog',  template: 'katalog', title: 'Katalog untuk pelanggan korporat', audience: 'Percetakan B2B: banyak produk, minta penawaran lewat daftar tanya.' },
-    { package: 'shop',     template: 'toko',    title: 'Toko dengan keranjang',           audience: 'Digital printing yang ingin pelanggan memilih, memasukkan keranjang, lalu checkout.' }
+    { package: 'shop',     template: 'toko',    title: 'Toko dengan keranjang',           audience: 'Digital printing yang ingin pelanggan memilih, memasukkan keranjang, lalu checkout.' },
+    { package: 'shop',     template: 'grafika', title: 'Toko cetak ala marketplace',       audience: 'Percetakan dengan banyak produk: banner promo, kategori bergambar, pencarian, dan keranjang.' }
   ],
 
   /* ---------- Template standar ----------
@@ -262,6 +267,25 @@ window.PLATFORM = {
         { id: 'testimonials', variant: 'slider' },
         { id: 'faq', variant: 'columns' },
         { id: 'cta', variant: 'solid' }
+      ]
+    },
+    grafika: {
+      name: 'Grafika',
+      description: 'Marketplace cetak: banner promo bergeser, kategori bergambar, produk bertab, pencarian pil dan total keranjang di header.',
+      header: 'market', cardStyle: 'elevated', buttonShape: 'pill',
+      fonts: { heading: 'montserrat', body: 'inter' },
+      pages: { services: 'grid', blog: 'grid' },
+      home: [
+        { id: 'hero', variant: 'banner' },
+        { id: 'trust', variant: 'bar' },
+        { id: 'categories', variant: 'mosaic' },
+        { id: 'services', variant: 'tabs', limit: 8 },
+        { id: 'catshow', variant: 'chips' },
+        { id: 'steps', variant: 'cards' },
+        { id: 'clients', variant: 'marquee' },
+        { id: 'testimonials', variant: 'slider' },
+        { id: 'articles', variant: 'cards', limit: 3 },
+        { id: 'cta', variant: 'card' }
       ]
     }
   }
