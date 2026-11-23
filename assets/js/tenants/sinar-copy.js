@@ -27,6 +27,8 @@ window.TENANTS['sinar-copy'] = {
     phone: '6281234567890',
     phoneDisplay: '0812-3456-7890',
     whatsapp: '6281234567890',          // format internasional tanpa "+" (untuk wa.me)
+    // Opsional: tombol WhatsApp mengambang (HP/tablet). { label?, message?, href?, route? }. href (https saja) > route (mis. 'contact') > pesan WhatsApp.
+    // Contoh: floatingCta: { label: 'Tanya Admin', href: 'https://wa.me/message/KODE' }. Bisa per paket di packageText.<paket>.tenant.floatingCta.
     email: 'info@example.com',
     address: 'Jl. Raya Bekasi Km 18 No. 27, Pulogadung, Jakarta Timur 13920',
     addressParts: { street: 'Jl. Raya Bekasi Km 18 No. 27, Pulogadung', locality: 'Jakarta Timur', region: 'DKI Jakarta', postalCode: '13920', country: 'ID' },

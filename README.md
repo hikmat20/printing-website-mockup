@@ -265,6 +265,15 @@ Latar belang (putih / abu) dihitung otomatis dari urutan section yang tampil.
 | location | split, stacked |
 | cta | gradient, solid |
 
+### Tombol WhatsApp mengambang (tautan kustom)
+
+Tombol hijau di pojok (HP/tablet) membuka WhatsApp dengan pesan bawaan. Tenant boleh mengubahnya lewat `tenant.floatingCta`
+`{ label?, message?, href?, route? }`: `label` (maks 30 huruf, di-escape), `message` (pesan awal WhatsApp), `href` (tautan `https://`
+saja, tanpa spasi, maks 500 karakter, mis. tautan pesan `wa.me/message/KODE` atau katalog), atau `route` (rute statis platform,
+mis. `contact`, tab yang sama). Prioritas: `href` > `route` > pesan WhatsApp. Nilai tak sah dibuang dengan peringatan dan tombol memakai bawaan.
+Per paket: `packageText.<paket>.tenant.floatingCta` (mis. Company Profile mengarah ke Kontak). Laravel: kolom JSON `floating_cta` pada `tenant_settings`,
+divalidasi sama (skema `https` saja; tolak `javascript:` dan `http:`).
+
 ### Font
 
 Plus Jakarta Sans, Inter, Poppins, Montserrat, Roboto, Nunito, Raleway, Lato, Open Sans, DM Sans,
