@@ -63,6 +63,7 @@
 
   /* ---------------------------------------------------------------- hero */
   R.hero = function (variant) {
+    if (variant === 'fullbleed') return heroFullbleed();
     if (variant === 'banner') { var bh = bannerHero(); if (bh) return bh; variant = 'split'; }   /* banner kosong/tidak valid: kembali ke split */
     var h = T.hero, a = h.actions || {}, p1 = a.primary || {}, p2 = a.secondary || {};
     var copy = '<span class="hero-badge">' + ico('map-pin') + '<span>' + esc(h.eyebrow) + '</span></span>' +
@@ -82,6 +83,28 @@
     return '<section class="hero hero--' + variant + '" aria-labelledby="hero-title"><div class="container">' + body + '</div></section>';
   };
 
+  /* Hero layar penuh (template Compro): gambar sebagai latar, judul raksasa, dua ajakan, tiga poin singkat. */
+  function heroFullbleed() {
+    var h = T.hero, a = h.actions || {}, p1 = a.primary || {}, p2 = a.secondary || {};
+    var contact = PS.modules.order === 'contact';
+    var second = contact
+      ? '<a class="btn btn-light-ghost btn-lg" href="' + url('contact') + '">' + ico(p2.icon || 'message-square') + ' ' + esc(p2.label || 'Hubungi Kami') + '</a>'
+      : '<a class="btn btn-light-ghost btn-lg" data-wa data-wa-msg="' + esc(p2.message || PS.msgDefault()) + '">' + ico(p2.icon || 'message-circle') + ' ' + esc(p2.label) + '</a>';
+    return '<section class="hero hero--fullbleed" aria-labelledby="hero-title"><div class="hero-fb-bg" aria-hidden="true"><img src="' + esc(h.image) + '" alt="" width="800" height="640" fetchpriority="high"></div>' +
+      '<div class="container hero-fb-in"><span class="hero-kicker">' + esc(h.eyebrow) + '</span><h1 id="hero-title">' + esc(h.headline) + '</h1>' +
+      '<p class="hero-sub">' + esc(h.subheadline) + '</p><div class="hero-actions">' +
+      '<a class="btn btn-brand btn-lg" href="' + url(p1.route || 'services') + '">' + ico(p1.icon || 'layout-grid') + ' ' + esc(p1.label) + '</a>' + second + '</div></div>' +
+      '<div class="container"><ul class="hero-fb-points">' + (h.points || []).slice(0, 3).map(function (t, i) { return '<li><span aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span>' + esc(t) + '</li>'; }).join('') + '</ul></div></section>';
+  }
+
+  /* Angka besar satu baris (data: tenant.stats); tanpa data section dilewati */
+  R.stats = function () {
+    var list = Array.isArray(T.stats) ? T.stats.filter(function (s) { return s && s.value && s.label; }) : [];
+    if (!list.length) return '';
+    return '<section class="stats-band" id="angka" aria-label="' + esc(tx('stats').title || 'Angka perusahaan') + '"><div class="container"><dl class="stats-big">' +
+      list.map(function (s) { return '<div><dt>' + esc(s.label) + '</dt><dd>' + esc(s.value) + '</dd></div>'; }).join('') + '</dl></div></section>';
+  };
+
   /* --------------------------------------------------------------- trust */
   R.trust = function (variant) {
     var items = D.trust.map(function (t) {
@@ -94,6 +117,13 @@
   /* ---------------------------------------------------------- categories */
   R.categories = function (variant, o) {
     if (variant === 'mosaic') return mosaic(o);
+    if (variant === 'rows') {
+      return wrap('categories', head('categories') + '<div class="cat-rows">' + D.categories.map(function (c, i) {
+        var n = D.services.filter(function (s) { return s.category === c.slug; }).length;
+        return '<a class="svc-row" href="' + url('category', c.slug) + '"><span class="svc-n" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span><span class="svc-t"><strong>' + esc(c.name) + '</strong><span>' + esc(c.description) + '</span></span>' +
+          '<span class="svc-p">' + n + ' layanan</span><span class="svc-go" aria-hidden="true">' + ico('arrow-right') + '</span></a>';
+      }).join('') + '</div>', o);
+    }
     return wrap('categories', head('categories') +
       '<div class="row g-3 g-lg-4 cat-list cat-list--' + variant + '">' + cols(D.categories, 'col-12 col-sm-6 col-lg-4', C.categoryCard) + '</div>', o);
   };
@@ -103,6 +133,7 @@
     if (variant === 'tabs') return serviceTabs(o);
     var list = D.services.filter(function (s) { return s.featured; });
     if (o.limit) list = list.slice(0, o.limit);
+    if (variant === 'rows') return wrap('services', head('services') + '<div class="svc-rows">' + list.map(C.serviceRow).join('') + '</div>' + foot('services', 'link'), o);
     var body = variant === 'slider'
       ? slider(list.map(C.serviceCard), tx('services').title)
       : '<div class="row g-3 g-lg-4">' + cols(list, 'col-12 col-md-6 col-lg-4', C.serviceCard) + '</div>';
@@ -112,6 +143,14 @@
   /* --------------------------------------------------------------- about */
   R.about = function (variant, o) {
     var a = T.about, x = tx('about'), rev = variant === 'reverse';
+    if (variant === 'story') {           /* editorial: label dan tahun di kiri, cerita besar di kanan, gambar lebar di bawah */
+      return wrap('about', '<div class="story-grid"><div class="story-label">' + (x.eyebrow ? '<span class="eyebrow">' + esc(x.eyebrow) + '</span>' : '') +
+        '<strong class="story-since">' + esc(T.since) + '</strong><span>Sejak</span></div>' +
+        '<div class="story-body"><h2 id="about-title">' + esc(a.title) + '</h2>' + a.text.map(function (p, i) { return '<p class="' + (i === 0 ? 'story-lead' : 'text-muted-x') + '">' + esc(p) + '</p>'; }).join('') +
+        '<ul class="story-points">' + a.highlights.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
+        (x.cta && !o.noCta ? '<a class="link-arrow" href="' + url(x.cta.route) + '">' + esc(x.cta.label) + ' ' + ico('arrow-right') + '</a>' : '') + '</div></div>' +
+        '<figure class="story-media"><img src="' + esc(a.image) + '" alt="' + esc(a.imageAlt) + '" width="800" height="600" loading="lazy"></figure>', o);
+    }
     var media = '<div class="col-lg-6' + (rev ? ' order-lg-2' : '') + '"><div class="about-media">' +
       '<img src="' + esc(a.image) + '" alt="' + esc(a.imageAlt) + '" width="800" height="600" loading="lazy">' +
       '<div class="about-since"><strong>' + esc(T.since) + '</strong>Sejak</div></div></div>';
@@ -127,6 +166,11 @@
   /* ----------------------------------------------------------------- why */
   R.why = function (variant, o) {
     var items = D.why;
+    if (variant === 'numbered') {
+      return wrap('why', head('why') + '<div class="why-nums">' + items.map(function (w, i) {
+        return '<div class="why-num"><span class="n" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span><h3>' + esc(w.title) + '</h3><p>' + esc(w.text) + '</p></div>';
+      }).join('') + '</div>', o);
+    }
     if (variant === 'grid') {
       return wrap('why', head('why') + '<div class="row g-3 g-lg-4">' + cols(items, 'col-12 col-md-6 col-lg-3', function (w) {
         return '<div class="card-x why-card"><span class="ico">' + ico(w.icon, 'i-lg') + '</span><h3>' + esc(w.title) + '</h3><p>' + esc(w.text) + '</p></div>';
@@ -395,6 +439,11 @@
   /* ------------------------------------------------------------------ cta */
   R.cta = function (variant) {
     var c = T.cta;
+    if (variant === 'strip') {            /* satu baris besar dengan garis atas dan bawah, tanpa kartu */
+      var contact = PS.modules.order === 'contact';
+      return '<section class="cta-strip" aria-label="Hubungi kami"><div class="container"><h2>' + esc(c.title) + '</h2><div class="cta-actions">' +
+        (contact ? '<a class="btn btn-brand btn-lg" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>' : '<a class="btn btn-wa btn-lg" data-wa>' + WA + ' ' + esc(c.button) + '</a>') + '</div></div></section>';
+    }
     return '<section class="section pt-0" aria-label="Pesan lewat WhatsApp"><div class="container"><div class="cta-wa cta-wa--' + variant + '">' +
       '<div class="cta-copy"><h2>' + esc(c.title) + '</h2><p>' + esc(c.text) + '</p></div>' +
       '<div class="cta-actions"><a class="btn btn-wa btn-lg" data-wa>' + WA + ' ' + esc(c.button) + '</a>' +

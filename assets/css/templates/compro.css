@@ -1,0 +1,36 @@
+/* ==========================================================================
+   templates/compro.css — Template "Compro" (profil perusahaan editorial)
+   Karakter: tegas dan rata — tanpa kartu melayang, tanpa bayangan, sudut siku, garis tipis sebagai pemisah,
+   judul besar rata kiri, angka dan nomor sebagai aksen. Kerangka berbeda dari template lain: menu samping tetap
+   (header "rail"), hero layar penuh, layanan sebagai daftar bernomor.
+   Struktur tiap section ada di variants.css; berkas ini hanya kulit. Warna & font tetap milik tenant.
+   Susunan beranda bawaan: PLATFORM.templates.compro
+   ========================================================================== */
+
+[data-template="compro"] {
+  --r-card: 0px;
+  --r-media: 0px;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --section-y: 3.5rem;
+}
+@media (min-width: 768px)  { [data-template="compro"] { --section-y: 4.5rem; } }
+@media (min-width: 1200px) { [data-template="compro"] { --section-y: 5.5rem; } }
+
+[data-template="compro"] h1, [data-template="compro"] h2, [data-template="compro"] h3 { letter-spacing: -.015em; }
+[data-template="compro"] .section-head { text-align: left; margin-left: 0; max-width: 760px; margin-bottom: 2rem; }
+[data-template="compro"] .section-head h2 { font-weight: 800; font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.75rem); line-height: 1.15; }
+[data-template="compro"] .section-foot { text-align: left; }
+[data-template="compro"] .eyebrow { padding: 0; background: none; color: var(--c-accent-dark); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; font-size: .75rem; }
+
+/* Tombol: persegi, huruf kapital kecil */
+[data-template="compro"] .btn { text-transform: uppercase; letter-spacing: .06em; font-size: .8125rem; font-weight: 700; }
+[data-template="compro"] .btn-lg { font-size: .875rem; }
+
+/* Tanpa kartu melayang: permukaan datar bergaris */
+[data-template="compro"] :is(.card, .service-card, .portfolio-card, .testi-card, .article-card, .price-card, .order-card, .why-card) { box-shadow: none; }
+[data-template="compro"] .section--banded, [data-template="compro"] .section.is-banded { background: var(--c-primary-tint); }
+
+/* Bilah samping memakai warna primer gelap milik tenant */
+[data-template="compro"] .site-footer { background: var(--c-primary-dark); }

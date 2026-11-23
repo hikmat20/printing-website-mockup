@@ -84,17 +84,18 @@
         var n = D.services.filter(function (s) { return s.category === c.slug; }).length;
         return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + ' <span class="chip-n">' + n + '</span></button>';
       }).join('');
-    var colCls = variant === 'list' ? 'col-12' : catalog ? 'col-12 col-md-6 col-xl-4' : market ? 'col-6 col-md-4 col-xl-3' : 'col-12 col-md-6 col-lg-4';
+    var rows = variant === 'rows';                 /* daftar bernomor tanpa kartu (template Compro) */
+    var colCls = variant === 'list' || rows ? 'col-12' : catalog ? 'col-12 col-md-6 col-xl-4' : market ? 'col-6 col-md-4 col-xl-3' : 'col-12 col-md-6 col-lg-4';
     var items = D.services.map(function (s, i) {
       var cat = byKey(D.categories, 'slug', s.category);
       var q = (s.name + ' ' + s.short + ' ' + (cat ? cat.name : '')).toLowerCase();
-      return '<div class="' + colCls + '" data-item data-i="' + i + '" data-price="' + (Number(s.priceFrom) || 0) + '" data-name="' + esc(s.name.toLowerCase()) + '" data-category="' + esc(s.category) + '" data-q="' + esc(q) + '">' + C.serviceCard(s) + '</div>';
+      return '<div class="' + colCls + '" data-item data-i="' + i + '" data-price="' + (Number(s.priceFrom) || 0) + '" data-name="' + esc(s.name.toLowerCase()) + '" data-category="' + esc(s.category) + '" data-q="' + esc(q) + '">' + (rows ? C.serviceRow(s, i) : C.serviceCard(s)) + '</div>';
     }).join('');
     var empty = x.empty || {};
     var search = '<div class="search-input"><label class="visually-hidden" for="svc-search">' + esc(x.searchLabel || 'Cari layanan') + '</label>' + ico('search') +
         '<input id="svc-search" type="search" class="form-control" placeholder="' + esc(x.searchPlaceholder || '') + '" autocomplete="off"></div>';
     var listHtml = '<p class="result-count" id="svc-count" role="status" aria-live="polite"></p>' +
-      '<div class="row g-3 g-lg-4 svc-list svc-list--' + variant + '" id="svc-list">' + items + '</div>' +
+      '<div class="row ' + (rows ? 'g-0' : 'g-3 g-lg-4') + ' svc-list svc-list--' + variant + '" id="svc-list">' + items + '</div>' +
       '<div class="empty-state" id="svc-empty" hidden><span class="ico">' + ico('search-x', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
       '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
     var help = x.help || {};

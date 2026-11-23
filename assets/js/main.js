@@ -343,6 +343,14 @@
       '<span class="link-arrow">' + count + ' layanan ' + ico('arrow-right') + '</span></article>';
   }
 
+  /* --- card/service-row: baris bernomor (template Compro); seluruh baris adalah tautan ke detail ---- */
+  function serviceRow(s, i) {
+    return '<a class="svc-row" href="' + url('service', s.slug) + '"><span class="svc-n" aria-hidden="true">' + String((i || 0) + 1).padStart(2, '0') + '</span>' +
+      '<span class="svc-t"><strong>' + esc(s.name) + '</strong><span>' + esc(s.short) + '</span></span>' +
+      (S.modules.prices ? '<span class="svc-p"><small>Mulai</small>' + rupiah(s.priceFrom) + '<small> / ' + esc(s.unit) + '</small></span>' : '') +
+      '<span class="svc-go" aria-hidden="true">' + ico('arrow-right') + '</span></a>';
+  }
+
   /* --- card/portfolio ---------------------------------------------- */
   function portfolioCard(p, i) {
     var cat = findBy(D.categories, 'slug', p.category);
@@ -449,7 +457,25 @@
       '<button type="submit" class="btn btn-brand btn-sm"' + (market ? ' aria-label="Cari">' + ico('arrow-right') : '>Cari') + '</button></form>';
   }
 
+  /* Header "rail" (template Compro): bilah samping tetap di layar lebar (merek, menu bernomor, ajakan), bilah atas biasa di HP.
+     Submenu dibuka di tempat (tanpa panel melayang) dan grup halaman aktif sudah terbuka. */
+  function railHeader() {
+    var page = activePage(), contact = S.modules.order === 'contact';
+    var nav = '<nav class="nav-desktop rail-nav" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>';
+    var cta = contact
+      ? '<a class="btn btn-brand rail-cta" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
+      : '<a class="btn btn-wa rail-cta" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : S.modules.order === 'cart' ? 'Chat Admin' : 'Pesan via WhatsApp') + '</a>';
+    var brand = '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda"><img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>';
+    var tools = (S.modules.order === 'cart' ? cartLink('header-inq header-cart', false) : '') + (S.modules.order === 'inquiry' ? inquiryButton('header-inq') : '');
+    return '<div class="container rail-bar"><div class="header-inner">' + brand + tools +
+      '<button type="button" class="menu-btn" id="menu-open" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu">' + ico('menu', 'i-lg') + '</button></div></div>' +
+      '<div class="rail-inner">' + brand + nav + '<div class="rail-foot">' + tools.replace(/header-inq/g, 'header-inq rail-tool') + cta +
+      '<p class="rail-info">' + ico('clock') + '<span>Buka ' + esc(T.hoursSummary) + '</span></p>' +
+      '<a class="rail-phone" href="tel:+' + esc(T.phone) + '">' + ico('phone') + '<span>' + esc(T.phoneDisplay) + '</span></a></div></div>';
+  }
+
   function header() {
+    if (S.header === 'rail') return railHeader();
     var page = activePage(), market = S.header === 'market', store = S.header === 'store' || market;
     /* market: tombol "Kategori" (daftar kategori) di depan, lalu menu berikon; "Layanan" menjadi tautan "Semua Produk" */
     var items = market
@@ -700,7 +726,8 @@
   function initDropdowns() {
     var items = $$('.has-dropdown');
     if (!items.length) return;
-    var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    var rail = S.header === 'rail';                       /* rail: submenu dibuka di tempat dan tidak menutup sendiri */
+    var canHover = !rail && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     var timers = new WeakMap();
 
     function set(li, open, by) {
@@ -721,11 +748,12 @@
         li.addEventListener('mouseenter', function () { clearTimeout(timers.get(li)); closeAll(li); if (!li.classList.contains('is-open')) set(li, true, 'hover'); });
         li.addEventListener('mouseleave', function () { timers.set(li, setTimeout(function () { set(li, false); }, 140)); });
       }
-      li.addEventListener('focusout', function (e) { if (!li.contains(e.relatedTarget)) set(li, false); });
+      if (!rail) li.addEventListener('focusout', function (e) { if (!li.contains(e.relatedTarget)) set(li, false); });
     });
-    document.addEventListener('click', function (e) { if (!e.target.closest('.has-dropdown')) closeAll(); });
+    if (rail) items.forEach(function (li) { if ($('.nav-toggle', li).classList.contains('is-active')) set(li, true, 'click'); });
+    if (!rail) document.addEventListener('click', function (e) { if (!e.target.closest('.has-dropdown')) closeAll(); });
     document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
+      if (e.key !== 'Escape' || rail) return;
       items.forEach(function (li) { if (li.classList.contains('is-open')) { set(li, false); $('.nav-toggle', li).focus(); } });
     });
   }
@@ -863,7 +891,7 @@
     data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); }, ready: function (fn) { if (booted) fn(window.PrintSite); else afterBoot.push(fn); },
     esc: esc, rupiah: rupiah, isNew: isNew, optionPrice: optionPrice, unitPrice: unitPrice, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
-    components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }
+    components: { serviceCard: serviceCard, serviceRow: serviceRow, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }
   };
 
   /* Skrip defer dijalankan saat readyState 'interactive', sebelum DOMContentLoaded: tunggu agar modul lain (sections.js, seo.js) sempat mendaftar. */

@@ -80,6 +80,7 @@ Template = **skin visual** (`templates/<id>.css`) + **susunan beranda bawaan** (
 | `bold` | Tegas, kontras tinggi, bayangan keras, huruf kapital | topbar | outlined | square | Montserrat / Open Sans |
 | `katalog` | Katalog B2B: padat informasi, mega menu per kategori, filter di samping, section klien/solusi/industri/jangkauan | megamenu | outlined | square | DM Sans / Inter |
 | `toko` | Etalase online (referensi anugerahprint.com): bilah promo, kotak cari + keranjang di header, ubin promo, kartu produk dengan tombol keranjang | store | elevated | rounded | Poppins / Inter |
+| `compro` | Profil perusahaan editorial (paket Company Profile): menu samping tetap, hero layar penuh, angka besar, layanan sebagai daftar bernomor, tanpa kartu/bayangan | rail | flat | square | Raleway / Source Sans 3 |
 | `grafika` | Marketplace cetak (referensi primagraphia.co.id): banner promo bergeser, mosaik kategori bergambar, produk bertab (Terlaris / Baru / Semua), jelajah per kategori, deret merek berjalan, artikel terbaru; header dua baris dengan pencarian pil dan total keranjang | market | elevated | pill | Montserrat / Inter |
 
 Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `data-card`, `data-buttons`.
@@ -88,7 +89,7 @@ Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `d
 
 Struktur tiap halaman **dikunci platform**; hanya beranda yang section-nya bisa diatur tenant.
 Tenant hanya memilih template, warna, font, gaya kartu/tombol, dan varian daftar yang diizinkan
-`PLATFORM.pages` (`site.pages.<halaman>.variant`): `services` = `grid`\|`list`\|`catalog`\|`market`, `service` = `standard`\|`configurator`, `blog` = `grid`\|`list`\|`magazine`, `faq` = `accordion`\|`help`. Bawaan per template; Grafika memakai `market`, `configurator`, `magazine`, `help` (lihat *Halaman dalam Grafika*).
+`PLATFORM.pages` (`site.pages.<halaman>.variant`): `services` = `grid`\|`list`\|`catalog`\|`market`\|`rows`, `service` = `standard`\|`configurator`, `blog` = `grid`\|`list`\|`magazine`, `faq` = `accordion`\|`help`. Bawaan per template; Grafika memakai `market`, `configurator`, `magazine`, `help` (lihat *Halaman dalam Grafika*).
 
 | Halaman | Berkas | Laravel | Status |
 |---|---|---|---|
@@ -214,6 +215,21 @@ Alamat `/harga` di paket tanpa halaman harga menampilkan keadaan "tidak tersedia
 - **Blog `magazine`**: artikel terbaru besar (hanya tanpa filter/pencarian), chip kategori berhitung, kartu, dan penomoran halaman
   (`PLATFORM.pages.blog.pageSize`, bawaan 3 karena data mockup sedikit). Laravel: penomoran di server (`?halaman=`).
 
+### Template Compro: header `rail` (Gelombang G)
+
+Satu-satunya template dengan **kerangka** berbeda, bukan hanya kulit. `?template=compro` (paket Company Profile, tetapi bisa dipasang di paket apa pun).
+
+- Header `rail` (`?header=rail`, bisa dipasang di template lain): ≥992px bilah samping tetap lebar 272px (merek, menu bernomor 01–05 lewat
+  CSS counter, tombol ajakan, jam buka, telepon); konten dan footer bergeser lewat `--rail-w`. Submenu dibuka **di tempat** (akordeon, tidak melayang,
+  tidak menutup sendiri; grup yang berisi halaman aktif sudah terbuka). <992px menjadi bilah atas biasa + menu geser seperti header lain.
+  `--header-h` dan `--header-stack` menjadi 0 di layar lebar agar posisi sticky halaman dalam (kartu pesan, filter, ringkasan keranjang) tetap benar.
+  Paket keranjang/tanya: tombol keranjang atau daftar tanya ikut tampil di kaki rail.
+- Varian section baru (bisa dipakai template lain): hero `fullbleed` (layar penuh, judul besar, tiga poin bernomor), categories `rows`,
+  services `rows` (komponen `PS.components.serviceRow`; harga hanya bila `modules.prices`), about `story` (tahun berdiri besar + cerita editorial),
+  why `numbered`, cta `strip`; section baru `stats` (`band`, data `tenant.stats`; tanpa data section dilewati).
+- Halaman `/layanan` varian `rows` (bawaan Compro): filter kategori dan pencarian sama dengan varian lain; tanpa kotak urut. Pemesanan tetap di halaman detail.
+- Laravel: `rail` = satu layout Blade (`layouts/rail.blade.php`) yang dipilih dari `site.header`; `serviceRow` = komponen `<x-service-row>`.
+
 ## Halaman demo (`demo.html`)
 
 Materi penjualan untuk ditunjukkan ke calon client; **bukan halaman tenant** (tidak memakai header/footer tenant, noindex).
@@ -252,18 +268,19 @@ Latar belang (putih / abu) dihitung otomatis dari urutan section yang tampil.
 
 | Section | Varian (yang pertama = bawaan) |
 |---|---|
-| hero | split, centered, dark |
+| hero | split, centered, dark, banner, fullbleed |
 | trust | bar, cards |
-| categories | grid, compact |
-| services | grid, slider |
-| about | split, reverse |
-| why | split, grid |
+| categories | grid, compact, mosaic, rows |
+| services | grid, slider, tabs, rows |
+| about | split, reverse, story |
+| why | split, grid, numbered |
 | portfolio | grid, slider |
 | steps | cards, timeline |
 | testimonials | scroll, slider, grid |
 | faq | list, columns |
 | location | split, stacked |
-| cta | gradient, solid |
+| stats | band |
+| cta | gradient, solid, card, strip |
 
 ### Tombol WhatsApp mengambang (tautan kustom)
 
