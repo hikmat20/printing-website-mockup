@@ -47,8 +47,9 @@ index.html                    Cangkang beranda: <main id="main"> diisi dari data
 services.html service-detail.html pricing.html portfolio.html about.html contact.html blog.html article-detail.html faq.html
                               Cangkang halaman internal (9 halaman)
 demo.html                      Halaman demo/penjualan platform: pilih paket x template x halaman x perangkat (assets/js/demo.js, assets/css/demo.css)
-keranjang.html status-pesanan.html
-                              Cangkang paket Semi e-commerce (di paket lain: keadaan "tidak tersedia", noindex)
+keranjang.html status-pesanan.html checkout.html
+                              Cangkang paket Semi dan Full e-commerce (di paket lain: keadaan "tidak tersedia", noindex;
+                              checkout.html hanya hidup di Full E-commerce)
 assets/
   js/
     platform.js               DATA PLATFORM: rute, navigasi, registri (font, header, kartu,
@@ -80,6 +81,7 @@ Template = **skin visual** (`templates/<id>.css`) + **susunan beranda bawaan** (
 | `bold` | Tegas, kontras tinggi, bayangan keras, huruf kapital | topbar | outlined | square | Montserrat / Open Sans |
 | `katalog` | Katalog B2B: padat informasi, mega menu per kategori, filter di samping, section klien/solusi/industri/jangkauan | megamenu | outlined | square | DM Sans / Inter |
 | `toko` | Etalase online (referensi anugerahprint.com): bilah promo, kotak cari + keranjang di header, ubin promo, kartu produk dengan tombol keranjang | store | elevated | rounded | Poppins / Inter |
+| `compro` | Profil perusahaan editorial (paket Company Profile): menu samping tetap, hero layar penuh, angka besar, layanan sebagai daftar bernomor, tanpa kartu/bayangan | rail | flat | square | Raleway / Source Sans 3 |
 | `grafika` | Marketplace cetak (referensi primagraphia.co.id): banner promo bergeser, mosaik kategori bergambar, produk bertab (Terlaris / Baru / Semua), jelajah per kategori, deret merek berjalan, artikel terbaru; header dua baris dengan pencarian pil dan total keranjang | market | elevated | pill | Montserrat / Inter |
 
 Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `data-card`, `data-buttons`.
@@ -88,7 +90,7 @@ Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `d
 
 Struktur tiap halaman **dikunci platform**; hanya beranda yang section-nya bisa diatur tenant.
 Tenant hanya memilih template, warna, font, gaya kartu/tombol, dan varian daftar yang diizinkan
-`PLATFORM.pages` (`site.pages.<halaman>.variant`): `services` = `grid`\|`list`\|`catalog`\|`market`, `service` = `standard`\|`configurator`, `blog` = `grid`\|`list`\|`magazine`, `faq` = `accordion`\|`help`. Bawaan per template; Grafika memakai `market`, `configurator`, `magazine`, `help` (lihat *Halaman dalam Grafika*).
+`PLATFORM.pages` (`site.pages.<halaman>.variant`): `services` = `grid`\|`list`\|`catalog`\|`market`\|`rows`, `service` = `standard`\|`configurator`, `blog` = `grid`\|`list`\|`magazine`, `faq` = `accordion`\|`help`. Bawaan per template; Grafika memakai `market`, `configurator`, `magazine`, `help` (lihat *Halaman dalam Grafika*).
 
 | Halaman | Berkas | Laravel | Status |
 |---|---|---|---|
@@ -123,8 +125,45 @@ Registri: `PLATFORM.packages`; tenant memilih lewat `site.package` (kosong = `sh
 | `showcase` Showcase + WA | siap (perilaku mockup sebelumnya) | ya | ya | WhatsApp per layanan |
 | `catalog` Katalog | siap | ya | ya | tombol + per layanan ke **daftar tanya**; seluruh daftar dikirim sekali ke WhatsApp |
 | `shop` Semi e-commerce | siap | ya | ya | tombol keranjang per layanan; checkout satu pesan WhatsApp; halaman lacak pesanan contoh |
+| `ecommerce` Full E-commerce | siap (simulasi) | ya | ya | keranjang dengan cek ongkir; checkout 3 langkah (alamat, pengiriman, pembayaran) dan bayar di website; lacak pesanan sampai resi |
 
 Paket yang belum tersedia (`available: false`) atau tidak dikenal ditolak dengan `console.warn` dan jatuh ke `showcase`.
+
+### Paket Full E-commerce: ongkir, checkout, dan pembayaran di website (`assets/js/checkout.js`, Gelombang H)
+
+Aktif bila `modules.checkout === 'onsite'` (dan `order: 'cart'`); memakai keranjang `shop.js` yang sama. SEMUA SIMULASI: tanpa server
+dan tanpa uang sungguhan. Alur:
+
+1. **Keranjang** (`keranjang.html`): ringkasan memuat kotak **Cek ongkos kirim ke**: pilih kota tujuan (diingat) dan semua layanan
+   kurir yang melayani kota itu tampil dengan ongkos dan estimasi hari, termurah dulu; "Estimasi total" = barang + ongkir termurah.
+2. **Checkout** (`checkout.html`): stepper 3 langkah (bisa kembali ke langkah selesai) dengan ringkasan lengket di kanan.
+   - *Alamat*: nama, WhatsApp, email, kirim ke alamat atau **ambil di toko** (tanpa alamat dan ongkir), kota tujuan, alamat, kode pos.
+   - *Pengiriman*: ongkir **otomatis** per kurir/layanan dari berat dan tujuan; yang termurah terpilih. Berat = jumlah (berat satuan x qty),
+     dibulatkan ke atas ke kg (minimal 1). Rumus dummy: `round500((base + perKg x kg) x faktorZona)`; layanan bisa dibatasi zona
+     (`groups`) atau berat (`maxKg`); GoSend hanya Jabodetabek.
+   - *Pembayaran*: metode berkelompok (Virtual Account BCA/Mandiri/BNI, QRIS, GoPay, DANA) dengan **biaya terlihat**
+     (`flat + persen x (barang + ongkir)`). Total bayar = barang + ongkir + biaya.
+3. **Instruksi bayar** (alamat sama, `#KODE`, bisa dimuat ulang): hitung mundur batas bayar (`payment.expiryMinutes`, 24 jam), nomor VA
+   (awalan bank + angka turunan kode, ada tombol salin) atau QR contoh atau tombol buka e-wallet, cara bayar, dan **mode demo**:
+   "Simulasikan pembayaran berhasil" / "Simulasikan kedaluwarsa". Kedaluwarsa otomatis saat batas lewat; "Masukkan ke keranjang lagi" memulihkan barang.
+4. **Lacak pesanan** (`status-pesanan.html`): tahap Menunggu pembayaran, Pembayaran diterima, Sedang diproses, Dikirim (atau
+   Siap diambil), Selesai, plus kurir dan **nomor resi**; tombol demo memajukan tahap dan membuat resi. Kode contoh `DEMO-101..103`.
+   Pesanan paket ini ditandai `kind: 'onsite'` dan tidak tampil di paket Semi e-commerce (dan sebaliknya).
+
+Data: `tenant.shipping` (kota asal, berat per layanan `weightGram`, kurir + layanan + tarif dummy, `groups` zona, `pickup`),
+`tenant.payment` (metode, biaya, masa berlaku), `tenant.orderStatus.onsite` (tahap dan contoh), `pageText.checkout`, dan
+`window.PLATFORM_REGIONS` (`assets/js/regions.js`, tujuan dummy milik platform, hanya dimuat di keranjang dan checkout).
+Data yang rusak atau tidak ada tidak membuat halaman jatuh: `console.warn` dan fitur terkait kosong. Semua data pesanan dari
+penyimpanan lokal dibersihkan (tipe, panjang, status, angka) sebelum ditampilkan.
+
+Laravel: server menghitung ULANG semuanya, angka di browser hanya tampilan.
+- `regions` (dari API kurir) + `shipping_couriers` (pilihan tenant) + `products.weight_gram`; ongkir lewat RajaOngkir/Biteship dengan
+  area asal toko, tujuan, dan berat; `tenant.shipping` tidak perlu dibawa.
+- `POST /checkout` (FormRequest + antispam): hitung ulang subtotal dari database, ongkir, biaya; satu transaksi membuat `orders`,
+  `order_items`, `shipments` (kurir, layanan, resi), `payments` (metode, jumlah, status, `expires_at`, `external_id`, payload).
+- Pembayaran Midtrans atau Xendit: VA/QR/charge e-wallet dibuat saat checkout; halaman instruksi membaca `payments`. Status berubah
+  HANYA lewat webhook (verifikasi signature, idempoten); job terjadwal membatalkan pesanan kedaluwarsa. Tombol demo tidak ada di produksi.
+- `GET /status-pesanan?kode=` dari `orders.status` + `shipments.resi`; admin memajukan tahap dan mengisi resi.
 
 ### Paket Katalog: daftar tanya (`assets/js/inquiry.js`)
 
@@ -214,6 +253,21 @@ Alamat `/harga` di paket tanpa halaman harga menampilkan keadaan "tidak tersedia
 - **Blog `magazine`**: artikel terbaru besar (hanya tanpa filter/pencarian), chip kategori berhitung, kartu, dan penomoran halaman
   (`PLATFORM.pages.blog.pageSize`, bawaan 3 karena data mockup sedikit). Laravel: penomoran di server (`?halaman=`).
 
+### Template Compro: header `rail` (Gelombang G)
+
+Satu-satunya template dengan **kerangka** berbeda, bukan hanya kulit. `?template=compro` (paket Company Profile, tetapi bisa dipasang di paket apa pun).
+
+- Header `rail` (`?header=rail`, bisa dipasang di template lain): ≥992px bilah samping tetap lebar 272px (merek, menu bernomor 01–05 lewat
+  CSS counter, tombol ajakan, jam buka, telepon); konten dan footer bergeser lewat `--rail-w`. Submenu dibuka **di tempat** (akordeon, tidak melayang,
+  tidak menutup sendiri; grup yang berisi halaman aktif sudah terbuka). <992px menjadi bilah atas biasa + menu geser seperti header lain.
+  `--header-h` dan `--header-stack` menjadi 0 di layar lebar agar posisi sticky halaman dalam (kartu pesan, filter, ringkasan keranjang) tetap benar.
+  Paket keranjang/tanya: tombol keranjang atau daftar tanya ikut tampil di kaki rail.
+- Varian section baru (bisa dipakai template lain): hero `fullbleed` (layar penuh, judul besar, tiga poin bernomor), categories `rows`,
+  services `rows` (komponen `PS.components.serviceRow`; harga hanya bila `modules.prices`), about `story` (tahun berdiri besar + cerita editorial),
+  why `numbered`, cta `strip`; section baru `stats` (`band`, data `tenant.stats`; tanpa data section dilewati).
+- Halaman `/layanan` varian `rows` (bawaan Compro): filter kategori dan pencarian sama dengan varian lain; tanpa kotak urut. Pemesanan tetap di halaman detail.
+- Laravel: `rail` = satu layout Blade (`layouts/rail.blade.php`) yang dipilih dari `site.header`; `serviceRow` = komponen `<x-service-row>`.
+
 ## Halaman demo (`demo.html`)
 
 Materi penjualan untuk ditunjukkan ke calon client; **bukan halaman tenant** (tidak memakai header/footer tenant, noindex).
@@ -252,18 +306,19 @@ Latar belang (putih / abu) dihitung otomatis dari urutan section yang tampil.
 
 | Section | Varian (yang pertama = bawaan) |
 |---|---|
-| hero | split, centered, dark |
+| hero | split, centered, dark, banner, fullbleed |
 | trust | bar, cards |
-| categories | grid, compact |
-| services | grid, slider |
-| about | split, reverse |
-| why | split, grid |
+| categories | grid, compact, mosaic, rows |
+| services | grid, slider, tabs, rows |
+| about | split, reverse, story |
+| why | split, grid, numbered |
 | portfolio | grid, slider |
 | steps | cards, timeline |
 | testimonials | scroll, slider, grid |
 | faq | list, columns |
 | location | split, stacked |
-| cta | gradient, solid |
+| stats | band |
+| cta | gradient, solid, card, strip |
 
 ### Tombol WhatsApp mengambang (tautan kustom)
 
@@ -317,6 +372,7 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 | `clients`, `problems`, `industries`, `coverage` | tabel konten section B2B per tenant (`tenant_id`) |
 | `inquiry.js` (daftar tanya) | session + `POST /daftar-tanya`; lead disimpan di tabel `inquiries` |
 | `shop.js` (keranjang, checkout, lacak) | session/`carts` + `POST /keranjang/checkout` → `orders`, `order_items`; `GET /status-pesanan` dari `orders` |
+| `checkout.js`, `shipping`, `payment`, `regions.js` | `regions`, `shipping_couriers`, `shipments`, `payments`; `POST /checkout`, webhook pembayaran, ongkir via API kurir (dihitung ulang server) |
 | `promos`, `orderStatus` | tabel promo per tenant; status pesanan = kolom/tabel status di `orders` |
 | `banners`, `services[].tags` | tabel `banners` (urutan, aktif, jadwal tayang) dan tag layanan per tenant |
 | `services[].options[].prices`, `faqs[].featured`, `faqGroups[].icon` | `option_values.price_delta`; kolom `featured` pada FAQ; kolom ikon pada kelompok FAQ |

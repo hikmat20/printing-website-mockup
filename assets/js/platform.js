@@ -22,7 +22,8 @@ window.PLATFORM = {
     contact:     { mockup: 'contact.html',        laravel: '/kontak' },
     faq:         { mockup: 'faq.html',            laravel: '/faq' },
     cart:        { mockup: 'keranjang.html',      laravel: '/keranjang',       module: 'cart' },
-    orderStatus: { mockup: 'status-pesanan.html', laravel: '/status-pesanan',  module: 'cart' }
+    orderStatus: { mockup: 'status-pesanan.html', laravel: '/status-pesanan',  module: 'cart' },
+    checkout:    { mockup: 'checkout.html',       laravel: '/checkout',        module: 'checkout' }   // hanya paket dengan modules.checkout = 'onsite'
   },
 
   /* ---------- Navigasi ---------- */
@@ -66,7 +67,7 @@ window.PLATFORM = {
   },
 
   /* ---------- Opsi komponen global ---------- */
-  headers:      ['standard', 'topbar', 'megamenu', 'store', 'market'],   // varian header (megamenu: panel lebar per kategori; store: pencarian + keranjang, menu di baris kedua; market: seperti store tanpa baris promo, tombol Kategori, menu berikon, total keranjang, dan strip kepercayaan di footer)
+  headers:      ['standard', 'topbar', 'megamenu', 'store', 'market', 'rail'],   // varian header (megamenu: panel lebar per kategori; store: pencarian + keranjang, menu di baris kedua; market: seperti store tanpa baris promo, tombol Kategori, menu berikon, total keranjang, dan strip kepercayaan di footer)
   cardStyles:   ['elevated', 'outlined', 'flat'],     // gaya kartu
   buttonShapes: ['rounded', 'pill', 'square'],        // bentuk tombol
 
@@ -77,12 +78,12 @@ window.PLATFORM = {
                bila tidak terpenuhi section dilewati diam-diam (bukan kesalahan tenant)
      variants[0] = varian default */
   sections: {
-    hero:         { locked: true,  variants: ['split', 'centered', 'dark', 'banner'] },     /* banner: slider spanduk dari tenant.banners */
+    hero:         { locked: true,  variants: ['split', 'centered', 'dark', 'banner', 'fullbleed'] },     /* banner: slider spanduk dari tenant.banners; fullbleed: layar penuh dengan judul raksasa (Compro) */
     trust:        {                variants: ['bar', 'cards'] },
-    categories:   { banded: true,  variants: ['grid', 'compact', 'mosaic'], anchor: 'kategori' },   /* mosaic: ubin bergambar, dua besar lalu kecil */
-    services:     { banded: true,  variants: ['grid', 'slider', 'tabs'], anchor: 'layanan' },    /* tabs: Terlaris / Baru / Semua (service.tags) */
-    about:        { banded: true,  variants: ['split', 'reverse'],     anchor: 'tentang' },
-    why:          { banded: true,  variants: ['split', 'grid'],        anchor: 'keunggulan' },
+    categories:   { banded: true,  variants: ['grid', 'compact', 'mosaic', 'rows'], anchor: 'kategori' },   /* mosaic: ubin bergambar, dua besar lalu kecil */
+    services:     { banded: true,  variants: ['grid', 'slider', 'tabs', 'rows'], anchor: 'layanan' },    /* tabs: Terlaris / Baru / Semua (service.tags) */
+    about:        { banded: true,  variants: ['split', 'reverse', 'story'], anchor: 'tentang' },
+    why:          { banded: true,  variants: ['split', 'grid', 'numbered'], anchor: 'keunggulan' },
     portfolio:    { banded: true,  variants: ['grid', 'slider'],       anchor: 'portofolio' },
     steps:        { banded: true,  variants: ['cards', 'timeline'],    anchor: 'cara-pesan' },
     testimonials: { banded: true,  variants: ['scroll', 'slider', 'grid'], anchor: 'testimoni' },
@@ -98,7 +99,9 @@ window.PLATFORM = {
     /* Section template Grafika (data: tenant.banners, service.tags, tenant.articles) */
     catshow:      { banded: true,  variants: ['chips'],                anchor: 'jelajah' },       /* jelajahi per kategori: chip + banner samping + kartu produk */
     articles:     { banded: true,  variants: ['cards'],                anchor: 'artikel-terbaru' },   /* artikel terbaru (limit bawaan 3) */
-    cta:          { locked: true,  variants: ['gradient', 'solid', 'card'] }
+    /* Section template Compro (data: tenant.stats) */
+    stats:        {                variants: ['band'],                 anchor: 'angka' },         /* angka besar satu baris */
+    cta:          { locked: true,  variants: ['gradient', 'solid', 'card', 'strip'] }
   },
 
   /* ---------- Paket (fungsi yang dijual) ----------
@@ -137,6 +140,12 @@ window.PLATFORM = {
       description: 'Keranjang dan checkout yang berujung pesan WhatsApp; pembayaran dan akun dibuat di Laravel.',
       modules: { prices: true, pricingPage: true, order: 'cart' },
       seo: {}
+    },
+    ecommerce: {
+      name: 'Full E-commerce', available: true,
+      description: 'Belanja sampai bayar di website: keranjang, ongkos kirim otomatis per kurir, metode pembayaran, dan lacak pesanan sampai resi.',
+      modules: { prices: true, pricingPage: true, order: 'cart', checkout: 'onsite' },
+      seo: {}
     }
   },
 
@@ -148,7 +157,9 @@ window.PLATFORM = {
     { package: 'showcase', template: 'classic', title: 'Etalase dengan harga + WhatsApp', audience: 'Toko fotocopy dan percetakan lokal yang menerima pesanan lewat WhatsApp.' },
     { package: 'catalog',  template: 'katalog', title: 'Katalog untuk pelanggan korporat', audience: 'Percetakan B2B: banyak produk, minta penawaran lewat daftar tanya.' },
     { package: 'shop',     template: 'toko',    title: 'Toko dengan keranjang',           audience: 'Digital printing yang ingin pelanggan memilih, memasukkan keranjang, lalu checkout.' },
-    { package: 'shop',     template: 'grafika', title: 'Toko cetak ala marketplace',       audience: 'Percetakan dengan banyak produk: banner promo, kategori bergambar, pencarian, dan keranjang.' }
+    { package: 'shop',     template: 'grafika', title: 'Toko cetak ala marketplace',       audience: 'Percetakan dengan banyak produk: banner promo, kategori bergambar, pencarian, dan keranjang.' },
+    { package: 'ecommerce', template: 'toko',   title: 'Toko online dengan ongkir dan bayar',  audience: 'Percetakan yang ingin pelanggan membayar langsung di website: ongkir otomatis, VA, QRIS, e-wallet, dan lacak resi.' },
+    { package: 'profile',  template: 'compro',  title: 'Profil perusahaan editorial',      audience: 'Usaha yang ingin tampil seperti perusahaan: menu samping tetap, hero layar penuh, layanan sebagai daftar bernomor.' }
   ],
 
   /* ---------- Template standar ----------
@@ -158,7 +169,7 @@ window.PLATFORM = {
   /* Halaman internal: STRUKTUR TETAP (dikunci platform). Tenant hanya boleh memilih varian daftar di bawah ini,
      lewat site.pages.<halaman>.variant. Bawaan tiap template ada di templates.<id>.pages. */
   pages: {
-    services: { variants: ['grid', 'list', 'catalog', 'market'] },   // catalog: filter kategori di sisi kiri + kartu di kanan; market: chip kategori berhitung + urutkan
+    services: { variants: ['grid', 'list', 'catalog', 'market', 'rows'] },   // catalog: filter kategori di sisi kiri + kartu di kanan; market: chip kategori berhitung + urutkan
     service:  { variants: ['standard', 'configurator'] },            // configurator: opsi berharga per pilihan, langkah Spesifikasi > Jumlah > Desain, total langsung (hanya paket dengan harga)
     blog:     { variants: ['grid', 'list', 'magazine'], pageSize: 3 }, // magazine: artikel utama + kartu + chip kategori berhitung + halaman (pageSize kecil karena data mockup sedikit)
     faq:      { variants: ['accordion', 'help'] }                      // help: pusat bantuan: pencarian besar, pertanyaan populer, kartu topik berhitung
@@ -288,6 +299,26 @@ window.PLATFORM = {
         { id: 'testimonials', variant: 'slider' },
         { id: 'articles', variant: 'cards', limit: 3 },
         { id: 'cta', variant: 'card' }
+      ]
+    },
+    compro: {
+      name: 'Compro',
+      description: 'Profil perusahaan editorial: menu samping tetap, hero layar penuh, angka besar, layanan sebagai daftar bernomor, tanpa kartu.',
+      header: 'rail', cardStyle: 'flat', buttonShape: 'square',
+      fonts: { heading: 'raleway', body: 'source-sans-3' },
+      pages: { services: 'rows' },
+      home: [
+        { id: 'hero', variant: 'fullbleed' },
+        { id: 'stats', variant: 'band' },
+        { id: 'about', variant: 'story' },
+        { id: 'services', variant: 'rows', limit: 6 },
+        { id: 'why', variant: 'numbered' },
+        { id: 'steps', variant: 'timeline' },
+        { id: 'portfolio', variant: 'grid', limit: 6 },
+        { id: 'testimonials', variant: 'slider' },
+        { id: 'faq', variant: 'columns' },
+        { id: 'location', variant: 'split' },
+        { id: 'cta', variant: 'strip' }
       ]
     }
   }

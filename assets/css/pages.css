@@ -300,3 +300,107 @@ main .h3, main .h4, main .h5 { font-family: var(--font-heading); font-weight: 70
   #svc-list .col-6 .card-actions { justify-content: stretch; }
   #svc-list .col-6 .card-actions .btn-icon { width: 100%; }
 }
+
+
+/* ==========================================================================
+   Gelombang H — paket Full E-commerce: cek ongkir di keranjang, checkout bertahap, instruksi bayar, status berbayar
+   ========================================================================== */
+.sum-rows { margin: 0 0 .25rem; display: grid; gap: .5rem; }
+.sum-rows > div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.sum-rows dt { font-weight: 500; color: var(--c-muted); }
+.sum-rows dt small { display: block; font-size: .75rem; }
+.sum-rows dd { margin: 0; font-weight: 700; text-align: right; }
+.sum-rows dd small { font-weight: 500; color: var(--c-muted); }
+.sum-items { list-style: none; margin: 0 0 1rem; padding: 0 0 1rem; display: grid; gap: .6rem; border-bottom: 1px solid var(--c-border); }
+.sum-items li { display: flex; justify-content: space-between; gap: .75rem; font-size: .9375rem; }
+.sum-items small { display: block; color: var(--c-muted); font-size: .8125rem; }
+.sum-items b { white-space: nowrap; }
+
+.est-box { margin: 1rem 0 0; padding: 1rem 0 0; border-top: 1px solid var(--c-border); }
+.est-list { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .4rem; }
+.est-list li { display: flex; justify-content: space-between; gap: .75rem; align-items: center; padding: .5rem .65rem; border: 1px solid var(--c-border); border-radius: var(--r-btn); font-size: .9375rem; }
+.est-list li small { display: block; color: var(--c-muted); font-size: .75rem; }
+.est-list b { white-space: nowrap; color: var(--c-primary); }
+.est-list .est-none { color: var(--c-muted); border-style: dashed; }
+.est-box .form-note { margin: .5rem 0 0; }
+
+/* Checkout */
+.co-layout { display: grid; gap: 1.5rem; align-items: start; }
+@media (min-width: 992px) { .co-layout { grid-template-columns: minmax(0, 1fr) 380px; gap: 2rem; } .co-summary { position: sticky; top: calc(var(--header-stack, var(--header-h)) + 1rem); } }
+.co-main { min-width: 0; }
+.co-stepper { list-style: none; margin: 0 0 1.25rem; padding: 0; display: flex; gap: .5rem; counter-reset: none; }
+.co-stepper li { flex: 1 1 0; min-width: 0; }
+.co-stepper button, .co-stepper-item { width: 100%; display: flex; align-items: center; gap: .5rem; padding: .6rem .75rem; border: 1px solid var(--c-border); border-radius: var(--r-btn); background: var(--c-card); color: var(--c-muted); font: inherit; font-weight: 600; font-size: .875rem; text-align: left; }
+.co-stepper button { cursor: pointer; }
+.co-stepper button:hover { border-color: var(--c-primary); color: var(--c-primary); }
+.co-stepper .n { flex: none; width: 1.6rem; height: 1.6rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--c-surface); font-size: .8125rem; }
+.co-stepper .n .i { width: .9rem; height: .9rem; }
+.co-stepper .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.co-stepper .is-current .co-stepper-item { border-color: var(--c-primary); color: var(--c-primary); background: var(--c-primary-light); }
+.co-stepper .is-current .n { background: var(--c-primary); color: var(--c-on-dark); }
+.co-stepper .is-done button { color: var(--c-success-text); border-color: var(--c-success-border); background: var(--c-success-bg); }
+.co-stepper .is-done .n { background: var(--c-success-text); color: #fff; }
+@media (max-width: 575.98px) { .co-stepper .t { display: none; } .co-stepper .is-current .t { display: inline; } .co-stepper li:not(.is-current) { flex: 0 0 auto; } .co-stepper li:not(.is-current) button, .co-stepper li:not(.is-current) .co-stepper-item { padding: .6rem; } }
+.co-step { padding: 1.25rem; border: 1px solid var(--c-border); border-radius: var(--r-card); background: var(--c-card); }
+.co-step[hidden] { display: none; }
+.co-step > h2 { margin-bottom: 1rem; }
+.co-step > h2:focus { outline: none; }
+.co-actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: space-between; margin-top: 1.25rem; }
+.co-postal { max-width: 10rem; }
+.co-opts { border: 0; padding: 0; margin: 0 0 1rem; min-width: 0; display: grid; gap: .5rem; }
+.co-group { float: none; width: auto; padding: 0; margin: 0 0 .15rem; font-size: .8125rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--c-muted); }
+.co-opt { display: flex; align-items: center; gap: .75rem; padding: .8rem .9rem; border: 1px solid var(--c-border); border-radius: var(--r-btn); background: var(--c-card); cursor: pointer; }
+.co-opt:hover { border-color: var(--c-primary); }
+.co-opt:has(input:checked) { border-color: var(--c-primary); background: var(--c-primary-light); box-shadow: 0 0 0 1px var(--c-primary) inset; }
+.co-opt:has(input:focus-visible) { outline: 3px solid var(--c-focus, var(--c-primary)); outline-offset: 2px; }
+.co-opt input { flex: none; width: 1.1rem; height: 1.1rem; accent-color: var(--c-primary); }
+.co-opt-main { flex: 1; min-width: 0; display: grid; }
+.co-opt-main small { color: var(--c-muted); }
+.co-opt-price { font-weight: 700; color: var(--c-primary); white-space: nowrap; }
+.co-opt-fee { font-weight: 500; font-size: .8125rem; color: var(--c-muted); }
+.co-pickup { display: flex; gap: 1rem; padding: 1rem; border: 1px solid var(--c-border); border-radius: var(--r-btn); background: var(--c-surface); }
+.co-pickup p { margin: .25rem 0 0; color: var(--c-muted); }
+.co-pickup .i { flex: none; color: var(--c-primary); }
+.co-dest { display: flex; gap: .6rem; margin: 1rem 0 0; padding-top: 1rem; border-top: 1px solid var(--c-border); font-size: .9375rem; overflow-wrap: anywhere; }
+.co-dest .i { flex: none; color: var(--c-primary); }
+
+/* Instruksi pembayaran */
+.pay-card { padding: 1.5rem 1.25rem; border: 1px solid var(--c-border); border-radius: var(--r-card); background: var(--c-card); display: grid; gap: 1rem; min-width: 0; }
+.pay-card h2 { margin: 0; font-size: 1.5rem; }
+.pay-card h2:focus, .pay-card:focus { outline: none; }
+.pay-chip { display: inline-block; align-self: start; justify-self: start; margin: 0; padding: .2rem .7rem; border-radius: 999px; font-size: .8125rem; font-weight: 700; background: var(--c-accent-tint, #fff4e5); color: var(--c-accent-dark); }
+.pay-chip--paid { background: var(--c-success-bg); color: var(--c-success-text); }
+.pay-chip--expired { background: #fdeaea; color: var(--c-danger-dark); }
+.pay-timer { display: grid; gap: .1rem; padding: .9rem 1rem; border-radius: var(--r-btn); background: var(--c-surface); }
+.pay-timer span, .pay-timer small { color: var(--c-muted); font-size: .8125rem; }
+.pay-timer strong { font-size: 1.75rem; font-variant-numeric: tabular-nums; letter-spacing: .04em; color: var(--c-primary); }
+.pay-field { display: grid; gap: .35rem; justify-items: start; padding: 1rem; border: 1px solid var(--c-border); border-radius: var(--r-btn); }
+.pay-field > span { font-size: .8125rem; color: var(--c-muted); }
+.pay-field > strong { font-size: 1.5rem; color: var(--c-text); overflow-wrap: anywhere; }
+.pay-field small { color: var(--c-muted); }
+.pay-field--amount > strong { color: var(--c-primary); }
+.pay-va { font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+.pay-va--sm { font-size: 1rem; }
+.pay-field--qr { justify-items: center; text-align: center; }
+.pay-qr { width: min(240px, 100%); height: auto; border: 1px solid var(--c-border); border-radius: 8px; }
+.pay-how { border: 1px solid var(--c-border); border-radius: var(--r-btn); padding: .75rem 1rem; }
+.pay-how summary { cursor: pointer; font-weight: 700; }
+.pay-how ol { margin: .75rem 0 0; padding-left: 1.25rem; display: grid; gap: .4rem; }
+.pay-demo { padding: 1rem; border: 1px dashed var(--c-border-strong, var(--c-border)); border-radius: var(--r-btn); background: var(--c-surface); }
+.pay-demo p { margin: .25rem 0 .75rem; font-size: .875rem; color: var(--c-muted); }
+.pay-demo strong { display: inline-flex; align-items: center; gap: .4rem; }
+.pay-card--paid, .pay-card--expired { text-align: center; justify-items: center; }
+.pay-card--paid > .i { width: 48px; height: 48px; color: var(--c-success-text); }
+.pay-card--expired > .i { width: 48px; height: 48px; color: var(--c-danger-dark); }
+.pay-card--paid { border-color: var(--c-success-border); background: var(--c-success-bg); }
+.order-code--sm { display: flex; margin: 0 0 1rem; padding: .5rem .8rem; }
+.order-code--sm strong { font-size: 1.0625rem; }
+
+/* Status berbayar */
+.status-info { display: grid; gap: .75rem; margin: 1rem 0; padding: 1rem; border-radius: var(--r-btn); background: var(--c-surface); }
+.status-info > div { display: grid; gap: .15rem; }
+.status-info dt { font-size: .8125rem; color: var(--c-muted); font-weight: 600; }
+.status-info dd { margin: 0; overflow-wrap: anywhere; }
+@media (min-width: 768px) { .status-info { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.status-card .pay-demo { margin-top: 1rem; }
+.status-card .status-empty { margin: 1rem 0; flex-wrap: wrap; }

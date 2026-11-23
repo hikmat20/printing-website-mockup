@@ -3,7 +3,9 @@
  * ---------------------------------------------------------------------------
  * Alur mockup: tambah layanan ke keranjang -> /keranjang (ubah jumlah, isi data pemesan, pilih ambil/antar)
  * -> satu pesan WhatsApp berisi kode pesanan, rincian, dan estimasi total -> /status-pesanan (contoh pelacakan).
- * TIDAK ADA pembayaran, akun, atau login di mockup: itu bagian Laravel (lihat README).
+ * TIDAK ADA pembayaran, akun, atau login di paket Semi e-commerce: itu bagian Laravel (lihat README).
+ * Paket Full E-commerce (modules.checkout = 'onsite') memakai keranjang yang sama, tetapi checkout, ongkir, dan pembayaran
+ * dikerjakan di website oleh checkout.js (simulasi); berkas ini hanya menyediakan keranjang, penyimpanan, dan pengait (PS.shop).
  * Harga di keranjang = ESTIMASI (harga "mulai dari" x jumlah); harga final dikonfirmasi admin lewat WhatsApp.
  *
  * Paket lain: halaman /keranjang dan /status-pesanan menampilkan "Halaman tidak tersedia" (noindex);
@@ -20,7 +22,7 @@
   if (!PS) return;
 
   var D = PS.data, T = D.tenant, esc = PS.esc, ico = PS.ico, url = PS.url, rupiah = PS.rupiah, WA = PS.WA_ICON;
-  var K = PS.pageKit, R = PS.pages || {}, ON = PS.modules.order === 'cart';
+  var K = PS.pageKit, R = PS.pages || {}, ON = PS.modules.order === 'cart', ONSITE = ON && PS.modules.checkout === 'onsite';
   var PT = D.pageText || {};
   var tenantId = document.body.getAttribute('data-tenant') || 'tenant';
   var CART_KEY = 'ps-cart:' + tenantId, ORDERS_KEY = 'ps-orders:' + tenantId;
@@ -56,7 +58,7 @@
   }, obj(PT.orderStatus));
   var STEPS = arr(D.orderStatus && D.orderStatus.steps).filter(function (s) { return s && s.title; });
   if (!STEPS.length) STEPS = [{ title: 'Pesanan diterima', text: 'Kami menerima pesanan Anda.' }, { title: 'Dikonfirmasi admin', text: 'Harga final dan jadwal dikonfirmasi.' }, { title: 'Diproses', text: 'Pesanan dikerjakan.' }, { title: 'Siap diambil / dikirim', text: 'Pesanan selesai.' }];
-  var EXAMPLES = arr(D.orderStatus && D.orderStatus.examples).filter(function (e) { return e && typeof e.code === 'string' && typeof e.step === 'number'; });
+  var EXAMPLES = arr(D.orderStatus && (ONSITE ? obj(D.orderStatus.onsite).examples : D.orderStatus.examples)).filter(function (e) { return e && typeof e.code === 'string' && typeof e.step === 'number'; });
 
   /* ---------------------------------------------------------------- penyimpanan */
   var cart = [], orders = [];
@@ -73,9 +75,25 @@
   }
   function cleanOpts(o) { var r = {}; if (o && typeof o === 'object') Object.keys(o).forEach(function (k) { if (typeof o[k] === 'string') r[k] = o[k]; }); return r; }
   function lineId(slug, opts) { var o = cleanOpts(opts); return slug + '|' + Object.keys(o).sort().map(function (k) { return k + '=' + o[k]; }).join(';'); }
+  /* Pesanan paket Full E-commerce (kind: 'onsite'): semua angka dan teks dari penyimpanan dibersihkan; total dihitung ulang oleh pemakainya */
+  function sanitizeOnsite(o) {
+    var num = function (v, max) { v = Number(v); return isFinite(v) && v >= 0 ? Math.min(Math.round(v), max || 1e10) : 0; };   /* uang <= 10 miliar; waktu (ms) <= 1e14 */
+    var str = function (v, n) { return typeof v === 'string' ? v.slice(0, n || 200) : ''; };
+    var pay = obj(o.payment), sh = obj(o.shipping), cu = obj(o.customer);
+    var st = ['pending', 'paid', 'expired'].indexOf(pay.status) >= 0 ? pay.status : 'pending';
+    return { kind: 'onsite', code: o.code, ts: num(o.ts, 1e14), step: Math.min(4, num(o.step)), delivery: o.delivery === 'ship' ? 'ship' : 'pickup',
+      subtotal: num(o.subtotal), shippingCost: num(o.shippingCost), fee: num(o.fee), total: num(o.total),
+      items: o.items.filter(function (i) { return i && typeof i.name === 'string'; }).slice(0, MAX_LINES).map(function (i) {
+        return { name: str(i.name, 120), qty: parseInt(i.qty, 10) > 0 ? Math.min(parseInt(i.qty, 10), MAX_QTY) : 1, unit: str(i.unit, 30), slug: str(i.slug, 80), opts: cleanOpts(i.opts) };
+      }),
+      customer: { name: str(cu.name, 80), phone: str(cu.phone, 20), email: str(cu.email, 120), address: str(cu.address, 300), postal: str(cu.postal, 5), note: str(cu.note, 600), regionLabel: str(cu.regionLabel, 120) },
+      shipping: { label: str(sh.label, 60), eta: str(sh.eta, 40), kg: num(sh.kg), resi: str(sh.resi, 40) },
+      payment: { method: str(pay.method, 20), name: str(pay.name, 60), group: str(pay.group, 20), status: st, amount: num(pay.amount), ref: str(pay.ref, 40), expiresAt: num(pay.expiresAt, 1e14), paidAt: num(pay.paidAt, 1e14) } };
+  }
   function sanitizeOrders(raw) {
     if (!Array.isArray(raw)) return [];
     return raw.filter(function (o) { return o && typeof o === 'object' && typeof o.code === 'string' && /^[A-Z0-9\-]{4,30}$/.test(o.code) && Array.isArray(o.items); }).slice(0, 10).map(function (o) {
+      if (o.kind === 'onsite') return sanitizeOnsite(o);
       return { code: o.code, ts: typeof o.ts === 'number' ? o.ts : 0, total: typeof o.total === 'number' ? o.total : 0, delivery: o.delivery === 'ship' ? 'ship' : 'pickup',
         items: o.items.filter(function (i) { return i && typeof i.name === 'string'; }).slice(0, MAX_LINES).map(function (i) { return { name: i.name, qty: parseInt(i.qty, 10) > 0 ? parseInt(i.qty, 10) : 1, unit: typeof i.unit === 'string' ? i.unit : '' }; }) };
     });
@@ -128,7 +146,7 @@
 
   /* ------------------------------------------------------------------ halaman */
   function unavailable(key, title) {
-    var na = { title: 'Halaman tidak tersedia', text: 'Fitur keranjang tidak aktif di situs ini. Hubungi kami untuk memesan.', button: 'Hubungi Kami' };
+    var na = { title: 'Halaman tidak tersedia', text: key === 'checkout' ? 'Checkout dan pembayaran di website tidak aktif di paket ini. Hubungi kami untuk memesan.' : 'Fitur keranjang tidak aktif di situs ini. Hubungi kami untuk memesan.', button: 'Hubungi Kami' };
     return {
       html: K.crumbs([{ label: 'Beranda', route: 'home' }, { label: na.title }]) +
         '<section class="section"><div class="container"><div class="empty-state"><span class="ico">' + ico('file-question', 'i-lg') + '</span>' +
@@ -163,7 +181,7 @@
   function cartBody() {
     return '<div class="cart-layout"><section aria-labelledby="cart-items-title"><h2 id="cart-items-title" class="h5 mb-3">' + esc(CT.itemsTitle) + '</h2>' +
       '<ul class="cart-list">' + cart.map(itemRow).join('') + '</ul><button type="button" class="inq-clear" data-cart-clear>' + esc(CT.clear) + '</button></section>' +
-      '<aside class="cart-summary" aria-labelledby="cart-sum-title"><h2 id="cart-sum-title" class="h5">' + esc(CT.summaryTitle) + '</h2>' +
+      (ONSITE && PS.shop.cartAside ? PS.shop.cartAside() : '<aside class="cart-summary" aria-labelledby="cart-sum-title"><h2 id="cart-sum-title" class="h5">' + esc(CT.summaryTitle) + '</h2>' +
       '<p class="cart-total"><span>' + esc(CT.total) + '</span><strong id="cart-total">' + rupiah(total()) + '</strong></p><p class="form-note">' + esc(CT.totalNote) + '</p>' +
       '<form id="co-form" novalidate aria-label="Data pemesan">' +
       field('name', esc(CT.name) + ' *', '<input class="form-control" id="co-name" name="name" maxlength="80" autocomplete="name" placeholder="' + esc(CT.namePh) + '" required aria-describedby="co-name-err">', CT.nameErr) +
@@ -174,7 +192,7 @@
       '<div id="co-address-wrap" hidden>' + field('address', esc(CT.address) + ' *', '<textarea class="form-control" id="co-address" name="address" rows="3" maxlength="300" autocomplete="street-address" placeholder="' + esc(CT.addressPh) + '" aria-describedby="co-address-err"></textarea>', CT.addressErr) + '</div>' +
       field('note', esc(CT.note), '<textarea class="form-control" id="co-note" name="note" rows="2" maxlength="600" placeholder="' + esc(CT.notePh) + '"></textarea>') +
       '<div class="visually-hidden" aria-hidden="true"><label>Jangan diisi <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>' +
-      '<button type="submit" class="btn btn-wa btn-lg w-100">' + WA + ' ' + esc(CT.submit) + '</button></form></aside></div>';
+      '<button type="submit" class="btn btn-wa btn-lg w-100">' + WA + ' ' + esc(CT.submit) + '</button></form></aside>') + '</div>';
   }
 
   var root = null;
@@ -183,13 +201,15 @@
     root.innerHTML = cart.length ? cartBody() : emptyCart();
     icons(root);
     var f = $('#co-form', root);
-    if (f) wireForm(f);
+    if (f && !ONSITE) wireForm(f);
+    if (ONSITE && cart.length && PS.shop.afterCart) PS.shop.afterCart(root);
   }
 
   function refreshTotals() {
     var t = $('#cart-total'); if (t) t.textContent = rupiah(total());
     $$('.cart-item', root).forEach(function (li) { var it = cart[parseInt(li.getAttribute('data-i'), 10)]; if (it) $('[data-line]', li).textContent = rupiah(lineTotal(it)); });
     badge();                                           /* total berjalan di header ikut berubah saat jumlah diubah */
+    if (ONSITE && PS.shop.onTotals) PS.shop.onTotals();   /* ongkir dan total estimasi ikut berubah */
   }
 
   /* ------------------------------------------------------------ pesan + checkout */
@@ -269,7 +289,8 @@
   /* -------------------------------------------------------------- status pesanan */
   function statusView(code) {
     var c = String(code || '').trim().toUpperCase();
-    var local = orders.filter(function (o) { return o.code === c; })[0];
+    if (ONSITE && PS.shop.statusView) { PS.shop.statusView(c); return; }          /* tahap bayar dan kirim: checkout.js */
+    var local = orders.filter(function (o) { return o.code === c && o.kind !== 'onsite'; })[0];
     var ex = EXAMPLES.filter(function (e) { return e.code.toUpperCase() === c; })[0];
     var out = $('#status-result'); if (!out) return;
     if (!local && !ex) { out.innerHTML = '<div class="status-empty" role="alert">' + ico('search-x') + '<p>' + esc(ST.notFound) + '</p></div>'; icons(out); return; }
@@ -292,7 +313,7 @@
   if (HAS_PAGES) R.orderStatus = function () {
     if (!ON) return unavailable('orderStatus');
     var cr = [{ label: 'Beranda', route: 'home' }, { label: ST.title }];
-    var ownOrders = orders.map(function (o) { return '<button type="button" class="chip" data-status-code="' + esc(o.code) + '">' + esc(o.code) + '</button>'; }).join('');
+    var ownOrders = orders.filter(function (o) { return ONSITE ? o.kind === 'onsite' : o.kind !== 'onsite'; }).map(function (o) { return '<button type="button" class="chip" data-status-code="' + esc(o.code) + '">' + esc(o.code) + '</button>'; }).join('');
     var demos = EXAMPLES.map(function (e) { return '<button type="button" class="chip" data-status-code="' + esc(e.code) + '">' + esc(e.code) + '</button>'; }).join('');
     return {
       html: K.crumbs(cr) + K.pageHead(ST.title, ST.lead) + '<section class="section pt-4" aria-label="' + esc(ST.title) + '"><div class="container"><div class="status-layout">' +
@@ -311,6 +332,17 @@
         var h = hashText(); if (h && /^[A-Za-z0-9\-]{4,30}$/.test(h)) { input.value = h.toUpperCase(); statusView(h); }
       }
     };
+  };
+
+  /* ------------------------------------------------- pengait untuk checkout.js */
+  PS.shop = {
+    on: ON, onsite: ONSITE, tenantId: tenantId, CT: CT,
+    cart: function () { return cart; }, orders: function () { return orders; },
+    setOrders: function (o) { orders = o; saveOrders(); }, saveOrders: saveOrders, saveCart: saveCart, clearCart: function () { cart = []; saveCart(); badge(); },
+    addLines: function (lines) { lines.forEach(function (l) { if (svc(l.slug)) add(l.slug, l.opts, l.qty, false); }); },
+    svc: svc, lineTotal: lineTotal, total: total, optText: optText, orderCode: orderCode, badge: badge, say: say, icons: icons,
+    unavailable: unavailable, emptyCart: emptyCart, hashText: hashText, read: read, write: write, root: function () { return root; },
+    MAX_QTY: MAX_QTY, PHONE_RE: PHONE_RE
   };
 
   /* ----------------------------------------------------------------- pasang */
