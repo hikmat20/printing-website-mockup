@@ -499,8 +499,8 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 250, unit: 'lembar', eta: 'Langsung jadi (≤ 100 lembar)',
       specs: [{ label: 'Ukuran kertas', value: 'A4, F4, A3' }, { label: 'Warna', value: 'Hitam putih & berwarna' }, { label: 'Kertas standar', value: 'HVS 70 gsm' }, { label: 'Fitur', value: 'Perbesar/perkecil, 2 sisi' }],
       options: [
-        { label: 'Ukuran', choices: ['A4', 'F4', 'A3'] },
-        { label: 'Warna', choices: ['Hitam putih', 'Berwarna'] },
+        { label: 'Ukuran', choices: ['A4', 'F4', 'A3'], prices: { 'F4': 50, 'A3': 750 } },
+        { label: 'Warna', choices: ['Hitam putih', 'Berwarna'], prices: { 'Berwarna': 1250 } },
         { label: 'Sisi', choices: ['Satu sisi', 'Dua sisi'] }
       ],
       pricing: [
@@ -524,10 +524,10 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 500, unit: 'lembar', eta: '10–30 menit (≤ 50 lembar)',
       specs: [{ label: 'Ukuran kertas', value: 'A4, F4' }, { label: 'Format file', value: 'PDF, DOCX, XLSX, JPG' }, { label: 'Jenis kertas', value: 'HVS 70/80 gsm' }, { label: 'Warna', value: 'Hitam putih & berwarna' }],
       options: [
-        { label: 'Ukuran', choices: ['A4', 'F4'] },
-        { label: 'Warna', choices: ['Hitam putih', 'Berwarna'] },
+        { label: 'Ukuran', choices: ['A4', 'F4'], prices: { 'F4': 100 } },
+        { label: 'Warna', choices: ['Hitam putih', 'Berwarna'], prices: { 'Berwarna': 1000 } },
         { label: 'Sisi', choices: ['Satu sisi', 'Dua sisi'] },
-        { label: 'Kertas', choices: ['HVS 70 gsm', 'HVS 80 gsm'] }
+        { label: 'Kertas', choices: ['HVS 70 gsm', 'HVS 80 gsm'], prices: { 'HVS 80 gsm': 50 } }
       ],
       pricing: [
         { spec: 'A4 hitam putih (teks)', unit: 'lembar', price: 500, note: 'HVS 70 gsm' },
@@ -595,8 +595,8 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 25000, unit: 'm²', eta: '1–2 hari kerja',
       specs: [{ label: 'Bahan', value: 'Flexi 280 / 340 gsm, Albatros, Indoor' }, { label: 'Ukuran', value: 'Bebas, lebar maksimal 3 m' }, { label: 'Finishing', value: 'Mata ayam, lipat jahit' }, { label: 'Format file', value: 'PDF, CDR, AI, JPG resolusi tinggi' }],
       options: [
-        { label: 'Bahan', choices: ['Flexi 280 gsm', 'Flexi 340 gsm', 'Albatros', 'Indoor'] },
-        { label: 'Finishing', choices: ['Mata ayam', 'Lipat jahit', 'Tanpa finishing'] }
+        { label: 'Bahan', choices: ['Flexi 280 gsm', 'Flexi 340 gsm', 'Albatros', 'Indoor'], prices: { 'Flexi 340 gsm': 10000, 'Albatros': 35000, 'Indoor': 20000 } },
+        { label: 'Finishing', choices: ['Mata ayam', 'Lipat jahit', 'Tanpa finishing'], prices: { 'Lipat jahit': 3000 } }
       ],
       pricing: [
         { spec: 'Flexi 280 gsm', unit: 'm²', price: 25000, note: 'Minimal pesan 1 m²' },
@@ -615,8 +615,8 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 7000, unit: 'buku', eta: 'Jilid lakban/spiral 1 jam; hard cover 1–2 hari',
       specs: [{ label: 'Jenis jilid', value: 'Lakban, spiral, hard cover' }, { label: 'Ukuran', value: 'A4, F4, A5' }, { label: 'Sampul', value: 'Karton, BC, kulit sintetis' }, { label: 'Tambahan', value: 'Cetak judul emas' }],
       options: [
-        { label: 'Jenis jilid', choices: ['Lakban', 'Spiral', 'Hard cover'] },
-        { label: 'Sampul', choices: ['Karton', 'Kulit sintetis'] }
+        { label: 'Jenis jilid', choices: ['Lakban', 'Spiral', 'Hard cover'], prices: { 'Spiral': 5000, 'Hard cover': 48000 } },
+        { label: 'Sampul', choices: ['Karton', 'Kulit sintetis'], prices: { 'Kulit sintetis': 3000 } }
       ],
       pricing: [
         { spec: 'Jilid lakban A4', unit: 'buku', price: 7000, note: '' },
@@ -635,7 +635,7 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 3000, unit: 'lembar', eta: 'Langsung jadi',
       specs: [{ label: 'Ukuran', value: 'Kartu, A5, A4, A3' }, { label: 'Finishing', value: 'Glossy / Doff' }, { label: 'Tebal plastik', value: '80–125 micron' }],
       options: [
-        { label: 'Ukuran', choices: ['Kartu', 'A4', 'A3'] },
+        { label: 'Ukuran', choices: ['Kartu', 'A4', 'A3'], prices: { 'A4': 2000, 'A3': 6000 } },
         { label: 'Finishing', choices: ['Glossy', 'Doff'] }
       ],
       pricing: [
@@ -654,9 +654,9 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 15000, unit: 'lembar A3+', eta: '1–2 hari kerja',
       specs: [{ label: 'Bahan', value: 'Chromo, Vinyl, Transparan' }, { label: 'Ukuran lembar', value: 'A3+ (32×48 cm)' }, { label: 'Finishing', value: 'Laminasi glossy/doff, potong bentuk' }],
       options: [
-        { label: 'Bahan', choices: ['Chromo', 'Vinyl', 'Transparan'] },
+        { label: 'Bahan', choices: ['Chromo', 'Vinyl', 'Transparan'], prices: { 'Vinyl': 10000, 'Transparan': 12000 } },
         { label: 'Laminasi', choices: ['Glossy', 'Doff', 'Tanpa'] },
-        { label: 'Potong', choices: ['Kiss cut', 'Die cut', 'Tanpa potong'] }
+        { label: 'Potong', choices: ['Kiss cut', 'Die cut', 'Tanpa potong'], prices: { 'Kiss cut': 10000, 'Die cut': 12000 } }
       ],
       pricing: [
         { spec: 'Chromo A3+ + laminasi', unit: 'lembar', price: 15000, note: '' },
@@ -674,7 +674,7 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 6000, unit: 'lembar A3+', eta: '1 hari kerja',
       specs: [{ label: 'Kertas', value: 'Art Paper 120–260 gsm, Art Carton 260–310 gsm, Photo Paper' }, { label: 'Ukuran', value: 'Hingga A3+' }, { label: 'Resolusi', value: '1200 dpi' }],
       options: [
-        { label: 'Kertas', choices: ['Art Paper 150 gsm', 'Art Carton 260 gsm', 'Photo Paper'] },
+        { label: 'Kertas', choices: ['Art Paper 150 gsm', 'Art Carton 260 gsm', 'Photo Paper'], prices: { 'Art Carton 260 gsm': 3000, 'Photo Paper': 12000 } },
         { label: 'Sisi', choices: ['Satu sisi', 'Dua sisi'] }
       ],
       pricing: [
@@ -693,9 +693,9 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 1200, unit: 'lembar', eta: '2–3 hari kerja',
       specs: [{ label: 'Ukuran', value: 'A4, A5, A6, DL' }, { label: 'Kertas', value: 'Art Paper 120/150 gsm' }, { label: 'Finishing', value: 'Lipat 2 / lipat 3, laminasi' }],
       options: [
-        { label: 'Ukuran', choices: ['A4', 'A5', 'A6'] },
+        { label: 'Ukuran', choices: ['A4', 'A5', 'A6'], prices: { 'A4': 1000 } },
         { label: 'Kertas', choices: ['Art Paper 120 gsm', 'Art Paper 150 gsm'] },
-        { label: 'Lipat', choices: ['Tanpa lipat', 'Lipat 2', 'Lipat 3'] }
+        { label: 'Lipat', choices: ['Tanpa lipat', 'Lipat 2', 'Lipat 3'], prices: { 'Lipat 3': 1300 } }
       ],
       pricing: [
         { spec: 'Flyer A5 Art Paper 120 gsm (min. 100)', unit: 'lembar', price: 1200, note: 'Dua sisi' },
@@ -713,7 +713,7 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 35000, unit: 'box (100 pcs)', eta: '1–2 hari kerja',
       specs: [{ label: 'Ukuran', value: '9 × 5,5 cm' }, { label: 'Kertas', value: 'Art Carton 260 gsm' }, { label: 'Finishing', value: 'Laminasi doff/glossy, sudut tumpul' }],
       options: [
-        { label: 'Sisi', choices: ['Satu sisi', 'Dua sisi'] },
+        { label: 'Sisi', choices: ['Satu sisi', 'Dua sisi'], prices: { 'Dua sisi': 15000 } },
         { label: 'Laminasi', choices: ['Doff', 'Glossy'] }
       ],
       pricing: [
@@ -732,8 +732,8 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 2500, unit: 'pcs', eta: '3–5 hari kerja',
       specs: [{ label: 'Kertas', value: 'Art Carton, Linen, Concorde' }, { label: 'Ukuran', value: 'A5, 14×21 cm, kustom' }, { label: 'Tambahan', value: 'Amplop, hot print, emboss' }],
       options: [
-        { label: 'Kertas', choices: ['Art Carton 260 gsm', 'Linen', 'Concorde'] },
-        { label: 'Tambahan', choices: ['Tanpa', 'Amplop', 'Hot print emas'] }
+        { label: 'Kertas', choices: ['Art Carton 260 gsm', 'Linen', 'Concorde'], prices: { 'Linen': 2000, 'Concorde': 3000 } },
+        { label: 'Tambahan', choices: ['Tanpa', 'Amplop', 'Hot print emas'], prices: { 'Amplop': 600, 'Hot print emas': 1500 } }
       ],
       pricing: [
         { spec: 'Undangan Art Carton A5 (min. 100)', unit: 'pcs', price: 2500, note: 'Belum termasuk amplop' },
@@ -751,8 +751,8 @@ window.TENANTS['sinar-copy'] = {
       priceFrom: 15000, unit: 'eksemplar', eta: '4–7 hari kerja',
       specs: [{ label: 'Ukuran', value: 'A5, B5, A4' }, { label: 'Kertas isi', value: 'HVS 70 gsm, Bookpaper' }, { label: 'Sampul', value: 'Art Carton 260 gsm + laminasi' }, { label: 'Jilid', value: 'Perfect binding, jahit benang' }],
       options: [
-        { label: 'Ukuran', choices: ['A5', 'B5', 'A4'] },
-        { label: 'Jilid', choices: ['Perfect binding', 'Jahit benang'] }
+        { label: 'Ukuran', choices: ['A5', 'B5', 'A4'], prices: { 'B5': 3000, 'A4': 6000 } },
+        { label: 'Jilid', choices: ['Perfect binding', 'Jahit benang'], prices: { 'Jahit benang': 2000 } }
       ],
       pricing: [
         { spec: 'Buku A5, 100 halaman, isi hitam putih (min. 50 eks)', unit: 'eksemplar', price: 15000, note: '' },
@@ -803,11 +803,11 @@ window.TENANTS['sinar-copy'] = {
 
   /* ---------- FAQ (group = kelompok, featured = tampil di beranda) ---------- */
   faqGroups: [
-    { slug: 'umum', name: 'Umum & Pemesanan' },
-    { slug: 'fotocopy-print', name: 'Fotocopy & Print' },
-    { slug: 'large-format', name: 'Large Format & Banner' },
-    { slug: 'finishing', name: 'Jilid & Laminating' },
-    { slug: 'promosi-undangan', name: 'Brosur, Kartu Nama & Undangan' }
+    { slug: 'umum', name: 'Umum & Pemesanan', icon: 'circle-help' },
+    { slug: 'fotocopy-print', name: 'Fotocopy & Print', icon: 'files' },
+    { slug: 'large-format', name: 'Large Format & Banner', icon: 'ruler' },
+    { slug: 'finishing', name: 'Jilid & Laminating', icon: 'book-open-check' },
+    { slug: 'promosi-undangan', name: 'Brosur, Kartu Nama & Undangan', icon: 'megaphone' }
   ],
   faqs: [
     { group: 'umum', featured: true, q: 'Bagaimana cara memesan?', a: 'Hubungi kami lewat WhatsApp, sebutkan jenis layanan, ukuran, dan jumlah, lalu kirim file Anda. Kami konfirmasi harga dan estimasi selesai sebelum dikerjakan.', byPackage: { profile: { a: 'Hubungi kami lewat WhatsApp, sebutkan jenis layanan, ukuran, dan jumlah, lalu kirim file Anda. Kami konfirmasi kebutuhan dan estimasi selesai sebelum dikerjakan.' } } },

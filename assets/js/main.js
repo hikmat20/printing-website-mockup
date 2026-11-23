@@ -184,6 +184,18 @@
   var get = function (obj, path) { return path.split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, obj); };
   var ico = function (name, cls) { return '<i data-lucide="' + name + '" class="i ' + (cls || '') + '" aria-hidden="true"></i>'; };
   var findBy = function (list, key, val) { return list.filter(function (x) { return x[key] === val; })[0]; };
+  /* Harga opsi: service.options[].prices = { "<pilihan>": tambahan per satuan }. Harga satuan = priceFrom + tambahan semua pilihan terpilih.
+     Nilai bukan angka / negatif dianggap 0. Keranjang lama tanpa opsi tetap memakai priceFrom. */
+  var optionPrice = function (s, label, choice) {
+    var o = (Array.isArray(s.options) ? s.options : []).filter(function (x) { return x && x.label === label; })[0];
+    var p = o && o.prices && typeof o.prices === 'object' && hasOwn(o.prices, choice) ? Number(o.prices[choice]) : 0;
+    return isFinite(p) && p > 0 ? Math.min(Math.round(p), 100000000) : 0;
+  };
+  var unitPrice = function (s, opts) {
+    var t = Number(s.priceFrom) || 0;
+    if (opts && typeof opts === 'object') Object.keys(opts).forEach(function (k) { t += optionPrice(s, k, opts[k]); });
+    return t;
+  };
   var fmtDate = function (iso) {
     var d = new Date(iso + 'T00:00:00');
     return isNaN(d) ? '' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -825,7 +837,7 @@
   /* API kecil untuk halaman lain (services.html, service-detail.html, dll.) */
   window.PrintSite = {
     data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); }, ready: function (fn) { if (booted) fn(window.PrintSite); else afterBoot.push(fn); },
-    esc: esc, rupiah: rupiah, isNew: isNew, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
+    esc: esc, rupiah: rupiah, isNew: isNew, optionPrice: optionPrice, unitPrice: unitPrice, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
     components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }
   };

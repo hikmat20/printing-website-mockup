@@ -158,8 +158,10 @@ window.PLATFORM = {
   /* Halaman internal: STRUKTUR TETAP (dikunci platform). Tenant hanya boleh memilih varian daftar di bawah ini,
      lewat site.pages.<halaman>.variant. Bawaan tiap template ada di templates.<id>.pages. */
   pages: {
-    services: { variants: ['grid', 'list', 'catalog'] },   // catalog: filter kategori di sisi kiri + kartu di kanan
-    blog:     { variants: ['grid', 'list'] }
+    services: { variants: ['grid', 'list', 'catalog', 'market'] },   // catalog: filter kategori di sisi kiri + kartu di kanan; market: chip kategori berhitung + urutkan
+    service:  { variants: ['standard', 'configurator'] },            // configurator: opsi berharga per pilihan, langkah Spesifikasi > Jumlah > Desain, total langsung (hanya paket dengan harga)
+    blog:     { variants: ['grid', 'list', 'magazine'], pageSize: 3 }, // magazine: artikel utama + kartu + chip kategori berhitung + halaman (pageSize kecil karena data mockup sedikit)
+    faq:      { variants: ['accordion', 'help'] }                      // help: pusat bantuan: pencarian besar, pertanyaan populer, kartu topik berhitung
   },
 
   templates: {
@@ -274,7 +276,7 @@ window.PLATFORM = {
       description: 'Marketplace cetak: banner promo bergeser, kategori bergambar, produk bertab, pencarian pil dan total keranjang di header.',
       header: 'market', cardStyle: 'elevated', buttonShape: 'pill',
       fonts: { heading: 'montserrat', body: 'inter' },
-      pages: { services: 'grid', blog: 'grid' },
+      pages: { services: 'market', service: 'configurator', blog: 'magazine', faq: 'help' },
       home: [
         { id: 'hero', variant: 'banner' },
         { id: 'trust', variant: 'bar' },
