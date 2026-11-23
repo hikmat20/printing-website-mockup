@@ -117,7 +117,7 @@
 
   function readForm(root) {                                /* pilihan + jumlah dari kartu pemesanan di halaman detail */
     var opts = {};
-    $$('[data-opt]', root).forEach(function (sel) { opts[sel.getAttribute('data-opt')] = sel.value; });
+    $$('[data-opt]', root).forEach(function (sel) { if (sel.type === 'radio' && !sel.checked) return; opts[sel.getAttribute('data-opt')] = sel.value; });   /* select atau radio terpilih */
     var qty = $('[data-qty]', root);
     return { opts: opts, qty: qty ? qty.value : '' };
   }

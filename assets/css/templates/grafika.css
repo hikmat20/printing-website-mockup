@@ -40,3 +40,14 @@
 [data-template="grafika"] .service-card:hover { transform: translateY(-4px); }
 [data-template="grafika"] .flag-new { display: inline-block; position: absolute; right: .75rem; top: .75rem; padding: .2rem .6rem; border-radius: 999px; background: var(--c-accent); color: var(--c-on-accent); font-size: .6875rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 [data-template="grafika"] .card-body-x h3 { font-weight: 700; }
+
+/* Gelombang F: halaman dalam */
+[data-template="grafika"] .market-bar .form-select, [data-template="grafika"] .market-bar input { border-radius: 999px; }
+[data-template="grafika"] .page-head { background: var(--c-surface); }
+[data-template="grafika"] .page-head--help { background: linear-gradient(180deg, var(--c-primary-light), var(--c-surface)); }
+[data-template="grafika"] .order-card--config { border-radius: 20px; }
+[data-template="grafika"] .cfg-choice-in { border-radius: 999px; padding-inline: 1rem; }
+[data-template="grafika"] .cfg-sum { border-radius: 14px; }
+[data-template="grafika"] .faq-topic .ico { background: var(--c-accent-tint); color: var(--c-accent-dark); }
+[data-template="grafika"] .mag-feature { border-radius: 20px; }
+[data-template="grafika"] .pager button { border-radius: 999px; }

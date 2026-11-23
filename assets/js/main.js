@@ -184,6 +184,18 @@
   var get = function (obj, path) { return path.split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, obj); };
   var ico = function (name, cls) { return '<i data-lucide="' + name + '" class="i ' + (cls || '') + '" aria-hidden="true"></i>'; };
   var findBy = function (list, key, val) { return list.filter(function (x) { return x[key] === val; })[0]; };
+  /* Harga opsi: service.options[].prices = { "<pilihan>": tambahan per satuan }. Harga satuan = priceFrom + tambahan semua pilihan terpilih.
+     Nilai bukan angka / negatif dianggap 0. Keranjang lama tanpa opsi tetap memakai priceFrom. */
+  var optionPrice = function (s, label, choice) {
+    var o = (Array.isArray(s.options) ? s.options : []).filter(function (x) { return x && x.label === label; })[0];
+    var p = o && o.prices && typeof o.prices === 'object' && hasOwn(o.prices, choice) ? Number(o.prices[choice]) : 0;
+    return isFinite(p) && p > 0 ? Math.min(Math.round(p), 100000000) : 0;
+  };
+  var unitPrice = function (s, opts) {
+    var t = Number(s.priceFrom) || 0;
+    if (opts && typeof opts === 'object') Object.keys(opts).forEach(function (k) { t += optionPrice(s, k, opts[k]); });
+    return t;
+  };
   var fmtDate = function (iso) {
     var d = new Date(iso + 'T00:00:00');
     return isNaN(d) ? '' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -217,6 +229,25 @@
   var waLink = function (msg) { return 'https://wa.me/' + T.whatsapp + '?text=' + encodeURIComponent(msg); };
   var msgService = function (s) { return 'Halo, saya ingin bertanya mengenai layanan ' + s.name + '. Mohon informasi harga dan ketentuannya.'; };
   var msgDefault = function () { return 'Halo ' + T.name + ', saya ingin memesan layanan cetak. Mohon informasi lebih lanjut.'; };
+
+  /* Tombol WhatsApp mengambang. Opsional di data tenant: floatingCta = { label?, message?, href?, route? }.
+     Prioritas tautan: href (hanya https) > route (rute statis platform, mis. 'contact') > pesan WhatsApp (message atau pesan bawaan).
+     Nilai tak sah dibuang dengan peringatan dan tombol memakai bawaan. Bisa berbeda per paket lewat packageText.<paket>.tenant.floatingCta. */
+  var floatingCta = function () {
+    var c = T.floatingCta, out = { label: 'Chat WhatsApp', href: null, msg: null };
+    if (c == null) return out;
+    if (typeof c !== 'object' || Array.isArray(c)) { console.warn('[main.js] tenant.floatingCta harus objek; dipakai bawaan.'); return out; }
+    if (typeof c.label === 'string' && c.label.trim()) out.label = c.label.trim().slice(0, 30);
+    if (typeof c.message === 'string' && c.message.trim()) out.msg = c.message.trim().slice(0, 500);
+    if (c.href != null) {
+      if (typeof c.href === 'string' && c.href.length <= 500 && /^https:\/\/[^\s<>"']+$/i.test(c.href)) out.href = c.href;
+      else console.warn('[main.js] tenant.floatingCta.href harus tautan https tanpa spasi; dipakai bawaan.');
+    } else if (c.route != null) {
+      var r = D.routes && hasOwn(D.routes, c.route) ? D.routes[c.route] : null;
+      if (r && !r.hash && !r.module) out.href = url(c.route); else console.warn('[main.js] tenant.floatingCta.route "' + c.route + '" bukan rute statis platform; dipakai bawaan.');
+    }
+    return out;
+  };
 
   /* Elemen <a data-wa> (+ data-wa-service="slug" atau data-wa-msg="...") diberi tautan wa.me */
   function applyWa(root) {
@@ -579,8 +610,13 @@
     menu.setAttribute('role', 'dialog'); menu.setAttribute('aria-modal', 'true'); menu.setAttribute('aria-label', 'Menu navigasi');
     menu.innerHTML = mobileMenu();
     var wa = document.createElement('a');
-    wa.className = 'wa-float'; wa.setAttribute('data-wa', ''); wa.setAttribute('aria-label', 'Chat WhatsApp');
-    wa.innerHTML = WA_ICON + '<span>Chat WhatsApp</span>';
+    var fc = floatingCta();
+    wa.className = 'wa-float'; wa.setAttribute('aria-label', fc.label);
+    if (fc.href) {                                        /* tautan kustom: tidak lewat applyWa */
+      wa.href = fc.href;
+      if (/^https:/i.test(fc.href)) { wa.target = '_blank'; wa.rel = 'noopener noreferrer'; }     /* rute internal: tab yang sama */
+    } else { wa.setAttribute('data-wa', ''); if (fc.msg) wa.setAttribute('data-wa-msg', fc.msg); }
+    wa.innerHTML = WA_ICON + '<span>' + esc(fc.label) + '</span>';
     var top = document.createElement('button');
     top.type = 'button'; top.className = 'to-top'; top.id = 'to-top'; top.setAttribute('aria-label', 'Kembali ke atas');
     top.innerHTML = ico('arrow-up');
@@ -825,7 +861,7 @@
   /* API kecil untuk halaman lain (services.html, service-detail.html, dll.) */
   window.PrintSite = {
     data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); }, ready: function (fn) { if (booted) fn(window.PrintSite); else afterBoot.push(fn); },
-    esc: esc, rupiah: rupiah, isNew: isNew, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
+    esc: esc, rupiah: rupiah, isNew: isNew, optionPrice: optionPrice, unitPrice: unitPrice, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
     components: { serviceCard: serviceCard, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }
   };

@@ -88,7 +88,7 @@ Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `d
 
 Struktur tiap halaman **dikunci platform**; hanya beranda yang section-nya bisa diatur tenant.
 Tenant hanya memilih template, warna, font, gaya kartu/tombol, dan varian daftar yang diizinkan
-`PLATFORM.pages` (`site.pages.services.variant`: `grid` | `list`; bawaan Bold = `list`).
+`PLATFORM.pages` (`site.pages.<halaman>.variant`): `services` = `grid`\|`list`\|`catalog`\|`market`, `service` = `standard`\|`configurator`, `blog` = `grid`\|`list`\|`magazine`, `faq` = `accordion`\|`help`. Bawaan per template; Grafika memakai `market`, `configurator`, `magazine`, `help` (lihat *Halaman dalam Grafika*).
 
 | Halaman | Berkas | Laravel | Status |
 |---|---|---|---|
@@ -98,7 +98,7 @@ Tenant hanya memilih template, warna, font, gaya kartu/tombol, dan varian daftar
 | Portofolio (filter kategori + lightbox) | `portfolio.html` | `/portofolio` | selesai |
 | Tentang (profil, visi/misi, perjalanan, keunggulan) | `about.html` | `/tentang-kami` | selesai |
 | Kontak (form kirim via WhatsApp, info, peta) | `contact.html` | `/kontak` | selesai |
-| Artikel (filter kategori + cari; varian `grid`\|`list`) | `blog.html` | `/artikel` | selesai |
+| Artikel (filter kategori + cari; varian `grid`\|`list`\|`magazine`) | `blog.html` | `/artikel` | selesai |
 | Detail artikel (slug = hash `#slug`) | `article-detail.html` | `/artikel/{slug}` | selesai |
 | FAQ (per kelompok + pencarian) | `faq.html` | `/faq` | selesai |
 
@@ -195,6 +195,25 @@ Paket tanpa entri memakai teks utama. Paket tanpa harga memakai pola SEO bawaan 
 (`packages.<id>.seo.service`) bila pola tenant masih memuat `{price}`, supaya harga tidak bocor ke judul.
 Alamat `/harga` di paket tanpa halaman harga menampilkan keadaan "tidak tersedia" (noindex).
 
+### Halaman dalam Grafika (Gelombang F)
+
+- **Daftar layanan `market`**: chip kategori berhitung (`.chip-n`) satu baris yang bisa digeser, kotak cari, dan *Urutkan*
+  (Rekomendasi, Nama A–Z, Harga terendah/tertinggi; dua pilihan harga hanya bila paket menampilkan harga). Pilihan ikut `?sort=`
+  (nilai tak dikenal diabaikan) dan bekerja bersama filter kategori `#slug` dan pencarian. Dua kolom rapat di HP.
+  Teks urut opsional di `pageText.services.sort`. Laravel: `GET /layanan?kategori=&q=&urut=`, diurutkan dan dipaginasi di server.
+- **Konfigurator `configurator`** (detail layanan; hanya paket dengan tombol pesan: Showcase, Katalog, Semi e-commerce; Company Profile
+  tetap kartu kontak): langkah 1 *Spesifikasi* (tiap opsi = `fieldset` + radio berbentuk chip, pilihan pertama terpilih),
+  2 *Jumlah* (stepper 1–99999, nilai tak sah dibersihkan), 3 *Kirim desain* (di mockup lewat WhatsApp; unggah berkas = Laravel).
+  Ringkasan harga satuan, jumlah, dan total (`aria-live`) hanya bila paket menampilkan harga.
+  **Harga opsi**: `service.options[].prices = { '<pilihan>': tambahan per satuan }`; harga satuan = `priceFrom` + tambahan semua pilihan
+  (`PrintSite.optionPrice` / `unitPrice`; angka negatif, teks, atau di atas Rp 100 juta dibatasi). Keranjang memakai harga yang sama
+  (`lineTotal`, tampilan keranjang, dan pesan checkout), sehingga baris lama tanpa opsi tetap memakai `priceFrom`. Pesan WhatsApp memuat
+  "Estimasi harga di situs". Teks di `pageText.service.config`. Laravel: `option_values.price_delta`; **harga wajib dihitung ulang di server**.
+- **FAQ `help`**: pencarian besar di kepala, *Populer* (maks 6, dari `faqs[].featured`), kartu topik berhitung per kelompok
+  (`faqGroups[].icon`, cadangan `circle-help`; tidak tampil bila kelompok < 2), lalu jawaban per kelompok. Teks di `pageText.faq.helpCenter`.
+- **Blog `magazine`**: artikel terbaru besar (hanya tanpa filter/pencarian), chip kategori berhitung, kartu, dan penomoran halaman
+  (`PLATFORM.pages.blog.pageSize`, bawaan 3 karena data mockup sedikit). Laravel: penomoran di server (`?halaman=`).
+
 ## Halaman demo (`demo.html`)
 
 Materi penjualan untuk ditunjukkan ke calon client; **bukan halaman tenant** (tidak memakai header/footer tenant, noindex).
@@ -246,6 +265,15 @@ Latar belang (putih / abu) dihitung otomatis dari urutan section yang tampil.
 | location | split, stacked |
 | cta | gradient, solid |
 
+### Tombol WhatsApp mengambang (tautan kustom)
+
+Tombol hijau di pojok (HP/tablet) membuka WhatsApp dengan pesan bawaan. Tenant boleh mengubahnya lewat `tenant.floatingCta`
+`{ label?, message?, href?, route? }`: `label` (maks 30 huruf, di-escape), `message` (pesan awal WhatsApp), `href` (tautan `https://`
+saja, tanpa spasi, maks 500 karakter, mis. tautan pesan `wa.me/message/KODE` atau katalog), atau `route` (rute statis platform,
+mis. `contact`, tab yang sama). Prioritas: `href` > `route` > pesan WhatsApp. Nilai tak sah dibuang dengan peringatan dan tombol memakai bawaan.
+Per paket: `packageText.<paket>.tenant.floatingCta` (mis. Company Profile mengarah ke Kontak). Laravel: kolom JSON `floating_cta` pada `tenant_settings`,
+divalidasi sama (skema `https` saja; tolak `javascript:` dan `http:`).
+
 ### Font
 
 Plus Jakarta Sans, Inter, Poppins, Montserrat, Roboto, Nunito, Raleway, Lato, Open Sans, DM Sans,
@@ -291,6 +319,7 @@ bawaan header/kartu/tombol/font dan susunan `home`.
 | `shop.js` (keranjang, checkout, lacak) | session/`carts` + `POST /keranjang/checkout` → `orders`, `order_items`; `GET /status-pesanan` dari `orders` |
 | `promos`, `orderStatus` | tabel promo per tenant; status pesanan = kolom/tabel status di `orders` |
 | `banners`, `services[].tags` | tabel `banners` (urutan, aktif, jadwal tayang) dan tag layanan per tenant |
+| `services[].options[].prices`, `faqs[].featured`, `faqGroups[].icon` | `option_values.price_delta`; kolom `featured` pada FAQ; kolom ikon pada kelompok FAQ |
 | `resolveSite()` di `main.js` | `SiteConfigResolver` (class PHP), validasi sama |
 | `sections.js` (`R.<id>`) | Blade Components `<x-section.services variant="slider" />` |
 | `templates/<id>.css` | aset per template, dimuat sesuai `tenant.template` |

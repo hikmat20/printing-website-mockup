@@ -15,7 +15,9 @@
  *   R.contact  -> pages/contact.blade.php     (POST /kontak: validasi + antispam di server)
  *   R.blog     -> pages/blog.blade.php        (/artikel; varian grid|list dari site.pages.blog.variant)
  *   R.article  -> pages/article.blade.php     (/artikel/{slug}; di mockup slug = hash)
- *   R.faq      -> pages/faq.blade.php         (/faq; JSON-LD FAQPage dari semua pertanyaan)
+ *   R.faq      -> pages/faq.blade.php         (/faq; JSON-LD FAQPage dari semua pertanyaan; varian accordion|help)
+ * Varian (site.pages.<halaman>.variant, registri PLATFORM.pages): services grid|list|catalog|market, service standard|configurator,
+ * blog grid|list|magazine, faq accordion|help. Harga opsi konfigurator: service.options[].prices (PS.unitPrice di main.js).
  * Pada produksi halaman dirender server-side; filter/pencarian di sini hanya sisi klien.
  */
 (function () {
@@ -76,16 +78,17 @@
         return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + '</button>';
       }).join('');
     var catalog = variant === 'catalog';           /* filter di sisi kiri + kartu di kanan (template Katalog B2B) */
-    if (catalog) chips = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (active === 'all') + '">Semua <span class="chip-n">' + D.services.length + '</span></button>' +
+    var market = variant === 'market';             /* chip kategori berhitung + urutkan, kartu rapat (template Grafika) */
+    if (catalog || market) chips = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (active === 'all') + '">Semua <span class="chip-n">' + D.services.length + '</span></button>' +
       D.categories.map(function (c) {
         var n = D.services.filter(function (s) { return s.category === c.slug; }).length;
         return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + ' <span class="chip-n">' + n + '</span></button>';
       }).join('');
-    var colCls = variant === 'list' ? 'col-12' : catalog ? 'col-12 col-md-6 col-xl-4' : 'col-12 col-md-6 col-lg-4';
-    var items = D.services.map(function (s) {
+    var colCls = variant === 'list' ? 'col-12' : catalog ? 'col-12 col-md-6 col-xl-4' : market ? 'col-6 col-md-4 col-xl-3' : 'col-12 col-md-6 col-lg-4';
+    var items = D.services.map(function (s, i) {
       var cat = byKey(D.categories, 'slug', s.category);
       var q = (s.name + ' ' + s.short + ' ' + (cat ? cat.name : '')).toLowerCase();
-      return '<div class="' + colCls + '" data-item data-category="' + esc(s.category) + '" data-q="' + esc(q) + '">' + C.serviceCard(s) + '</div>';
+      return '<div class="' + colCls + '" data-item data-i="' + i + '" data-price="' + (Number(s.priceFrom) || 0) + '" data-name="' + esc(s.name.toLowerCase()) + '" data-category="' + esc(s.category) + '" data-q="' + esc(q) + '">' + C.serviceCard(s) + '</div>';
     }).join('');
     var empty = x.empty || {};
     var search = '<div class="search-input"><label class="visually-hidden" for="svc-search">' + esc(x.searchLabel || 'Cari layanan') + '</label>' + ico('search') +
@@ -95,7 +98,13 @@
       '<div class="empty-state" id="svc-empty" hidden><span class="ico">' + ico('search-x', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
       '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
     var help = x.help || {};
-    var body = catalog
+    var so = x.sort || {};
+    var sortBox = '<div class="sort-box"><label for="svc-sort">' + esc(so.label || 'Urutkan') + '</label><select id="svc-sort" class="form-select">' +
+      '<option value="">' + esc(so.recommended || 'Rekomendasi') + '</option><option value="name">' + esc(so.name || 'Nama A–Z') + '</option>' +
+      (PS.modules.prices ? '<option value="price-asc">' + esc(so.priceAsc || 'Harga terendah') + '</option><option value="price-desc">' + esc(so.priceDesc || 'Harga tertinggi') + '</option>' : '') + '</select></div>';
+    var body = market
+      ? '<div class="market-bar">' + search + sortBox + '</div><div class="chips chips--scroll" role="group" aria-label="Filter kategori">' + chips + '</div>' + listHtml
+      : catalog
       ? '<div class="catalog-layout"><aside class="catalog-side" aria-label="' + esc(x.filterLabel || 'Filter katalog') + '">' + search +
           '<h3 class="catalog-side-title">' + esc(x.categoryLabel || 'Kategori') + '</h3><div class="chips chips--stack" role="group" aria-label="Filter kategori">' + chips + '</div>' +
           (help.title ? '<div class="catalog-help"><strong>' + esc(help.title) + '</strong><p>' + esc(help.text) + '</p><a class="btn btn-wa btn-sm w-100" data-wa>' + WA + ' ' + esc(help.button) + '</a></div>' : '') +
@@ -146,16 +155,43 @@
     initFilter({ list: 'svc-list', search: 'svc-search', count: 'svc-count', empty: 'svc-empty', noun: 'layanan' });
     var q = PS.query.get('q'), input = document.getElementById('svc-search');      /* kotak cari di header (varian store) mengirim ?q= */
     if (q && input) { input.value = q.slice(0, 80); input.dispatchEvent(new Event('input')); }
+    initSort();
+  }
+
+  /* Urutkan (varian market): mengurutkan ulang kolom di DOM; pilihan ikut ?sort= agar bisa dibagikan. */
+  function initSort() {
+    var sel = document.getElementById('svc-sort'), box = document.getElementById('svc-list');
+    if (!sel || !box) return;
+    var cols = Array.prototype.slice.call(box.querySelectorAll('[data-item]'));
+    var by = {
+      '': function (a, b) { return a.getAttribute('data-i') - b.getAttribute('data-i'); },
+      name: function (a, b) { return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'), 'id'); },
+      'price-asc': function (a, b) { return a.getAttribute('data-price') - b.getAttribute('data-price') || by[''](a, b); },
+      'price-desc': function (a, b) { return b.getAttribute('data-price') - a.getAttribute('data-price') || by[''](a, b); }
+    };
+    function apply() { cols.slice().sort(by[sel.value] || by['']).forEach(function (c) { box.appendChild(c); }); }
+    var want = PS.query.get('sort');
+    if (want && Array.prototype.some.call(sel.options, function (o) { return o.value === want; })) sel.value = want;
+    sel.addEventListener('change', function () {
+      apply();
+      try { var u = new URL(window.location.href); if (sel.value) u.searchParams.set('sort', sel.value); else u.searchParams.delete('sort'); window.history.replaceState(null, '', u.pathname + u.search + u.hash); } catch (e) { /* abaikan */ }
+    });
+    apply();
   }
 
   /* ------------------------------------------------------ /layanan/{slug} */
+  var cfgQty = function (inp) { var v = inp && /^\d{1,9}$/.test(String(inp.value).trim()) ? parseInt(inp.value, 10) : 1; return Math.min(Math.max(v, 1), 99999); };
   function msgOrder(s, root) {
     var ask = PS.modules.order === 'inquiry';
-    var parts = [];
-    Array.prototype.slice.call(root.querySelectorAll('[data-opt]')).forEach(function (sel) { parts.push(sel.getAttribute('data-opt') + ': ' + sel.value); });
+    var parts = [], chosen = {};
+    Array.prototype.slice.call(root.querySelectorAll('[data-opt]')).forEach(function (sel) {
+      if (sel.type === 'radio' && !sel.checked) return;
+      parts.push(sel.getAttribute('data-opt') + ': ' + sel.value); chosen[sel.getAttribute('data-opt')] = sel.value;
+    });
     var qty = root.querySelector('[data-qty]');
     if (qty && qty.value) parts.push('Jumlah: ' + qty.value + ' ' + s.unit);
-    return 'Halo ' + T.shortName + ', saya ingin ' + (ask ? 'bertanya mengenai ' : 'memesan ') + s.name + (parts.length ? ' dengan pilihan: ' + parts.join(', ') : '') + '. Mohon informasi harga dan estimasi selesai.';
+    var est = PS.modules.prices && root.querySelector('[data-cfg-total]') ? ' Estimasi harga di situs: ' + rupiah(PS.unitPrice(s, chosen) * cfgQty(qty)).replace(/\u00a0/g, ' ') + '.' : '';
+    return 'Halo ' + T.shortName + ', saya ingin ' + (ask ? 'bertanya mengenai ' : 'memesan ') + s.name + (parts.length ? ' dengan pilihan: ' + parts.join(', ') : '') + '.' + est + ' Mohon informasi harga dan estimasi selesai.';
   }
 
   R.service = function () {
@@ -192,7 +228,8 @@
         o.choices.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select></div>';
     }).join('');
     var contactOnly = PS.modules.order === 'contact';       /* paket Company Profile: tanpa pilihan dan tombol pesan per layanan */
-    var order = '<aside class="order-card" aria-labelledby="order-title"><h2 id="order-title" class="h5">' + esc(x.orderTitle) + '</h2>' +
+    var cfg = PS.site.pages.service.variant === 'configurator' && !contactOnly;   /* konfigurator: opsi berharga + total langsung */
+    var order = cfg ? configurator(s, op, x) : '<aside class="order-card" aria-labelledby="order-title"><h2 id="order-title" class="h5">' + esc(x.orderTitle) + '</h2>' +
       (showPrices ? '<div class="price-from">Mulai dari<strong>' + rupiah(s.priceFrom) + ' <small class="fw-medium text-muted-x">/ ' + esc(s.unit) + '</small></strong></div>' : '') +
       '<p class="eta">' + ico('clock') + '<span>' + esc(s.eta) + '</span></p>' +
       '<p class="form-note">' + esc(x.orderHint) + '</p>' +
@@ -223,13 +260,14 @@
     var main = '<section class="section pt-4"><div class="container"><div class="row g-4 g-lg-5">' +
       '<div class="col-lg-8"><figure class="detail-media"><img src="' + esc(s.image) + '" alt="' + esc(s.imageAlt) + '" width="800" height="600"></figure>' +
       '<h2 class="h4">Tentang layanan ini</h2><p class="text-muted-x">' + esc(s.description) + '</p>' +
-      specs + (optsInfo ? '<h2 class="h4 mt-4">Pilihan tersedia</h2>' + optsInfo : '') + prices + faqs + '</div>' +
+      specs + (optsInfo && !cfg ? '<h2 class="h4 mt-4">Pilihan tersedia</h2>' + optsInfo : '') + prices + faqs + '</div>' +
       '<div class="col-lg-4">' + order + '</div></div></div></section>';
 
     return {
       html: crumbs(cr) + head + main + relatedHtml + ctaBand(),
       meta: { key: 'service', route: 'service', service: s, category: cat, crumbs: crumbMeta(cr), faqs: fq },
       after: function () {
+        if (cfg) return initConfigurator(s);
         var card = document.querySelector('.order-card'), wa = document.getElementById('order-wa');
         if (!card || !wa) return;
         var upd = function () { wa.setAttribute('data-wa-msg', msgOrder(s, card)); PS.applyWa(card); };
@@ -238,6 +276,62 @@
       }
     };
   };
+
+  /* Konfigurator (varian service "configurator"): langkah 1 Spesifikasi (pilihan berharga tambahan), 2 Jumlah, 3 Desain (dikirim lewat WhatsApp;
+     unggah berkas langsung = versi Laravel). Total langsung = (priceFrom + tambahan pilihan) x jumlah, hanya bila paket menampilkan harga. */
+  function configurator(s, op, x) {
+    var c = x.config || {}, prices = PS.modules.prices, mode = PS.modules.order;
+    var groups = op.map(function (o, i) {
+      var ch = list(o.choices).filter(function (v) { return typeof v === 'string' && v; });
+      if (!ch.length || !o.label) return '';
+      return '<fieldset class="cfg-group"><legend>' + esc(o.label) + '</legend><div class="cfg-choices">' + ch.map(function (v, k) {
+        var d = prices ? PS.optionPrice(s, o.label, v) : 0;
+        return '<label class="cfg-choice"><input type="radio" name="opt-' + i + '" value="' + esc(v) + '" data-opt="' + esc(o.label) + '"' + (k === 0 ? ' checked' : '') + '>' +
+          '<span class="cfg-choice-in">' + esc(v) + (d ? '<small>+' + rupiah(d) + '</small>' : '') + '</span></label>';
+      }).join('') + '</div></fieldset>';
+    }).join('');
+    var qty = '<div class="qty" role="group" aria-label="Jumlah ' + esc(s.name) + '"><button type="button" data-cfg-step="-1" aria-label="Kurangi jumlah">' + ico('minus') + '</button>' +
+      '<input type="number" class="form-control qty-input" id="opt-qty" min="1" max="99999" value="1" inputmode="numeric" data-qty aria-label="Jumlah (' + esc(s.unit) + ')">' +
+      '<button type="button" data-cfg-step="1" aria-label="Tambah jumlah">' + ico('plus') + '</button></div><span class="cfg-unit">' + esc(s.unit) + '</span>';
+    var sum = !prices ? '' : '<dl class="cfg-sum"><div><dt>' + esc(c.unitLabel || 'Harga satuan') + '</dt><dd data-cfg-unit></dd></div>' +
+      '<div><dt>' + esc(c.qtyLabel || 'Jumlah') + '</dt><dd data-cfg-qty></dd></div>' +
+      '<div class="cfg-total"><dt>' + esc(c.totalLabel || 'Estimasi total') + '</dt><dd data-cfg-total role="status" aria-live="polite"></dd></div></dl>' +
+      '<p class="form-note">' + esc(c.estimateNote || 'Estimasi untuk pilihan di atas; harga final dikonfirmasi admin setelah file desain diperiksa.') + '</p>';
+    var actions = mode === 'cart'
+      ? '<button type="button" class="btn btn-brand btn-lg w-100" data-cart-add="' + esc(s.slug) + '" data-cart-form>' + ico('shopping-cart') + ' ' + esc(x.orderButton) + '</button>' +
+        '<button type="button" class="btn btn-outline-brand btn-lg w-100 mt-2" data-cart-add="' + esc(s.slug) + '" data-cart-form data-cart-go>' + esc(x.orderAlt || 'Beli Sekarang') + '</button>'
+      : mode === 'inquiry'
+        ? '<button type="button" class="btn btn-brand btn-lg w-100" data-inq-add="' + esc(s.slug) + '" data-inq-form>' + ico('plus') + ' ' + esc(x.orderButton) + '</button>' +
+          '<a class="btn btn-outline-wa w-100 mt-2" id="order-wa" data-wa data-wa-msg="">' + WA + ' ' + esc(x.orderAlt || 'Tanya langsung via WhatsApp') + '</a>'
+        : '<a class="btn btn-wa btn-lg w-100" id="order-wa" data-wa data-wa-msg="">' + WA + ' ' + esc(x.orderButton) + '</a>';
+    return '<aside class="order-card order-card--config" aria-labelledby="order-title"><h2 id="order-title" class="h5">' + esc(c.title || x.orderTitle) + '</h2>' +
+      '<p class="eta">' + ico('clock') + '<span>' + esc(s.eta) + '</span></p>' +
+      '<ol class="cfg-steps">' +
+        (groups ? '<li class="cfg-step"><h3>' + esc(c.step1 || 'Pilih spesifikasi') + '</h3>' + groups + '</li>' : '') +
+        '<li class="cfg-step"><h3>' + esc(c.step2 || 'Tentukan jumlah') + '</h3><div class="cfg-qty-row">' + qty + '</div></li>' +
+        '<li class="cfg-step"><h3>' + esc(c.step3 || 'Kirim desain') + '</h3><p class="cfg-hint">' + ico('file-up') + '<span>' + esc(c.designHint || 'Setelah memesan, kirim file desain (PDF/CDR/AI) lewat WhatsApp. Belum punya desain? Kami bantu buatkan.') + '</span></p></li>' +
+      '</ol>' + sum + actions + '</aside>';
+  }
+
+  function initConfigurator(s) {
+    var card = document.querySelector('.order-card--config'); if (!card) return;
+    var qty = card.querySelector('[data-qty]'), wa = document.getElementById('order-wa');
+    function chosen() { var o = {}; Array.prototype.forEach.call(card.querySelectorAll('[data-opt]'), function (r) { if (r.checked) o[r.getAttribute('data-opt')] = r.value; }); return o; }
+    function set(attr, v) { var el = card.querySelector('[' + attr + ']'); if (el) el.textContent = v; }
+    function upd() {
+      var u = PS.unitPrice(s, chosen()), n = cfgQty(qty);
+      set('data-cfg-unit', rupiah(u) + ' / ' + s.unit); set('data-cfg-qty', n + ' ' + s.unit); set('data-cfg-total', rupiah(u * n));
+      if (wa) { wa.setAttribute('data-wa-msg', msgOrder(s, card)); PS.applyWa(card); }
+    }
+    card.addEventListener('change', upd);
+    card.addEventListener('input', upd);
+    card.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-cfg-step]'); if (!b) return;
+      qty.value = Math.min(Math.max(cfgQty(qty) + parseInt(b.getAttribute('data-cfg-step'), 10), 1), 99999); upd();
+    });
+    qty.addEventListener('blur', function () { qty.value = cfgQty(qty); upd(); });     /* nilai kosong / tidak valid dikembalikan ke angka sah */
+    upd();
+  }
 
   /* --------------------------------------------------------------- /harga */
   R.pricing = function () {
@@ -421,7 +515,7 @@
   };
 
   R.blog = function () {
-    var x = PT.blog || {}; x = { title: x.title || 'Artikel', lead: x.lead, listTitle: x.listTitle, searchLabel: x.searchLabel, searchPlaceholder: x.searchPlaceholder, countNoun: x.countNoun, empty: x.empty }; var variant = PS.site.pages.blog.variant, arts = articles(), cats = articleCats(arts);
+    var x = PT.blog || {}; x = { title: x.title || 'Artikel', lead: x.lead, listTitle: x.listTitle, searchLabel: x.searchLabel, searchPlaceholder: x.searchPlaceholder, countNoun: x.countNoun, empty: x.empty, featuredLabel: x.featuredLabel, readMore: x.readMore, pagerLabel: x.pagerLabel }; var variant = PS.site.pages.blog.variant, arts = articles(), cats = articleCats(arts);
     var active = byKey(cats, 'slug', hashSlug()) ? hashSlug() : 'all';
     var chips = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (active === 'all') + '">Semua</button>' + cats.map(function (c) {
       return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + '</button>';
@@ -432,6 +526,7 @@
       return '<div class="' + colCls + '" data-item data-category="' + esc(slugify(a.category)) + '" data-q="' + esc(q) + '">' + C.articleCard(a) + '</div>';
     }).join('');
     var empty = x.empty || {};
+    if (variant === 'magazine') return blogMagazine(x, arts, cats, active);
     var body =
       '<div class="filter-bar">' +
         '<div class="search-input"><label class="visually-hidden" for="art-search">' + esc(x.searchLabel || 'Cari artikel') + '</label>' + ico('search') +
@@ -457,6 +552,98 @@
       after: function () { initFilter({ list: 'art-list', search: 'art-search', count: 'art-count', empty: 'art-empty', noun: x.countNoun || 'artikel', cats: cats }); }
     };
   };
+
+  /* Blog majalah: artikel terbaru di atas (hanya saat tanpa filter/pencarian), kartu di bawahnya, chip kategori berhitung, halaman. */
+  function blogMagazine(x, arts, cats, active) {
+    var size = Math.max(1, parseInt(window.PLATFORM && window.PLATFORM.pages && window.PLATFORM.pages.blog && window.PLATFORM.pages.blog.pageSize, 10) || 6);
+    var chips = '<button type="button" class="chip" data-cat="all" aria-pressed="' + (active === 'all') + '">Semua <span class="chip-n">' + arts.length + '</span></button>' + cats.map(function (c) {
+      var n = arts.filter(function (a) { return slugify(a.category) === c.slug; }).length;
+      return '<button type="button" class="chip" data-cat="' + esc(c.slug) + '" aria-pressed="' + (active === c.slug) + '">' + esc(c.name) + ' <span class="chip-n">' + n + '</span></button>';
+    }).join('');
+    var items = arts.map(function (a, i) {
+      var q = (a.title + ' ' + (a.excerpt || '') + ' ' + (a.category || '')).toLowerCase();
+      return '<div class="col-12 col-md-6 col-lg-4" data-item' + (i === 0 ? ' data-feature' : '') + ' data-category="' + esc(slugify(a.category)) + '" data-q="' + esc(q) + '">' + C.articleCard(a) + '</div>';
+    }).join('');
+    var f = arts[0];
+    var feature = !f ? '' : '<article class="card-x mag-feature" id="art-featured">' +
+      (f.image ? '<a class="mag-feature-media" href="' + esc(url('article', f.slug)) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(f.image) + '" alt="" width="800" height="600" fetchpriority="high"></a>' : '') +
+      '<div class="mag-feature-body"><span class="tag-pill">' + esc(x.featuredLabel || 'Terbaru') + (f.category ? ' · ' + esc(f.category) : '') + '</span>' +
+      '<h3><a href="' + esc(url('article', f.slug)) + '">' + esc(f.title) + '</a></h3>' + (f.excerpt ? '<p>' + esc(f.excerpt) + '</p>' : '') +
+      '<div class="meta-row">' + PS.metaParts(f, 'menit baca').join('<span aria-hidden="true">•</span>') + '</div>' +
+      '<a class="link-arrow" href="' + esc(url('article', f.slug)) + '">' + esc(x.readMore || 'Baca selengkapnya') + ' ' + ico('arrow-right') + '</a></div></article>';
+    var empty = x.empty || {};
+    var body = '<div class="filter-bar"><div class="search-input"><label class="visually-hidden" for="art-search">' + esc(x.searchLabel || 'Cari artikel') + '</label>' + ico('search') +
+        '<input id="art-search" type="search" class="form-control" placeholder="' + esc(x.searchPlaceholder || '') + '" autocomplete="off"></div>' +
+        '<div class="chips chips--scroll" role="group" aria-label="Filter kategori">' + chips + '</div></div>' +
+      feature + '<p class="result-count" id="art-count" role="status" aria-live="polite"></p>' +
+      '<div class="row g-3 g-lg-4 art-list art-list--magazine" id="art-list">' + items + '</div>' +
+      '<nav class="mag-pager" id="art-pager" aria-label="' + esc(x.pagerLabel || 'Halaman artikel') + '" hidden></nav>' +
+      '<div class="empty-state" id="art-empty" hidden><span class="ico">' + ico('search-x', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
+      '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
+    var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
+    return {
+      html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-labelledby="art-list-title"><div class="container"><h2 class="visually-hidden" id="art-list-title">' + esc(x.listTitle || x.title) + '</h2>' + body + '</div></section>' + ctaBand(),
+      meta: {
+        key: 'blog', route: 'blog', crumbs: crumbMeta(cr),
+        pageLd: function (pageUrl) {
+          return { '@context': 'https://schema.org', '@type': 'Blog', name: x.title, url: pageUrl, inLanguage: 'id-ID',
+            publisher: { '@type': 'LocalBusiness', name: T.name, url: PS.seo.abs('/') },
+            blogPost: arts.map(function (a) {
+              return { '@type': 'BlogPosting', headline: a.title, datePublished: a.date, image: a.image ? PS.seo.abs(a.image) : undefined, url: PS.seo.abs(PS.seo.pathFor('article', a.slug)) };
+            }) };
+        }
+      },
+      after: function () { initMagazine({ size: size, noun: x.countNoun || 'artikel', cats: cats }); }
+    };
+  }
+
+  function initMagazine(cfg) {
+    var box = document.getElementById('art-list'), search = document.getElementById('art-search'), count = document.getElementById('art-count');
+    var empty = document.getElementById('art-empty'), feat = document.getElementById('art-featured'), pager = document.getElementById('art-pager');
+    if (!box) return;
+    var cols = Array.prototype.slice.call(box.querySelectorAll('[data-item]'));
+    var chips = Array.prototype.slice.call(document.querySelectorAll('.chip[data-cat]'));
+    var page = 1;
+    function cat() { var c = chips.filter(function (b) { return b.getAttribute('aria-pressed') === 'true'; })[0]; return c ? c.getAttribute('data-cat') : 'all'; }
+    function pagerHtml(pages) {
+      var h = '<ul class="pager"><li><button type="button" data-page="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + ' aria-label="Halaman sebelumnya">' + ico('chevron-left') + '</button></li>';
+      for (var i = 1; i <= pages; i++) h += '<li><button type="button" data-page="' + i + '"' + (i === page ? ' aria-current="page"' : '') + ' aria-label="Halaman ' + i + '">' + i + '</button></li>';
+      return h + '<li><button type="button" data-page="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + ' aria-label="Halaman berikutnya">' + ico('chevron-right') + '</button></li></ul>';
+    }
+    function apply() {
+      var c = cat(), q = search ? search.value.trim().toLowerCase() : '';
+      var match = cols.filter(function (col) { return (c === 'all' || col.getAttribute('data-category') === c) && (!q || col.getAttribute('data-q').indexOf(q) > -1); });
+      var showFeat = !!feat && c === 'all' && !q;                    /* artikel utama hanya tanpa filter; selainnya ikut daftar biasa */
+      var total = match.length;
+      if (showFeat) match = match.filter(function (col) { return !col.hasAttribute('data-feature'); });
+      if (feat) feat.hidden = !showFeat;
+      var pages = Math.max(1, Math.ceil(match.length / cfg.size));
+      page = Math.min(Math.max(page, 1), pages);
+      cols.forEach(function (col) { col.classList.add('hidden-by-filter'); });
+      match.slice((page - 1) * cfg.size, page * cfg.size).forEach(function (col) { col.classList.remove('hidden-by-filter'); });
+      var cobj = c !== 'all' ? byKey(cfg.cats, 'slug', c) : null;
+      count.textContent = total + ' ' + cfg.noun + (cobj ? ' dalam kategori ' + cobj.name : '') + (q ? ' untuk "' + search.value.trim() + '"' : '') + (pages > 1 ? ' · halaman ' + page + ' dari ' + pages : '');
+      empty.hidden = total !== 0;
+      pager.hidden = pages <= 1;
+      pager.innerHTML = pages > 1 ? pagerHtml(pages) : '';
+      if (pages > 1 && window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    }
+    function select(c, pushHash) {
+      chips.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-cat') === c)); });
+      if (pushHash) window.history.replaceState(null, '', c === 'all' ? window.location.pathname + window.location.search : '#' + c);
+      page = 1; apply();
+    }
+    chips.forEach(function (b) { b.addEventListener('click', function () { select(b.getAttribute('data-cat'), true); }); });
+    if (search) search.addEventListener('input', function () { page = 1; apply(); });
+    pager.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-page]'); if (!b || b.disabled) return;
+      page = parseInt(b.getAttribute('data-page'), 10); apply();
+      box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var cur = pager.querySelector('[aria-current="page"]'); if (cur) cur.focus({ preventScroll: true });
+    });
+    window.addEventListener('hashchange', function () { if (isAnchor()) return; var s = hashSlug(); select(chips.some(function (b) { return b.getAttribute('data-cat') === s; }) ? s : 'all', false); });
+    apply();
+  }
 
   /* ------------------------------------------------------ /artikel/{slug} */
   /* Isi artikel = daftar blok data: { type: 'h2'|'p'|'ul'|'ol'|'note', text | items }. Tidak ada HTML dari data. */
@@ -523,18 +710,20 @@
     var x = PT.faq || {}; if (!x.title) x = Object.assign({}, x, { title: 'Pertanyaan Umum' }); var all = list(D.faqs).filter(function (f) { return f && typeof f === 'object' && f.q && f.a; });
     var seenG = {};
     var groups = list(D.faqGroups).filter(function (g) { if (!g || !g.slug || seenG[g.slug]) return false; seenG[g.slug] = 1; return true; }).map(function (g) {
-      return { slug: g.slug, name: g.name, items: all.filter(function (f) { return f.group === g.slug; }) };
+      return { slug: g.slug, name: g.name, icon: g.icon, items: all.filter(function (f) { return f.group === g.slug; }) };
     });
     var rest = all.filter(function (f) { return !byKey(groups, 'slug', f.group); });        /* pertanyaan tanpa kelompok valid tetap tampil */
     if (rest.length) groups.push({ slug: 'lainnya', name: x.otherGroup || 'Lainnya', items: rest });
     groups = groups.filter(function (g) { return g.items.length; });
     var empty = x.empty || {};
-    var jump = !groups.length ? '' : '<nav class="faq-jump" aria-label="' + esc(x.jumpLabel || 'Lompat ke kelompok') + '"><ul class="chips">' + groups.map(function (g) {
+    var helpV = PS.site.pages.faq.variant === 'help';
+    var qid = function (f) { return 'faq-q-' + all.indexOf(f); };
+    var jump = !groups.length || helpV ? '' : '<nav class="faq-jump" aria-label="' + esc(x.jumpLabel || 'Lompat ke kelompok') + '"><ul class="chips">' + groups.map(function (g) {
       return '<li data-jump="' + esc(g.slug) + '"><a class="chip" href="#faq-g-' + esc(g.slug) + '">' + esc(g.name) + '</a></li>'; }).join('') + '</ul></nav>';
     var sections = groups.map(function (g) {
       return '<section class="faq-group" id="faq-g-' + esc(g.slug) + '" aria-labelledby="faq-g-' + esc(g.slug) + '-title" data-group>' +
         '<h2 class="h4" id="faq-g-' + esc(g.slug) + '-title">' + esc(g.name) + '</h2><div class="faq-list">' +
-        g.items.map(function (f) { return C.faqItem(f).replace('<div class="faq-item">', '<div class="faq-item" data-item data-q="' + esc((f.q + ' ' + f.a).toLowerCase()) + '">'); }).join('') +
+        g.items.map(function (f) { return C.faqItem(f).replace('<div class="faq-item">', '<div class="faq-item" id="' + qid(f) + '" data-item data-q="' + esc((f.q + ' ' + f.a).toLowerCase()) + '">'); }).join('') +
         '</div></section>';
     }).join('');
     var body = '<div class="filter-bar"><div class="search-input"><label class="visually-hidden" for="faq-search">' + esc(x.searchLabel || 'Cari pertanyaan') + '</label>' + ico('search') +
@@ -544,12 +733,46 @@
       '<div class="empty-state" id="faq-empty" hidden><span class="ico">' + ico('search-x', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
       '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
     var cr = [{ label: 'Beranda', route: 'home' }, { label: x.title }];
+    if (helpV) {                                  /* pusat bantuan: pencarian besar di kepala, pertanyaan populer, kartu topik, lalu semua jawaban */
+      var hp = x.helpCenter || {};
+      var popular = all.filter(function (f) { return f.featured; }).slice(0, 6);
+      var head = '<section class="page-head page-head--help" aria-labelledby="page-title"><div class="container"><h1 id="page-title">' + esc(x.title) + '</h1>' + (x.lead ? '<p class="page-lead">' + esc(x.lead) + '</p>' : '') +
+        '<div class="search-input search-input--lg"><label class="visually-hidden" for="faq-search">' + esc(x.searchLabel || 'Cari pertanyaan') + '</label>' + ico('search') +
+        '<input id="faq-search" type="search" class="form-control" placeholder="' + esc(x.searchPlaceholder || '') + '" autocomplete="off"></div>' +
+        (popular.length ? '<div class="faq-popular"><span>' + esc(hp.popularLabel || 'Populer:') + '</span>' + popular.map(function (f) { return '<a class="chip" href="#' + qid(f) + '" data-faq-go="' + qid(f) + '">' + esc(f.q) + '</a>'; }).join('') + '</div>' : '') + '</div></section>';
+      var topics = groups.length < 2 ? '' : '<h2 class="h4 mb-3">' + esc(hp.topicsTitle || 'Pilih topik') + '</h2><div class="faq-topics">' + groups.map(function (g) {
+        return '<a class="faq-topic" href="#faq-g-' + esc(g.slug) + '" data-jump="' + esc(g.slug) + '"><span class="ico">' + ico(g.icon || 'circle-help', 'i-lg') + '</span><span class="faq-topic-body"><strong>' + esc(g.name) + '</strong><span>' + g.items.length + ' ' + esc(x.countNoun || 'pertanyaan') + '</span></span></a>';
+      }).join('') + '</div>';
+      var main2 = topics + '<p class="result-count" id="faq-count" role="status" aria-live="polite"></p><div class="faq-groups">' + sections + '</div>' +
+        '<div class="empty-state" id="faq-empty" hidden><span class="ico">' + ico('search-x', 'i-lg') + '</span><h2>' + esc(empty.title) + '</h2><p>' + esc(empty.text) + '</p>' +
+        '<a class="btn btn-wa" data-wa>' + WA + ' ' + esc(empty.button) + '</a></div>';
+      return {
+        html: crumbs(cr) + head + '<section class="section pt-4" aria-label="' + esc(x.title) + '"><div class="container"><div class="faq-page">' + main2 + '</div></div></section>' + ctaBand(),
+        meta: { key: 'faq', route: 'faq', crumbs: crumbMeta(cr), faqs: all },
+        after: function () { initFaqSearch(x.countNoun || 'pertanyaan'); initFaqGo(); }
+      };
+    }
     return {
       html: crumbs(cr) + pageHead(x.title, x.lead) + '<section class="section pt-4" aria-label="' + esc(x.title) + '"><div class="container"><div class="faq-page">' + body + '</div></div></section>' + ctaBand(),
       meta: { key: 'faq', route: 'faq', crumbs: crumbMeta(cr), faqs: all },
       after: function () { initFaqSearch(x.countNoun || 'pertanyaan'); }
     };
   };
+
+  /* Pertanyaan populer: buka jawabannya di tempat (hapus pencarian bila menyembunyikannya), gulir, fokus ke pertanyaan. */
+  function initFaqGo() {
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-faq-go]'); if (!a) return;
+      e.preventDefault();
+      var input = document.getElementById('faq-search'), it = document.getElementById(a.getAttribute('data-faq-go'));
+      if (input && input.value) { input.value = ''; input.dispatchEvent(new Event('input')); }
+      if (!it) return;
+      var q = it.querySelector('.faq-q'); if (!q) return;
+      if (q.getAttribute('aria-expanded') !== 'true') q.click();
+      it.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      q.focus({ preventScroll: true });
+    });
+  }
 
   /* Pencarian FAQ: sembunyikan pertanyaan yang tidak cocok dan kelompok yang jadi kosong. */
   function initFaqSearch(noun) {

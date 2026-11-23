@@ -86,7 +86,7 @@
   var saveCart = function () { write(CART_KEY, cart); };
   var saveOrders = function () { write(ORDERS_KEY, orders); };
 
-  var lineTotal = function (it) { return svc(it.slug).priceFrom * it.qty; };
+  var lineTotal = function (it) { return PS.unitPrice(svc(it.slug), it.opts) * it.qty; };        /* harga satuan sudah memuat tambahan opsi */
   var total = function () { return cart.reduce(function (a, it) { return a + lineTotal(it); }, 0); };
   var optText = function (it) { return Object.keys(it.opts).map(function (k) { return k + ': ' + it.opts[k]; }).join(', '); };
 
@@ -121,7 +121,7 @@
   }
   function readForm(root) {
     var opts = {};
-    $$('[data-opt]', root).forEach(function (sel) { opts[sel.getAttribute('data-opt')] = sel.value; });
+    $$('[data-opt]', root).forEach(function (sel) { if (sel.type === 'radio' && !sel.checked) return; opts[sel.getAttribute('data-opt')] = sel.value; });   /* select atau radio terpilih */
     var q = $('[data-qty]', root);
     return { opts: opts, qty: q ? q.value : '1' };
   }
@@ -146,7 +146,7 @@
     var s = svc(it.slug), o = optText(it);
     return '<li class="cart-item" data-i="' + i + '"><a class="cart-thumb" href="' + esc(url('service', s.slug)) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(s.image) + '" alt="" width="72" height="72" loading="lazy"></a>' +
       '<div class="cart-info"><a class="cart-name" href="' + esc(url('service', s.slug)) + '">' + esc(s.name) + '</a>' + (o ? '<small>' + esc(o) + '</small>' : '') +
-      '<span class="cart-unit">' + rupiah(s.priceFrom) + ' / ' + esc(s.unit) + '</span></div>' +
+      '<span class="cart-unit">' + rupiah(PS.unitPrice(s, it.opts)) + ' / ' + esc(s.unit) + '</span></div>' +
       '<div class="qty" role="group" aria-label="' + esc(CT.qty) + ' ' + esc(s.name) + '">' +
         '<button type="button" data-cart-dec aria-label="Kurangi jumlah ' + esc(s.name) + '">' + ico('minus') + '</button>' +
         '<input type="number" class="form-control qty-input" min="1" max="' + MAX_QTY + '" inputmode="numeric" value="' + it.qty + '" data-cart-qty aria-label="' + esc(CT.qty) + ' ' + esc(s.name) + ' (' + esc(s.unit) + ')">' +
@@ -212,7 +212,7 @@
   function message(code, v) {
     var lines = cart.map(function (it, i) {
       var s = svc(it.slug), o = optText(it);
-      return (i + 1) + '. ' + s.name + (o ? ' (' + o + ')' : '') + ' — ' + it.qty + ' ' + s.unit + ' x ' + rupiah(s.priceFrom).replace(/ /g, ' ') + ' = ' + rupiah(lineTotal(it)).replace(/ /g, ' ');
+      return (i + 1) + '. ' + s.name + (o ? ' (' + o + ')' : '') + ' — ' + it.qty + ' ' + s.unit + ' x ' + rupiah(PS.unitPrice(s, it.opts)).replace(/ /g, ' ') + ' = ' + rupiah(lineTotal(it)).replace(/ /g, ' ');
     });
     var ship = v.delivery === 'ship';
     return 'Halo ' + T.shortName + ', saya ' + v.name.trim() + ' (WA ' + v.phone.trim() + ') ' + CT.intro + '\nKode pesanan: ' + code + '\n' + lines.join('\n') +
