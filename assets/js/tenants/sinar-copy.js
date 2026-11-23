@@ -150,6 +150,10 @@ window.TENANTS['sinar-copy'] = {
           title: 'Keranjang | Sinar Copy & Printing',
           description: 'Keranjang pesanan Sinar Copy & Printing. Periksa pesanan, isi data singkat, lalu kirim lewat WhatsApp.'
         },
+        checkout: {
+          title: 'Checkout | Sinar Copy & Printing',
+          description: 'Checkout pesanan Sinar Copy & Printing: alamat, ongkos kirim otomatis, dan pembayaran.'
+        },
         orderStatus: {
           title: 'Lacak Pesanan | Sinar Copy & Printing',
           description: 'Cek tahapan pesanan Anda di Sinar Copy & Printing dengan kode pesanan.'
@@ -305,6 +309,30 @@ window.TENANTS['sinar-copy'] = {
         services: { eyebrow: 'Produk Terlaris', title: 'Layanan yang Paling Sering Dipesan', text: 'Tekan ikon keranjang untuk menambahkan. Harga final dikonfirmasi admin.' },
         steps: { eyebrow: 'Cara Belanja', title: 'Dari Keranjang sampai Pesanan Jadi', text: 'Pilih, checkout lewat WhatsApp, lalu lacak pesanan dengan kode.' }
       }
+    },
+    /* Full E-commerce: bayar dan ongkir di website; WhatsApp hanya untuk tanya admin */
+    ecommerce: {
+      tenant: {
+        promoBar: 'Ongkir otomatis • Bayar via VA, QRIS, e-wallet • Antar ke seluruh Indonesia',
+        hero: {
+          actions: { primary: { label: 'Belanja Sekarang', icon: 'shopping-bag', route: 'services' }, secondary: { label: 'Chat Admin', icon: 'message-circle', message: 'Halo, saya ingin bertanya tentang pesanan cetak.' } },
+          points: ['Ongkir langsung terlihat', 'Bayar via VA, QRIS, e-wallet', 'Lacak pesanan sampai nomor resi']
+        }
+      },
+      pageText: {
+        services: { lead: 'Pilih layanan, masukkan keranjang, lalu bayar langsung di website. Ongkos kirim dihitung otomatis.' },
+        service: {
+          orderTitle: 'Pesan layanan ini', orderHint: 'Pilih kebutuhan dan jumlah, masukkan ke keranjang, lalu checkout dan bayar di website.',
+          orderButton: 'Tambah ke Keranjang', orderAlt: 'Beli Sekarang'
+        },
+        cart: {
+          lead: 'Periksa pesanan Anda dan cek ongkos kirim ke kota tujuan, lalu lanjut ke checkout untuk membayar.',
+          totalNote: 'Harga barang dari harga "mulai dari" x jumlah. Ongkos kirim dan biaya pembayaran dihitung pada checkout.'
+        }
+      },
+      homeText: {
+        steps: { eyebrow: 'Cara Belanja', title: 'Dari Keranjang sampai Pesanan Sampai', text: 'Pilih layanan, hitung ongkir, bayar di website, lalu lacak sampai nomor resi.' }
+      }
     }
   },
 
@@ -374,6 +402,10 @@ window.TENANTS['sinar-copy'] = {
     orderStatus: {
       title: 'Lacak Pesanan', lead: 'Masukkan kode pesanan yang Anda terima saat checkout untuk melihat tahapannya.',
       sample: 'Halaman contoh untuk demo. Pesanan yang Anda buat di perangkat ini dan kode contoh di atas bisa dicek. Di sistem sebenarnya, status dibaca dari database dan diperbarui admin.'
+    },
+    /* Paket Full E-commerce (modules.checkout = 'onsite'): checkout, ongkir, dan pembayaran di website. Semua kunci opsional. */
+    checkout: {
+      title: 'Checkout', lead: 'Isi alamat, pilih pengiriman, lalu bayar. Ongkos kirim dihitung otomatis.'
     }
   },
 
@@ -470,6 +502,83 @@ window.TENANTS['sinar-copy'] = {
       { code: 'DEMO-001', step: 1, items: ['Banner Flexi 3x1 m (1 pcs)'], total: 270000 },
       { code: 'DEMO-002', step: 2, items: ['Print Dokumen A4 (120 lembar)', 'Jilid Buku & Skripsi (2 buku)'], total: 150000 },
       { code: 'DEMO-003', step: 3, items: ['Kartu Nama (5 box)'], total: 225000 }
+    ],
+    /* Paket Full E-commerce: tahap pesanan yang sudah dibayar. Tahap 0 (menunggu bayar) dan tahap kirim/ambil diisi platform. */
+    onsite: {
+      steps: [
+        { title: 'Menunggu pembayaran', text: 'Selesaikan pembayaran sebelum batas waktu agar pesanan tidak dibatalkan.' },
+        { title: 'Pembayaran diterima', text: 'Pembayaran terverifikasi. Pesanan masuk antrean produksi.' },
+        { title: 'Sedang diproses', text: 'Pesanan sedang dicetak dan difinishing.' },
+        { title: 'Dikirim', pickupTitle: 'Siap diambil', text: 'Pesanan diserahkan ke kurir. Lacak dengan nomor resi.', pickupText: 'Pesanan siap diambil di toko. Tunjukkan kode pesanan.' },
+        { title: 'Selesai', text: 'Pesanan sudah diterima. Terima kasih!' }
+      ],
+      examples: [
+        { code: 'DEMO-101', step: 1, items: ['Banner Flexi 3x1 m (1 pcs)'], total: 285000, courier: 'JNE REG', resi: '', method: 'BCA Virtual Account' },
+        { code: 'DEMO-102', step: 3, items: ['Kartu Nama (5 box)', 'Cetak Brosur & Flyer (500 lembar)'], total: 842500, courier: 'J&T EZ', resi: 'JP1234567890', method: 'QRIS' },
+        { code: 'DEMO-103', step: 4, items: ['Jilid Buku & Skripsi (2 buku)'], total: 41500, courier: 'GoSend Instant', resi: 'GK-88213', method: 'GoPay' }
+      ]
+    }
+  },
+
+  /* ---------- Pengiriman (paket Full E-commerce) ----------
+     Data DUMMY agar ongkir terlihat di mockup. Rumus: bulatkan naik ke 500 dari (base + perKg x kg) x faktor zona tujuan;
+     kg = berat total dibulatkan ke atas (minimal 1). Estimasi hari = etaDays + eta tambahan zona.
+     Laravel: tabel shipping_couriers (dipilih tenant), ongkir dihitung SERVER lewat RajaOngkir/Biteship dengan area asal toko;
+     angka di sini hanya untuk tampilan. weightGram = berat per satuan layanan (kolom services.weight_gram). */
+  shipping: {
+    originLabel: 'Pulogadung, Jakarta Timur',
+    defaultWeightGram: 100,
+    weightGram: { 'fotocopy': 5, 'print-a4': 5, 'print-a3': 10, 'print-a0': 30, 'cetak-banner': 450, 'jilid-buku': 250, 'laminating': 8,
+      'cetak-sticker': 10, 'digital-printing': 10, 'cetak-brosur': 4, 'kartu-nama': 150, 'cetak-undangan': 12, 'cetak-buku': 300 },
+    pickup: { enabled: true, label: 'Ambil di toko', note: 'Gratis. Siap diambil pada jam buka setelah pesanan selesai.' },
+    groups: {
+      'jabodetabek':  { label: 'Jabodetabek',        factor: 1,   etaAdd: 0 },
+      'jawa':         { label: 'Pulau Jawa',         factor: 1.4, etaAdd: 1 },
+      'sumatera':     { label: 'Sumatera',           factor: 2.2, etaAdd: 2 },
+      'bali-nusa':    { label: 'Bali & Nusa Tenggara', factor: 2.4, etaAdd: 2 },
+      'kalimantan':   { label: 'Kalimantan',         factor: 2.8, etaAdd: 3 },
+      'sulawesi':     { label: 'Sulawesi',           factor: 3,   etaAdd: 3 },
+      'maluku-papua': { label: 'Maluku & Papua',     factor: 3.8, etaAdd: 5 }
+    },
+    couriers: [
+      { id: 'jne', name: 'JNE', services: [
+        { id: 'reg', name: 'REG', note: 'Reguler', etaDays: [2, 3], base: 9000, perKg: 3000 },
+        { id: 'yes', name: 'YES', note: 'Esok sampai', etaDays: [1, 1], base: 18000, perKg: 6000, groups: ['jabodetabek', 'jawa'] }
+      ] },
+      { id: 'jnt', name: 'J&T', services: [
+        { id: 'ez', name: 'EZ', note: 'Reguler', etaDays: [2, 4], base: 8000, perKg: 2800 }
+      ] },
+      { id: 'sicepat', name: 'SiCepat', services: [
+        { id: 'best', name: 'BEST', note: 'Besok sampai', etaDays: [1, 2], base: 12000, perKg: 4500, groups: ['jabodetabek', 'jawa'] },
+        { id: 'reg', name: 'REG', note: 'Reguler', etaDays: [2, 3], base: 8500, perKg: 3000 }
+      ] },
+      { id: 'gosend', name: 'GoSend', services: [
+        { id: 'instant', name: 'Instant', note: 'Hari ini, maks. 3 jam', etaDays: [0, 0], etaText: '2–3 jam', base: 14000, perKg: 2000, groups: ['jabodetabek'], maxKg: 10 }
+      ] }
+    ]
+  },
+
+  /* ---------- Pembayaran (paket Full E-commerce) ----------
+     Simulasi: nomor VA dan QR dibuat dari kode pesanan, TIDAK sungguhan. Biaya = flat + persen x (barang + ongkir).
+     Laravel: tabel payments (order_id, method, gross_amount, status, expires_at, external_id); gateway Midtrans/Xendit membuat VA/QR;
+     status hanya berubah lewat webhook yang diverifikasi (signature) dan idempoten; JANGAN percaya status dari browser. */
+  payment: {
+    expiryMinutes: 1440,
+    accountName: 'Sinar Copy & Printing',
+    groups: { va: 'Virtual Account', qris: 'QRIS', ewallet: 'E-Wallet' },
+    methods: [
+      { id: 'bca',     group: 'va',      name: 'BCA Virtual Account',     prefix: '39018', fee: { flat: 4000 },
+        steps: ['Buka BCA mobile atau ATM BCA, pilih Transfer lalu BCA Virtual Account.', 'Masukkan nomor Virtual Account di atas.', 'Periksa nama penerima dan jumlah tagihan, lalu konfirmasi.', 'Simpan bukti bayar. Status pesanan berubah otomatis.'] },
+      { id: 'mandiri', group: 'va',      name: 'Mandiri Virtual Account', prefix: '88908', fee: { flat: 4000 },
+        steps: ['Buka Livin by Mandiri, pilih Bayar lalu Multipayment.', 'Pilih penyedia jasa, masukkan nomor Virtual Account di atas.', 'Periksa jumlah tagihan, lalu konfirmasi dengan PIN.', 'Status pesanan berubah otomatis setelah pembayaran.'] },
+      { id: 'bni',     group: 'va',      name: 'BNI Virtual Account',     prefix: '8808',  fee: { flat: 3500 },
+        steps: ['Buka BNI Mobile Banking, pilih Transfer lalu Virtual Account Billing.', 'Masukkan nomor Virtual Account di atas.', 'Periksa jumlah tagihan, lalu konfirmasi.', 'Status pesanan berubah otomatis setelah pembayaran.'] },
+      { id: 'qris',    group: 'qris',    name: 'QRIS',                    fee: { percent: 0.7 },
+        steps: ['Buka aplikasi bank atau e-wallet yang mendukung QRIS.', 'Pindai kode QR di atas.', 'Periksa nama merchant dan jumlah, lalu konfirmasi.', 'Status pesanan berubah otomatis setelah pembayaran.'] },
+      { id: 'gopay',   group: 'ewallet', name: 'GoPay',                   fee: { percent: 2 },
+        steps: ['Tekan tombol "Buka GoPay" (di perangkat sebenarnya aplikasi akan terbuka).', 'Periksa jumlah tagihan di aplikasi.', 'Konfirmasi dengan PIN GoPay.', 'Kembali ke halaman ini; status berubah otomatis.'] },
+      { id: 'dana',    group: 'ewallet', name: 'DANA',                    fee: { percent: 1.5 },
+        steps: ['Tekan tombol "Buka DANA" (di perangkat sebenarnya aplikasi akan terbuka).', 'Periksa jumlah tagihan di aplikasi.', 'Konfirmasi dengan PIN DANA.', 'Kembali ke halaman ini; status berubah otomatis.'] }
     ]
   },
 

@@ -122,7 +122,7 @@
   D.site = S;
 
   /* Paket menentukan menu: halaman milik modul yang tidak aktif (mis. Harga) tidak ditampilkan */
-  var moduleOn = function (m) { return !m || (m === 'pricing' ? S.modules.pricingPage : m === 'cart' ? S.modules.order === 'cart' : true); };
+  var moduleOn = function (m) { return !m || (m === 'pricing' ? S.modules.pricingPage : m === 'cart' ? S.modules.order === 'cart' : m === 'checkout' ? S.modules.checkout === 'onsite' : true); };
   D.nav = P.nav.filter(function (n) { return moduleOn(n.module); }).map(function (n) {
     return Array.isArray(n.dropdown) ? Object.assign({}, n, { dropdown: n.dropdown.filter(function (c) { return moduleOn(c.module); }) }) : n;
   });

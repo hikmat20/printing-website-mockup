@@ -22,7 +22,8 @@ window.PLATFORM = {
     contact:     { mockup: 'contact.html',        laravel: '/kontak' },
     faq:         { mockup: 'faq.html',            laravel: '/faq' },
     cart:        { mockup: 'keranjang.html',      laravel: '/keranjang',       module: 'cart' },
-    orderStatus: { mockup: 'status-pesanan.html', laravel: '/status-pesanan',  module: 'cart' }
+    orderStatus: { mockup: 'status-pesanan.html', laravel: '/status-pesanan',  module: 'cart' },
+    checkout:    { mockup: 'checkout.html',       laravel: '/checkout',        module: 'checkout' }   // hanya paket dengan modules.checkout = 'onsite'
   },
 
   /* ---------- Navigasi ---------- */
@@ -139,6 +140,12 @@ window.PLATFORM = {
       description: 'Keranjang dan checkout yang berujung pesan WhatsApp; pembayaran dan akun dibuat di Laravel.',
       modules: { prices: true, pricingPage: true, order: 'cart' },
       seo: {}
+    },
+    ecommerce: {
+      name: 'Full E-commerce', available: true,
+      description: 'Belanja sampai bayar di website: keranjang, ongkos kirim otomatis per kurir, metode pembayaran, dan lacak pesanan sampai resi.',
+      modules: { prices: true, pricingPage: true, order: 'cart', checkout: 'onsite' },
+      seo: {}
     }
   },
 
@@ -151,6 +158,7 @@ window.PLATFORM = {
     { package: 'catalog',  template: 'katalog', title: 'Katalog untuk pelanggan korporat', audience: 'Percetakan B2B: banyak produk, minta penawaran lewat daftar tanya.' },
     { package: 'shop',     template: 'toko',    title: 'Toko dengan keranjang',           audience: 'Digital printing yang ingin pelanggan memilih, memasukkan keranjang, lalu checkout.' },
     { package: 'shop',     template: 'grafika', title: 'Toko cetak ala marketplace',       audience: 'Percetakan dengan banyak produk: banner promo, kategori bergambar, pencarian, dan keranjang.' },
+    { package: 'ecommerce', template: 'toko',   title: 'Toko online dengan ongkir dan bayar',  audience: 'Percetakan yang ingin pelanggan membayar langsung di website: ongkir otomatis, VA, QRIS, e-wallet, dan lacak resi.' },
     { package: 'profile',  template: 'compro',  title: 'Profil perusahaan editorial',      audience: 'Usaha yang ingin tampil seperti perusahaan: menu samping tetap, hero layar penuh, layanan sebagai daftar bernomor.' }
   ],
 

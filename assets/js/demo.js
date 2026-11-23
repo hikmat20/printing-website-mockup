@@ -20,9 +20,9 @@
   var pkgIds = Object.keys(P.packages).filter(function (id) { return P.packages[id].available; });
   var tplIds = Object.keys(P.templates);
   var DEVICES = { desktop: { label: 'Desktop', width: '100%', height: 800 }, tablet: { label: 'Tablet', width: '820px', height: 760 }, mobile: { label: 'Ponsel', width: '390px', height: 760 } };
-  var PAGE_LABEL = { home: 'Beranda', services: 'Layanan', service: 'Detail layanan', pricing: 'Harga', portfolio: 'Portofolio', about: 'Tentang', blog: 'Artikel', article: 'Detail artikel', contact: 'Kontak', faq: 'FAQ', cart: 'Keranjang', orderStatus: 'Lacak pesanan' };
-  var PAGE_ORDER = ['home', 'services', 'service', 'pricing', 'portfolio', 'about', 'blog', 'article', 'contact', 'faq', 'cart', 'orderStatus'];
-  var ORDER_TEXT = { contact: 'Tombol "Hubungi Kami" ke halaman Kontak', whatsapp: 'WhatsApp per layanan', inquiry: 'Daftar tanya, satu pesan WhatsApp', cart: 'Keranjang dan checkout ke WhatsApp' };
+  var PAGE_LABEL = { home: 'Beranda', services: 'Layanan', service: 'Detail layanan', pricing: 'Harga', portfolio: 'Portofolio', about: 'Tentang', blog: 'Artikel', article: 'Detail artikel', contact: 'Kontak', faq: 'FAQ', cart: 'Keranjang', checkout: 'Checkout', orderStatus: 'Lacak pesanan' };
+  var PAGE_ORDER = ['home', 'services', 'service', 'pricing', 'portfolio', 'about', 'blog', 'article', 'contact', 'faq', 'cart', 'checkout', 'orderStatus'];
+  var ORDER_TEXT = { contact: 'Tombol "Hubungi Kami" ke halaman Kontak', whatsapp: 'WhatsApp per layanan', inquiry: 'Daftar tanya, satu pesan WhatsApp', cart: 'Keranjang dan checkout ke WhatsApp', onsite: 'Keranjang, ongkir otomatis, bayar di website' };
   var HEADER_TEXT = { standard: 'Header standar', topbar: 'Bilah atas', megamenu: 'Mega menu', store: 'Header toko' };
   var CARD_TEXT = { elevated: 'Kartu berbayang', outlined: 'Kartu berbingkai' };
   var BTN_TEXT = { rounded: 'Tombol membulat', pill: 'Tombol pil', square: 'Tombol tegas' };
@@ -35,6 +35,7 @@
       var rt = P.routes[r]; if (!rt) return false;
       if (rt.module === 'pricing') return !!mod.pricingPage;
       if (rt.module === 'cart') return mod.order === 'cart';
+      if (rt.module === 'checkout') return mod.checkout === 'onsite';
       return true;
     });
   }
@@ -78,7 +79,7 @@
   var rows = [
     ['Harga tampil di situs', function (id) { return P.packages[id].modules.prices ? 'Ya' : 'Tidak'; }],
     ['Halaman Harga', function (id) { return P.packages[id].modules.pricingPage ? 'Ya' : 'Tidak ada'; }],
-    ['Cara pelanggan memesan', function (id) { return ORDER_TEXT[P.packages[id].modules.order] || '-'; }],
+    ['Cara pelanggan memesan', function (id) { var m = P.packages[id].modules; return ORDER_TEXT[m.checkout === 'onsite' ? 'onsite' : m.order] || '-'; }],
     ['Cocok untuk', function (id) { var d = presets.filter(function (x) { return x.package === id; })[0]; return d ? d.audience : P.packages[id].description; }]
   ];
   $('pk-table').insertAdjacentHTML('beforeend',
