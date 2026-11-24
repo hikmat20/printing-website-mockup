@@ -74,7 +74,9 @@
       '<a class="btn btn-wa btn-lg" data-wa data-wa-msg="' + esc(p2.message || PS.msgDefault()) + '">' + ico(p2.icon || 'message-circle') + ' ' + esc(p2.label) + '</a></div>' +
       '<ul class="hero-points">' + h.points.map(function (t) { return '<li>' + ico('circle-check') + '<span>' + esc(t) + '</span></li>'; }).join('') + '</ul>';
     var body;
-    if (variant === 'centered') {
+    if (variant === 'tiles') {
+      body = heroTiles(copy);
+    } else if (variant === 'centered') {
       body = '<div class="hero-copy">' + copy + '</div><div class="hero-visual hero-visual--wide">' + C.heroVisual() + '</div>';
     } else {
       body = '<div class="row align-items-center g-4 g-lg-5"><div class="col-lg-6">' + copy + '</div>' +
@@ -82,6 +84,19 @@
     }
     return '<section class="hero hero--' + variant + '" aria-labelledby="hero-title"><div class="container">' + body + '</div></section>';
   };
+
+  /* Hero berubin (template Etalase): teks di kiri; di kanan satu ubin tinggi (gambar hero) dan dua ubin layanan unggulan
+     (gambar, nama, harga bila paket menampilkannya). Tanpa layanan unggulan berbentuk gambar, ubin kecil dilewati. */
+  function heroTiles(copy) {
+    var h = T.hero, prices = PS.modules.prices;
+    var feat = D.services.filter(function (s) { return s.featured && s.image; }).slice(0, 2);
+    var tiles = feat.map(function (s) {
+      return '<a class="hero-tile" href="' + esc(url('service', s.slug)) + '"><img src="' + esc(s.image) + '" alt="" width="400" height="300" loading="lazy">' +
+        '<span class="hero-tile-cap"><strong>' + esc(s.name) + '</strong>' + (prices ? '<span>Mulai ' + PS.rupiah(s.priceFrom) + '</span>' : '<span>' + esc(s.eta) + '</span>') + '</span></a>';
+    }).join('');
+    return '<div class="tiles-grid' + (feat.length ? '' : ' is-solo') + '"><div class="tiles-copy">' + copy + '</div>' +
+      '<div class="tiles-art"><figure class="hero-tile hero-tile--main"><img src="' + esc(h.image) + '" alt="' + esc(h.imageAlt) + '" width="800" height="640" fetchpriority="high"></figure>' + tiles + '</div></div>';
+  }
 
   /* Hero layar penuh (template Compro): gambar sebagai latar, judul raksasa, dua ajakan, tiga poin singkat. */
   function heroFullbleed() {
@@ -117,6 +132,7 @@
   /* ---------------------------------------------------------- categories */
   R.categories = function (variant, o) {
     if (variant === 'mosaic') return mosaic(o);
+    if (variant === 'circles') return circles(o);
     if (variant === 'rows') {
       return wrap('categories', head('categories') + '<div class="cat-rows">' + D.categories.map(function (c, i) {
         var n = D.services.filter(function (s) { return s.category === c.slug; }).length;
@@ -351,6 +367,17 @@
           '<div class="banner-dots" role="group" aria-label="Pilih banner">' + dots + '</div>' +
           '<button type="button" class="slider-btn" data-slider-next aria-label="Banner berikutnya">' + ico('chevron-right') + '</button></div>'
         : '') + '</div></div></section>';
+  }
+
+  /* Kategori bulat (template Etalase): lingkaran bergambar sebaris. Gambar = gambar layanan pertama kategori (dekoratif); tanpa gambar, ikon kategori. */
+  function circles(o) {
+    var items = D.categories.map(function (c) {
+      var list = D.services.filter(function (s) { return s.category === c.slug; }), first = list[0];
+      return '<li><a class="circ" href="' + esc(url('category', c.slug)) + '"><span class="circ-img">' +
+        (first && first.image ? '<img src="' + esc(first.image) + '" alt="" width="200" height="200" loading="lazy">' : ico(c.icon || 'layers', 'i-lg')) + '</span>' +
+        '<strong>' + esc(c.name) + '</strong><small>' + list.length + ' layanan</small></a></li>';
+    }).join('');
+    return wrap('categories', head('categories') + '<ul class="cat-circles">' + items + '</ul>', o);
   }
 
   /* Mosaik kategori: dua ubin besar, lalu ubin kecil. Gambar = gambar layanan pertama kategori (dekoratif). */

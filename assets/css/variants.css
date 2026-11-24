@@ -620,3 +620,117 @@ html[data-header="rail"] .rail-inner { display: none; }
 /* Tombol utama di atas latar primer gelap (rail, hero layar penuh, CTA strip) memakai warna aksen agar tetap terbaca */
 html[data-header="rail"] .rail-inner .btn-brand, .hero--fullbleed .btn-brand, .cta-strip .btn-brand { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-on-accent); }
 html[data-header="rail"] .rail-inner .btn-brand:hover, .hero--fullbleed .btn-brand:hover, .cta-strip .btn-brand:hover { background: var(--c-accent-dark); border-color: var(--c-accent-dark); color: var(--c-on-accent); }
+
+/* 17. Template Etalase: header "boutique", laci keranjang, hero berubin, kategori bulat, galeri produk, checkout fokus ---- */
+/* Header boutique: merek di tengah, pencarian kiri, keranjang + ajakan kanan, menu satu baris di bawah (desktop). HP: baris merek + keranjang + menu, lalu pencarian. */
+html[data-header="boutique"] { --header-stack: calc(var(--header-h) + 58px); scroll-padding-top: calc(var(--header-stack) + 16px); }
+html[data-header="boutique"] :is(.price-group, .faq-group) { scroll-margin-top: calc(var(--header-stack) + 1rem); }
+html[data-header="boutique"] .boutique-inner { height: auto; min-height: var(--header-h); flex-wrap: wrap; row-gap: .4rem; padding-block: .4rem; }
+html[data-header="boutique"] .boutique-inner .brand { flex: 1 1 0; }
+html[data-header="boutique"] .boutique-inner .brand small { display: none; }
+.bq-tools { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+.bq-tools .header-inq { margin-left: 0; }
+html[data-header="boutique"] .boutique-inner .menu-btn { margin-left: 0; }
+html[data-header="boutique"] .inq-head, html[data-header="boutique"] .mobile-menu-head { height: var(--header-h); }
+@media (min-width: 768px) { html[data-header="boutique"] { --header-stack: calc(var(--header-h) + 58px + 34px); } }
+@media (min-width: 992px) {
+  html[data-header="boutique"] { --header-stack: calc(84px + 34px + 46px); }
+  html[data-header="boutique"] .boutique-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; height: 84px; min-height: 0; padding-block: 0; row-gap: 0; column-gap: 1.5rem; }
+  html[data-header="boutique"] .boutique-inner .store-search { grid-column: 1; grid-row: 1; order: 0; max-width: 300px; margin: 0; }
+  html[data-header="boutique"] .boutique-inner .brand { grid-column: 2; grid-row: 1; flex: none; justify-self: center; }
+  html[data-header="boutique"] .boutique-inner .brand small { display: block; }
+  html[data-header="boutique"] .bq-tools { grid-column: 3; grid-row: 1; justify-self: end; margin-left: 0; }
+  .boutique-nav .container { display: flex; justify-content: center; }
+  .boutique-nav .nav-desktop ul { justify-content: center; gap: .25rem; }
+  html[data-header="boutique"] .order-card, html[data-header="boutique"] .catalog-side, html[data-header="boutique"] .co-summary, html[data-header="boutique"] .cart-summary { top: calc(var(--header-stack) + 1rem); }
+}
+
+/* Laci keranjang (shop.js) */
+.cart-drawer { position: fixed; inset: 0; z-index: 1060; visibility: hidden; transition: visibility 0s linear .25s; }
+.cart-drawer.is-open { visibility: visible; transition-delay: 0s; }
+.dr-backdrop { position: absolute; inset: 0; background: color-mix(in srgb, var(--c-primary-dark) 50%, transparent); opacity: 0; transition: opacity .25s; }
+.cart-drawer.is-open .dr-backdrop { opacity: 1; }
+.dr-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(92vw, 420px); display: flex; flex-direction: column; background: var(--c-card); box-shadow: var(--shadow-lg); transform: translateX(100%); transition: transform .25s; }
+.cart-drawer.is-open .dr-panel { transform: none; }
+.dr-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 .75rem 0 1.25rem; height: var(--header-h); border-bottom: 1px solid var(--c-border); flex: none; }
+.dr-head h2 { margin: 0; font-size: 1.125rem; }
+.dr-count { color: var(--c-muted); font-weight: 500; }
+.dr-close { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--c-primary); border-radius: var(--r-btn); cursor: pointer; }
+.dr-close:hover { background: var(--c-primary-light); }
+.dr-list { list-style: none; margin: 0; padding: 0 1.25rem; flex: 1 1 auto; overflow-y: auto; }
+.dr-item { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: .75rem; padding: 1rem 0; border-bottom: 1px solid var(--c-border); align-items: start; }
+.dr-thumb img { display: block; width: 64px; height: 64px; object-fit: cover; border-radius: 10px; background: var(--c-surface); }
+.dr-info { min-width: 0; display: grid; gap: .25rem; }
+.dr-name { font-weight: 700; color: var(--c-text); overflow-wrap: anywhere; line-height: 1.3; }
+.dr-info small { color: var(--c-muted); overflow-wrap: anywhere; }
+.dr-side { display: flex; flex-direction: column; align-items: flex-end; gap: .35rem; }
+.dr-side strong { white-space: nowrap; font-size: .9375rem; }
+.qty--sm button { width: 32px; min-height: 32px; }
+.qty--sm .qty-val { min-width: 2.25rem; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .875rem; padding-inline: .25rem; }
+.dr-foot { flex: none; padding: 1.1rem 1.25rem 1.25rem; border-top: 1px solid var(--c-border); background: var(--c-card); }
+.dr-sub { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 .25rem; }
+.dr-sub strong { font-size: 1.25rem; }
+.dr-foot .form-note { margin-bottom: 1rem; }
+.dr-empty { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; padding: 2rem; text-align: center; color: var(--c-muted); }
+@media (prefers-reduced-motion: reduce) { .cart-drawer, .dr-backdrop, .dr-panel { transition: none; } }
+
+/* Hero berubin */
+.hero--tiles { padding: 1.75rem 0 2.5rem; }
+.tiles-grid { display: grid; gap: 1.5rem; align-items: center; }
+.tiles-art { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.hero-tile { position: relative; display: block; margin: 0; overflow: hidden; border-radius: var(--r-media); background: var(--c-primary-light); border: 1px solid var(--c-border); color: #fff; min-height: 150px; }
+.hero-tile img { display: block; width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; transition: transform .35s; }
+a.hero-tile:hover img { transform: scale(1.05); }
+.hero-tile--main { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
+.hero-tile-cap { position: absolute; inset: auto 0 0 0; display: block; padding: 1.75rem .85rem .75rem; background: linear-gradient(to top, rgba(0, 0, 0, .78), rgba(0, 0, 0, 0)); }
+.hero-tile-cap strong { display: block; font-size: .9375rem; line-height: 1.25; }
+.hero-tile-cap span { display: block; font-size: .8125rem; opacity: .92; }
+.tiles-grid.is-solo .tiles-art { grid-template-columns: 1fr; }
+@media (min-width: 576px) {
+  .tiles-art { grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr; }
+  .hero-tile--main { grid-column: 1; grid-row: 1 / 3; aspect-ratio: auto; min-height: 380px; }
+  .tiles-grid.is-solo .tiles-art { grid-template-columns: 1fr; grid-template-rows: none; }
+  .tiles-grid.is-solo .hero-tile--main { grid-row: auto; aspect-ratio: 16 / 10; min-height: 0; }
+}
+@media (min-width: 992px) { .tiles-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 3rem; } .hero--tiles { padding: 3rem 0 4rem; } }
+
+/* Kategori bulat */
+.cat-circles { list-style: none; margin: 0; padding: .25rem 0 .75rem; display: flex; gap: 1.25rem; overflow-x: auto; scroll-snap-type: x proximity; }
+.cat-circles li { flex: none; scroll-snap-align: start; }
+.circ { display: flex; flex-direction: column; align-items: center; gap: .35rem; width: 120px; text-align: center; color: var(--c-text); }
+.circ:hover { color: var(--c-primary); }
+.circ-img { width: 104px; height: 104px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: var(--c-primary-light); color: var(--c-primary); box-shadow: 0 0 0 2px var(--c-border), 0 0 0 5px var(--c-card); transition: box-shadow .18s; }
+.circ:hover .circ-img { box-shadow: 0 0 0 2px var(--c-accent), 0 0 0 5px var(--c-card); }
+.circ-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.circ strong { font-size: .9375rem; line-height: 1.25; overflow-wrap: anywhere; }
+.circ small { color: var(--c-muted); font-size: .8125rem; }
+@media (min-width: 992px) { .cat-circles { justify-content: center; flex-wrap: wrap; overflow: visible; gap: 1.5rem 2rem; } .circ { width: 136px; } .circ-img { width: 120px; height: 120px; } }
+
+/* Detail layanan: galeri + kotak beli */
+.gal-main { margin: 0; }
+.gal-main img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r-media); border: 1px solid var(--c-border); background: var(--c-surface); }
+.gal-thumbs { list-style: none; display: flex; flex-wrap: wrap; gap: .6rem; margin: .75rem 0 0; padding: 0; }
+.gal-thumb { display: block; width: 84px; padding: 0; overflow: hidden; border: 2px solid var(--c-border); border-radius: 10px; background: var(--c-card); cursor: pointer; }
+.gal-thumb[aria-pressed="true"] { border-color: var(--c-primary); }
+.gal-thumb img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+.buybox h1 { font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.25rem); margin: .75rem 0 .5rem; overflow-wrap: anywhere; }
+.buybox .page-lead { margin-bottom: 1.25rem; }
+html[data-card] .buybox .order-card { position: static; padding: 1.25rem 0 0; border: 0; border-top: 1px solid var(--c-border); border-radius: 0; background: none; box-shadow: none; }
+.buy-assure { list-style: none; margin: 1.1rem 0 0; padding: 1rem 0 0; border-top: 1px solid var(--c-border); display: grid; gap: .6rem; font-size: .875rem; color: var(--c-muted); }
+.buy-assure li { display: flex; gap: .6rem; align-items: flex-start; }
+.buy-assure .i { flex: none; color: var(--c-accent-dark); margin-top: .1rem; }
+.gal-detail { max-width: 860px; margin-inline: auto; }
+
+/* Checkout fokus: header dan footer diringkas */
+html[data-checkout="focus"] { --header-stack: var(--header-h); }
+.focus-inner { justify-content: space-between; }
+.focus-secure { display: inline-flex; align-items: center; gap: .4rem; color: var(--c-muted); font-weight: 600; font-size: .875rem; }
+.focus-secure .i { color: var(--c-wa-dark); }
+.focus-back { display: inline-flex; align-items: center; gap: .4rem; color: var(--c-primary); font-weight: 600; font-size: .875rem; white-space: nowrap; }
+@media (max-width: 575.98px) { .focus-secure span, .focus-back span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } .focus-secure, .focus-back { width: 44px; height: 44px; justify-content: center; } .focus-inner { gap: .25rem; } .focus-inner .brand { margin-right: auto; } }
+html[data-checkout="focus"] .site-footer { padding: 0; }
+.focus-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem 1.5rem; padding-block: 1.25rem; font-size: .875rem; }
+.focus-foot a { text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+html[data-checkout="focus"] .breadcrumb-wrap { display: none; }
+html[data-checkout="focus"] .page-head { padding-block: 1.5rem 1rem; }
+html[data-checkout="focus"] .page-head h1 { font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); margin-bottom: .25rem; }

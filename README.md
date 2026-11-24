@@ -82,6 +82,7 @@ Template = **skin visual** (`templates/<id>.css`) + **susunan beranda bawaan** (
 | `katalog` | Katalog B2B: padat informasi, mega menu per kategori, filter di samping, section klien/solusi/industri/jangkauan | megamenu | outlined | square | DM Sans / Inter |
 | `toko` | Etalase online (referensi anugerahprint.com): bilah promo, kotak cari + keranjang di header, ubin promo, kartu produk dengan tombol keranjang | store | elevated | rounded | Poppins / Inter |
 | `compro` | Profil perusahaan editorial (paket Company Profile): menu samping tetap, hero layar penuh, angka besar, layanan sebagai daftar bernomor, tanpa kartu/bayangan | rail | flat | square | Raleway / Source Sans 3 |
+| `etalase` | Butik online (paket Full E-commerce): merek di tengah, keranjang membuka laci geser, hero berubin, kategori bulat bergambar, galeri produk + kotak beli, checkout fokus | boutique | outlined | pill | Work Sans / Nunito |
 | `grafika` | Marketplace cetak (referensi primagraphia.co.id): banner promo bergeser, mosaik kategori bergambar, produk bertab (Terlaris / Baru / Semua), jelajah per kategori, deret merek berjalan, artikel terbaru; header dua baris dengan pencarian pil dan total keranjang | market | elevated | pill | Montserrat / Inter |
 
 Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `data-card`, `data-buttons`.
@@ -90,7 +91,7 @@ Atribut pada `<html>` yang ditulis `main.js`: `data-template`, `data-header`, `d
 
 Struktur tiap halaman **dikunci platform**; hanya beranda yang section-nya bisa diatur tenant.
 Tenant hanya memilih template, warna, font, gaya kartu/tombol, dan varian daftar yang diizinkan
-`PLATFORM.pages` (`site.pages.<halaman>.variant`): `services` = `grid`\|`list`\|`catalog`\|`market`\|`rows`, `service` = `standard`\|`configurator`, `blog` = `grid`\|`list`\|`magazine`, `faq` = `accordion`\|`help`. Bawaan per template; Grafika memakai `market`, `configurator`, `magazine`, `help` (lihat *Halaman dalam Grafika*).
+`PLATFORM.pages` (`site.pages.<halaman>.variant`): `services` = `grid`\|`list`\|`catalog`\|`market`\|`rows`, `service` = `standard`\|`configurator`\|`gallery`, `blog` = `grid`\|`list`\|`magazine`, `faq` = `accordion`\|`help`, `checkout` = `standard`\|`focus`. Bawaan per template; Grafika memakai `market`, `configurator`, `magazine`, `help` (lihat *Halaman dalam Grafika*).
 
 | Halaman | Berkas | Laravel | Status |
 |---|---|---|---|
@@ -267,6 +268,23 @@ Satu-satunya template dengan **kerangka** berbeda, bukan hanya kulit. `?template
   why `numbered`, cta `strip`; section baru `stats` (`band`, data `tenant.stats`; tanpa data section dilewati).
 - Halaman `/layanan` varian `rows` (bawaan Compro): filter kategori dan pencarian sama dengan varian lain; tanpa kotak urut. Pemesanan tetap di halaman detail.
 - Laravel: `rail` = satu layout Blade (`layouts/rail.blade.php`) yang dipilih dari `site.header`; `serviceRow` = komponen `<x-service-row>`.
+
+### Template Etalase: header `boutique`, laci keranjang, galeri, checkout fokus (Gelombang I)
+
+Template untuk paket Full E-commerce (`?package=ecommerce&template=etalase`; preset di `demo.html`), tetapi bisa dipasang di paket apa pun.
+
+- Header `boutique` (`?header=boutique`): baris promo, lalu pencarian di kiri, merek di tengah, keranjang (dengan total berjalan) + ajakan WhatsApp di kanan, menu satu baris
+  di tengah di bawahnya. Di HP: merek + keranjang + menu, lalu pencarian di baris kedua.
+- **Laci keranjang** (`shop.js`, hanya header `boutique` di halaman selain `/keranjang` dan `/checkout`): tombol keranjang (header atau menu HP) dan tombol "Tambah ke Keranjang"
+  membuka panel geser: baris keranjang dengan +/−/hapus, subtotal, lalu "Lanjut ke checkout" (paket checkout di website) atau "Lihat keranjang & pesan" (paket Semi e-commerce).
+  Dialog modal: fokus terjebak di dalam, Esc/klik latar menutup, fokus kembali ke pemicu, `prefers-reduced-motion` dihormati. Tanpa JS tombol tetap tautan ke `/keranjang`.
+  Teks bisa ditimpa lewat `pageText.drawer` (`title`, `close`, `subtotal`, `note`, `noteManual`, `view`, `checkout`, `order`).
+- Hero `tiles` (satu ubin gambar hero + dua ubin layanan unggulan; harga hanya bila `modules.prices`), categories `circles` (lingkaran bergambar; gambar = layanan pertama kategori).
+- Detail layanan varian `gallery` (`site.pages.service.variant`): galeri di kiri, kotak beli di kanan (judul, harga, opsi, jumlah, tombol keranjang), rincian di bawah. Gambar tambahan opsional per layanan:
+  `service.gallery = [{ image, alt }]` (maks. 4; tanpa itu hanya satu gambar tanpa miniatur). Paket checkout di website menambah dua catatan ongkir/bayar (`pageText.service.shipNote`, `payNote`).
+- Halaman `checkout` punya varian baru `site.pages.checkout.variant`: `standard` | `focus`. `focus` (bawaan Etalase; hanya berlaku bila paket punya checkout di website) meringkas header
+  (merek, "Pembayaran aman", kembali ke keranjang) dan footer (hak cipta + bantuan), menyembunyikan breadcrumb, dan menandai `<html data-checkout="focus">`.
+- Laravel: header = layout `layouts/boutique` dipilih dari `site.header`; laci = `<x-cart.drawer>` (Livewire/Alpine) membaca keranjang sesi yang sama; `focus` = layout `layouts/checkout-focus`.
 
 ## Halaman demo (`demo.html`)
 

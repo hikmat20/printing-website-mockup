@@ -296,6 +296,7 @@
     root.setAttribute('data-header', S.header);
     root.setAttribute('data-card', S.cardStyle);
     root.setAttribute('data-buttons', S.buttonShape);
+    if (focusMode()) root.setAttribute('data-checkout', 'focus');
     root.__theme = th;
   }
 
@@ -444,7 +445,8 @@
 
   /* Tautan keranjang (paket Semi e-commerce); isi dan jumlahnya dikelola shop.js */
   function cartLink(cls, withTotal) {
-    return '<a class="btn btn-outline-brand btn-sm ' + cls + '" href="' + url('cart') + '" aria-label="Keranjang">' + ico('shopping-cart') +
+    var drawer = S.header === 'boutique' ? ' data-cart-open aria-haspopup="dialog"' : '';      /* header boutique: tombol membuka laci keranjang (shop.js); tanpa JS tetap tautan ke /keranjang */
+    return '<a class="btn btn-outline-brand btn-sm ' + cls + '" href="' + url('cart') + '"' + drawer + ' aria-label="Keranjang">' + ico('shopping-cart') +
       '<span class="inq-label">Keranjang</span><span class="inq-count" data-cart-count hidden>0</span>' +
       (withTotal ? '<span class="cart-sum" data-cart-total>' + rupiah(0) + '</span>' : '') + '</a>';   /* total berjalan diisi shop.js */
   }
@@ -474,7 +476,39 @@
       '<a class="rail-phone" href="tel:+' + esc(T.phone) + '">' + ico('phone') + '<span>' + esc(T.phoneDisplay) + '</span></a></div></div>';
   }
 
+  /* Halaman checkout bervarian "focus" (paket dengan checkout di website): header dan footer diringkas agar pembeli tidak tergoda pergi. */
+  function focusMode() { return document.body.getAttribute('data-page') === 'checkout' && S.modules.checkout === 'onsite' && S.pages.checkout.variant === 'focus'; }
+
+  function focusHeader() {
+    return '<div class="container"><div class="header-inner focus-inner">' +
+      '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda"><img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span></span></a>' +
+      '<span class="focus-secure">' + ico('lock') + '<span>Pembayaran aman</span></span>' +
+      '<a class="focus-back" href="' + url('cart') + '">' + ico('arrow-left') + '<span>Kembali ke keranjang</span></a></div></div>';
+  }
+
+  function focusFooter() {
+    return '<div class="container focus-foot"><span>&copy; ' + new Date().getFullYear() + ' ' + esc(T.name) + '</span>' +
+      '<span>Butuh bantuan? <a data-wa data-wa-msg="' + esc('Halo ' + T.shortName + ', saya butuh bantuan untuk checkout.') + '">Chat admin</a> atau <a href="' + url('contact') + '">hubungi kami</a></span></div>';
+  }
+
+  /* Header "boutique" (template Etalase): merek di tengah, pencarian di kiri, keranjang (membuka laci) dan ajakan di kanan, menu satu baris di bawahnya. */
+  function boutiqueHeader() {
+    var page = activePage();
+    var nav = '<nav class="nav-desktop" aria-label="Navigasi utama"><ul>' + D.nav.map(function (n) { return navDesktop(n, page); }).join('') + '</ul></nav>';
+    var cta = S.modules.order === 'contact'
+      ? '<a class="btn btn-brand btn-sm header-cta" href="' + url('contact') + '">' + ico('message-square') + ' Hubungi Kami</a>'
+      : '<a class="btn btn-wa btn-sm header-cta" data-wa>' + WA_ICON + ' ' + (S.modules.order === 'inquiry' ? 'Chat Sales' : S.modules.order === 'cart' ? 'Chat Admin' : 'Pesan via WhatsApp') + '</a>';
+    return '<div class="promo-bar boutique-note"><div class="container"><span>' + ico('truck') + ' ' + esc(T.promoBar || ('Buka ' + T.hoursSummary + ' • ' + T.city)) + '</span></div></div>' +
+      '<div class="container"><div class="header-inner boutique-inner">' + searchForm(true) +
+      '<a class="brand" href="' + url('home') + '" aria-label="' + esc(T.name) + ' — Beranda"><img src="' + esc(T.logo) + '" alt="" width="42" height="42"><span class="brand-text"><span>' + esc(T.name) + '</span><small>' + esc(T.tagline) + '</small></span></a>' +
+      '<div class="bq-tools">' + (S.modules.order === 'cart' ? cartLink('header-inq header-cart', true) : '') + (S.modules.order === 'inquiry' ? inquiryButton('header-inq') : '') + cta + '</div>' +
+      '<button type="button" class="menu-btn" id="menu-open" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu">' + ico('menu', 'i-lg') + '</button></div></div>' +
+      '<div class="store-nav boutique-nav"><div class="container">' + nav + '</div></div>';
+  }
+
   function header() {
+    if (focusMode()) return focusHeader();
+    if (S.header === 'boutique') return boutiqueHeader();
     if (S.header === 'rail') return railHeader();
     var page = activePage(), market = S.header === 'market', store = S.header === 'store' || market;
     /* market: tombol "Kategori" (daftar kategori) di depan, lalu menu berikon; "Layanan" menjadi tautan "Semua Produk" */
@@ -523,6 +557,7 @@
 
   /* --- layout/footer ----------------------------------------------- */
   function footer() {
+    if (focusMode()) return focusFooter();
     var year = new Date().getFullYear();
     var svc = D.services.filter(function (s) { return s.featured; }).slice(0, 6)
       .map(function (s) { return '<li><a href="' + url('service', s.slug) + '">' + esc(s.name) + '</a></li>'; }).join('');

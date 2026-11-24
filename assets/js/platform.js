@@ -67,7 +67,7 @@ window.PLATFORM = {
   },
 
   /* ---------- Opsi komponen global ---------- */
-  headers:      ['standard', 'topbar', 'megamenu', 'store', 'market', 'rail'],   // varian header (megamenu: panel lebar per kategori; store: pencarian + keranjang, menu di baris kedua; market: seperti store tanpa baris promo, tombol Kategori, menu berikon, total keranjang, dan strip kepercayaan di footer)
+  headers:      ['standard', 'topbar', 'megamenu', 'store', 'market', 'rail', 'boutique'],   // varian header (megamenu: panel lebar per kategori; store: pencarian + keranjang, menu di baris kedua; market: seperti store tanpa baris promo, tombol Kategori, menu berikon, total keranjang, dan strip kepercayaan di footer; rail: bilah samping tetap (Compro); boutique: merek di tengah, pencarian di kiri, keranjang di kanan yang membuka laci keranjang (Etalase))
   cardStyles:   ['elevated', 'outlined', 'flat'],     // gaya kartu
   buttonShapes: ['rounded', 'pill', 'square'],        // bentuk tombol
 
@@ -78,9 +78,9 @@ window.PLATFORM = {
                bila tidak terpenuhi section dilewati diam-diam (bukan kesalahan tenant)
      variants[0] = varian default */
   sections: {
-    hero:         { locked: true,  variants: ['split', 'centered', 'dark', 'banner', 'fullbleed'] },     /* banner: slider spanduk dari tenant.banners; fullbleed: layar penuh dengan judul raksasa (Compro) */
+    hero:         { locked: true,  variants: ['split', 'centered', 'dark', 'banner', 'fullbleed', 'tiles'] },     /* banner: slider spanduk dari tenant.banners; fullbleed: layar penuh dengan judul raksasa (Compro); tiles: teks di kiri, tiga ubin gambar di kanan (Etalase) */
     trust:        {                variants: ['bar', 'cards'] },
-    categories:   { banded: true,  variants: ['grid', 'compact', 'mosaic', 'rows'], anchor: 'kategori' },   /* mosaic: ubin bergambar, dua besar lalu kecil */
+    categories:   { banded: true,  variants: ['grid', 'compact', 'mosaic', 'rows', 'circles'], anchor: 'kategori' },   /* mosaic: ubin bergambar, dua besar lalu kecil; circles: lingkaran bergambar sebaris (Etalase) */
     services:     { banded: true,  variants: ['grid', 'slider', 'tabs', 'rows'], anchor: 'layanan' },    /* tabs: Terlaris / Baru / Semua (service.tags) */
     about:        { banded: true,  variants: ['split', 'reverse', 'story'], anchor: 'tentang' },
     why:          { banded: true,  variants: ['split', 'grid', 'numbered'], anchor: 'keunggulan' },
@@ -158,7 +158,7 @@ window.PLATFORM = {
     { package: 'catalog',  template: 'katalog', title: 'Katalog untuk pelanggan korporat', audience: 'Percetakan B2B: banyak produk, minta penawaran lewat daftar tanya.' },
     { package: 'shop',     template: 'toko',    title: 'Toko dengan keranjang',           audience: 'Digital printing yang ingin pelanggan memilih, memasukkan keranjang, lalu checkout.' },
     { package: 'shop',     template: 'grafika', title: 'Toko cetak ala marketplace',       audience: 'Percetakan dengan banyak produk: banner promo, kategori bergambar, pencarian, dan keranjang.' },
-    { package: 'ecommerce', template: 'toko',   title: 'Toko online dengan ongkir dan bayar',  audience: 'Percetakan yang ingin pelanggan membayar langsung di website: ongkir otomatis, VA, QRIS, e-wallet, dan lacak resi.' },
+    { package: 'ecommerce', template: 'etalase', title: 'Toko online dengan ongkir dan bayar',  audience: 'Percetakan yang ingin pelanggan membayar langsung di website: laci keranjang, ongkir otomatis, VA, QRIS, e-wallet, dan lacak resi.' },
     { package: 'profile',  template: 'compro',  title: 'Profil perusahaan editorial',      audience: 'Usaha yang ingin tampil seperti perusahaan: menu samping tetap, hero layar penuh, layanan sebagai daftar bernomor.' }
   ],
 
@@ -170,9 +170,10 @@ window.PLATFORM = {
      lewat site.pages.<halaman>.variant. Bawaan tiap template ada di templates.<id>.pages. */
   pages: {
     services: { variants: ['grid', 'list', 'catalog', 'market', 'rows'] },   // catalog: filter kategori di sisi kiri + kartu di kanan; market: chip kategori berhitung + urutkan
-    service:  { variants: ['standard', 'configurator'] },            // configurator: opsi berharga per pilihan, langkah Spesifikasi > Jumlah > Desain, total langsung (hanya paket dengan harga)
+    service:  { variants: ['standard', 'configurator', 'gallery'] },            // configurator: opsi berharga per pilihan, langkah Spesifikasi > Jumlah > Desain, total langsung (hanya paket dengan harga); gallery: galeri gambar besar di kiri + kotak beli menempel di kanan, deskripsi di bawahnya (Etalase)
     blog:     { variants: ['grid', 'list', 'magazine'], pageSize: 3 }, // magazine: artikel utama + kartu + chip kategori berhitung + halaman (pageSize kecil karena data mockup sedikit)
-    faq:      { variants: ['accordion', 'help'] }                      // help: pusat bantuan: pencarian besar, pertanyaan populer, kartu topik berhitung
+    faq:      { variants: ['accordion', 'help'] },                     // help: pusat bantuan: pencarian besar, pertanyaan populer, kartu topik berhitung
+    checkout: { variants: ['standard', 'focus'] }                      // focus: header dan footer diringkas (merek + pembayaran aman) agar pembeli fokus menyelesaikan bayar; hanya paket dengan checkout di website
   },
 
   templates: {
@@ -319,6 +320,25 @@ window.PLATFORM = {
         { id: 'faq', variant: 'columns' },
         { id: 'location', variant: 'split' },
         { id: 'cta', variant: 'strip' }
+      ]
+    },
+    etalase: {
+      name: 'Etalase',
+      description: 'Butik online: merek di tengah, laci keranjang geser, hero berubin, kategori bulat bergambar, galeri produk dengan kotak beli menempel, dan checkout fokus.',
+      header: 'boutique', cardStyle: 'outlined', buttonShape: 'pill',
+      fonts: { heading: 'work-sans', body: 'nunito' },
+      pages: { services: 'market', service: 'gallery', checkout: 'focus', blog: 'grid' },
+      home: [
+        { id: 'hero', variant: 'tiles' },
+        { id: 'trust', variant: 'bar' },
+        { id: 'categories', variant: 'circles' },
+        { id: 'services', variant: 'grid', limit: 8 },
+        { id: 'promo', variant: 'tiles' },
+        { id: 'why', variant: 'grid' },
+        { id: 'steps', variant: 'cards' },
+        { id: 'testimonials', variant: 'slider' },
+        { id: 'faq', variant: 'columns' },
+        { id: 'cta', variant: 'card' }
       ]
     }
   }

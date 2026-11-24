@@ -135,6 +135,7 @@
     }
     saveCart(); badge();
     if (go) { window.location.href = url('cart'); return; }
+    if (DRAWER) { openDrawer(); return; }                 /* header boutique: tampilkan laci keranjang, bukan toast */
     say(s.name + ' ' + CT.added);
   }
   function readForm(root) {
@@ -334,6 +335,83 @@
     };
   };
 
+  /* ------------------------------------------------------------ laci keranjang
+     Hanya untuk header "boutique" (template Etalase) di halaman selain keranjang/checkout. Tombol keranjang di header (atau menu HP)
+     membuka panel geser berisi baris keranjang, subtotal, dan tombol lanjut; menambah layanan ke keranjang juga membukanya.
+     Tanpa JS, tombol tetap tautan biasa ke /keranjang. Laravel: komponen <x-cart.drawer> yang membaca keranjang yang sama. */
+  var PAGE_NOW = document.body.getAttribute('data-page');
+  var DRAWER = ON && PS.site.header === 'boutique' && PAGE_NOW !== 'cart' && PAGE_NOW !== 'checkout';
+  var DT = Object.assign({ title: 'Keranjang Anda', close: 'Tutup keranjang', subtotal: 'Subtotal', note: 'Ongkos kirim dan biaya pembayaran dihitung di langkah berikutnya.', noteManual: 'Harga final dan ongkos kirim dikonfirmasi admin.',
+    view: 'Lihat keranjang', checkout: 'Lanjut ke checkout', order: 'Lihat keranjang & pesan' }, obj(PT.drawer));
+  var drawer = null, drawerLast = null;
+
+  function drawerLine(it, i) {
+    var s = svc(it.slug), o = optText(it);
+    return '<li class="dr-item" data-i="' + i + '"><a class="dr-thumb" href="' + esc(url('service', s.slug)) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(s.image) + '" alt="" width="64" height="64" loading="lazy"></a>' +
+      '<div class="dr-info"><a class="dr-name" href="' + esc(url('service', s.slug)) + '">' + esc(s.name) + '</a>' + (o ? '<small>' + esc(o) + '</small>' : '') +
+      '<div class="qty qty--sm" role="group" aria-label="' + esc(CT.qty) + ' ' + esc(s.name) + '"><button type="button" data-dr-dec aria-label="Kurangi jumlah ' + esc(s.name) + '">' + ico('minus') + '</button>' +
+      '<span class="qty-val" aria-live="polite">' + it.qty + '</span><button type="button" data-dr-inc aria-label="Tambah jumlah ' + esc(s.name) + '">' + ico('plus') + '</button></div></div>' +
+      '<div class="dr-side"><strong>' + rupiah(lineTotal(it)) + '</strong><button type="button" class="inq-remove" data-dr-remove aria-label="' + esc(CT.remove) + ' ' + esc(s.name) + '">' + ico('trash-2') + '</button></div></li>';
+  }
+
+  function renderDrawer() {
+    var panel = $('.dr-panel', drawer); if (!panel) return;
+    var n = cart.length;
+    panel.innerHTML = '<div class="dr-head"><h2 id="dr-title">' + esc(DT.title) + (n ? ' <span class="dr-count">(' + n + ')</span>' : '') + '</h2>' +
+      '<button type="button" class="dr-close" data-dr-close aria-label="' + esc(DT.close) + '">' + ico('x', 'i-lg') + '</button></div>' +
+      (n ? '<ul class="dr-list">' + cart.map(drawerLine).join('') + '</ul>' +
+        '<div class="dr-foot"><p class="dr-sub"><span>' + esc(DT.subtotal) + '</span><strong>' + rupiah(total()) + '</strong></p><p class="form-note">' + esc(ONSITE ? DT.note : DT.noteManual) + '</p>' +
+        (ONSITE ? '<a class="btn btn-brand btn-lg w-100" href="' + esc(url('checkout')) + '">' + ico('lock') + ' ' + esc(DT.checkout) + '</a><a class="btn btn-outline-brand w-100 mt-2" href="' + esc(url('cart')) + '">' + esc(DT.view) + '</a>'
+          : '<a class="btn btn-brand btn-lg w-100" href="' + esc(url('cart')) + '">' + esc(DT.order) + '</a>') + '</div>'
+      : '<div class="dr-empty">' + ico('shopping-bag', 'i-lg') + '<p>' + esc(CT.emptyTitle) + '</p><a class="btn btn-brand" href="' + esc(url('services')) + '">' + esc(CT.emptyButton) + '</a></div>');
+    icons(panel);
+  }
+
+  function buildDrawer() {
+    drawer = document.createElement('div');
+    drawer.className = 'cart-drawer'; drawer.id = 'cart-drawer'; drawer.setAttribute('role', 'dialog'); drawer.setAttribute('aria-modal', 'true'); drawer.setAttribute('aria-labelledby', 'dr-title');
+    drawer.innerHTML = '<div class="dr-backdrop" data-dr-close></div><aside class="dr-panel"></aside>';
+    document.body.appendChild(drawer);
+    drawer.addEventListener('click', function (e) {
+      if (e.target.closest('[data-dr-close]')) { closeDrawer(); return; }
+      var li = e.target.closest('.dr-item'); if (!li) return;
+      var i = parseInt(li.getAttribute('data-i'), 10), it = cart[i]; if (!it) return;
+      var focus = null;
+      if (e.target.closest('[data-dr-inc]')) { it.qty = Math.min(it.qty + 1, MAX_QTY); focus = '[data-dr-inc]'; }
+      else if (e.target.closest('[data-dr-dec]')) { it.qty = Math.max(1, it.qty - 1); focus = '[data-dr-dec]'; }
+      else if (e.target.closest('[data-dr-remove]')) { cart.splice(i, 1); focus = 'remove'; }
+      else return;
+      saveCart(); badge(); renderDrawer();
+      var t = focus === 'remove' ? ($('.dr-item [data-dr-remove]', drawer) || $('.dr-close', drawer)) : $('.dr-item[data-i="' + i + '"] ' + focus, drawer);   /* fokus jangan hilang bersama baris */
+      if (t) t.focus();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!drawer.classList.contains('is-open')) return;
+      if (e.key === 'Escape') { closeDrawer(); return; }
+      if (e.key !== 'Tab') return;
+      var f = $$('a[href], button', drawer).filter(function (b) { return b.tabIndex >= 0 && b.offsetParent !== null; });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (!drawer.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
+
+  function openDrawer(from) {
+    if (!drawer) buildDrawer();
+    var mm = $('#mobile-menu.is-open'), mc = $('#menu-close'); if (mm && mc) mc.click();      /* menu HP yang terbuka ditutup dulu */
+    drawerLast = from || document.activeElement;
+    renderDrawer();
+    drawer.classList.add('is-open'); document.body.classList.add('is-locked');
+    var c = $('[data-dr-close]', $('.dr-panel', drawer)); if (c) c.focus();
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('is-open'); document.body.classList.remove('is-locked');
+    if (drawerLast && document.contains(drawerLast) && drawerLast.focus) drawerLast.focus();
+  }
+
   /* ------------------------------------------------- pengait untuk checkout.js */
   PS.shop = {
     on: ON, onsite: ONSITE, tenantId: tenantId, CT: CT,
@@ -350,6 +428,13 @@
   load();                              /* dimuat sekarang: halaman keranjang dirender sebelum header selesai */
   PS.ready(function () {
     badge();
+    if (DRAWER) {
+      document.addEventListener('click', function (e) {
+        var t = e.target.closest('[data-cart-open]');
+        if (!t || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;     /* buka di tab baru: tetap tautan biasa */
+        e.preventDefault(); openDrawer(t);
+      });
+    }
     document.addEventListener('click', function (e) {
       var a = e.target.closest('[data-cart-add]');
       if (a) {
@@ -384,6 +469,7 @@
     window.addEventListener('storage', function (e) {
       if (e.key !== CART_KEY && e.key !== ORDERS_KEY) return;
       load(); badge();
+      if (drawer && drawer.classList.contains('is-open')) renderDrawer();
       if (root && document.contains(root) && !root.contains(document.activeElement) && !$('#cart-success')) renderCart();
     });
   });

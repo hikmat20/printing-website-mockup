@@ -264,10 +264,41 @@
       specs + (optsInfo && !cfg ? '<h2 class="h4 mt-4">Pilihan tersedia</h2>' + optsInfo : '') + prices + faqs + '</div>' +
       '<div class="col-lg-4">' + order + '</div></div></div></section>';
 
+    /* Varian "gallery" (template Etalase): galeri di kiri, kotak beli menempel di kanan, deskripsi/spesifikasi/harga/FAQ di bawahnya.
+       Gambar tambahan opsional: service.gallery = [{ image, alt }] (maks. 4); tanpa itu hanya satu gambar dan tanpa deretan miniatur. */
+    var gal = PS.site.pages.service.variant === 'gallery';
+    if (gal) {
+      var imgs = [{ image: s.image, alt: s.imageAlt }].concat(list(s.gallery).filter(function (g) { return g && typeof g.image === 'string' && g.image; }).slice(0, 4).map(function (g) { return { image: g.image, alt: g.alt || s.imageAlt }; }));
+      var thumbs = imgs.length > 1 ? '<ul class="gal-thumbs" aria-label="Pilih gambar">' + imgs.map(function (g, i) {
+        return '<li><button type="button" class="gal-thumb" data-gal-thumb data-src="' + esc(g.image) + '" data-alt="' + esc(g.alt || '') + '" aria-label="Gambar ' + (i + 1) + ' dari ' + imgs.length + '" aria-pressed="' + (i === 0) + '">' +
+          '<img src="' + esc(g.image) + '" alt="" width="96" height="72" loading="lazy"></button></li>';
+      }).join('') + '</ul>' : '';
+      var assure = PS.modules.checkout === 'onsite'
+        ? '<ul class="buy-assure"><li>' + ico('truck') + '<span>' + esc(x.shipNote || 'Ongkos kirim dihitung otomatis per kurir di keranjang.') + '</span></li>' +
+          '<li>' + ico('shield-check') + '<span>' + esc(x.payNote || 'Bayar lewat VA, QRIS, atau e-wallet langsung di website.') + '</span></li></ul>' : '';
+      head = '';
+      main = '<section class="section pt-4"><div class="container"><div class="row g-4 g-lg-5 gal-top">' +
+        '<div class="col-lg-7"><div class="gal"><figure class="gal-main"><img src="' + esc(s.image) + '" alt="' + esc(s.imageAlt) + '" width="800" height="600" fetchpriority="high"></figure>' + thumbs + '</div></div>' +
+        '<div class="col-lg-5"><div class="buybox">' + (cat ? '<a class="tag-pill" href="' + url('category', cat.slug) + '">' + esc(cat.name) + '</a>' : '') +
+        '<h1 id="page-title">' + esc(s.name) + '</h1><p class="page-lead">' + esc(s.short) + '</p>' + order + assure + '</div></div></div></div></section>' +
+        '<section class="section pt-2" aria-label="Rincian layanan"><div class="container"><div class="gal-detail">' +
+        '<h2 class="h4">Tentang layanan ini</h2><p class="text-muted-x">' + esc(s.description) + '</p>' +
+        specs + (optsInfo ? '<h2 class="h4 mt-4">Pilihan tersedia</h2>' + optsInfo : '') + prices + faqs + '</div></div></section>';
+    }
+
     return {
       html: crumbs(cr) + head + main + relatedHtml + ctaBand(),
       meta: { key: 'service', route: 'service', service: s, category: cat, crumbs: crumbMeta(cr), faqs: fq },
       after: function () {
+        if (gal) {
+          var fig = document.querySelector('.gal-main img'), btns = Array.prototype.slice.call(document.querySelectorAll('[data-gal-thumb]'));
+          btns.forEach(function (b) {
+            b.addEventListener('click', function () {
+              if (fig) { fig.src = b.getAttribute('data-src'); fig.alt = b.getAttribute('data-alt'); }
+              btns.forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+            });
+          });
+        }
         if (cfg) return initConfigurator(s);
         var card = document.querySelector('.order-card'), wa = document.getElementById('order-wa');
         if (!card || !wa) return;
