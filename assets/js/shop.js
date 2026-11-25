@@ -24,7 +24,7 @@
   var D = PS.data, T = D.tenant, esc = PS.esc, ico = PS.ico, url = PS.url, rupiah = PS.rupiah, WA = PS.WA_ICON;
   var K = PS.pageKit, R = PS.pages || {}, ON = PS.modules.order === 'cart', ONSITE = ON && PS.modules.checkout === 'onsite';
   var PT = D.pageText || {};
-  var tenantId = document.body.getAttribute('data-tenant') || 'tenant';
+  var tenantId = PS.storeKey;                 /* tenant + template (folder statis): keranjang tiap template terpisah */
   var CART_KEY = 'ps-cart:' + tenantId, ORDERS_KEY = 'ps-orders:' + tenantId;
   var PHONE_RE = /^(\+?62|0)8\d{8,11}$/;
   var MAX_LINES = 30, MAX_QTY = 99999;

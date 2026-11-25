@@ -27,6 +27,15 @@
      Parameter URL (?template=modern&font=inter&primary=%23c0392b ...) hanya untuk
      pratinjau di mockup; di Laravel tidak ada. */
   var QS = new URLSearchParams(window.location.search);
+  /* Folder template statis (demo prospek): window.PS_STATIC = { template, package, bake?, baked? } diisi tiap halaman.
+     bake  = jalankan render penuh lalu berhenti sebelum interaksi (dipakai tools/bake.py untuk menyimpan HTML).
+     baked = HTML sudah jadi: lewati render, hanya pasang interaksi. Pratinjau lewat URL dimatikan. */
+  var ST = window.PS_STATIC || null, BAKE = !!(ST && ST.bake), BAKED = !!(ST && ST.baked);
+  /* Halaman di dalam folder template berada satu tingkat di bawah assets/: path gambar dari data diberi ../ (juga yang dirender ulang saat runtime). */
+  if (ST) (function fix(o) {
+    Object.keys(o).forEach(function (k) { var v = o[k]; if (typeof v === 'string') { if (/^assets\//.test(v)) o[k] = '../' + v; } else if (v && typeof v === 'object') fix(v); });
+  })(TN);
+  if (ST) ['customize', 'package', 'template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'].forEach(function (k) { QS.delete(k); });
   var HEX = /^#?[0-9a-f]{6}$/i;
   function firstValid(list) {                 /* kandidat pertama yang ada di daftar */
     for (var i = 1; i < arguments.length; i++) if (arguments[i] != null && list.indexOf(arguments[i]) > -1) return arguments[i];
@@ -43,7 +52,7 @@
 
   function resolveSite() {
     var ts = TN.site || {}, th = TN.theme || {};
-    var tplId = firstValid(Object.keys(P.templates), QS.get('template'), ts.template, 'classic');
+    var tplId = firstValid(Object.keys(P.templates), ST && ST.template, QS.get('template'), ts.template, 'classic');
     var tpl = P.templates[tplId];
     var fontIds = Object.keys(P.fonts);
     checkQuery('template', 'template', Object.keys(P.templates)); checkQuery('header', 'header', P.headers); checkQuery('cards', 'gaya kartu', P.cardStyles);
@@ -56,7 +65,7 @@
     /* Paket: modul yang aktif (sumbu terpisah dari template). Hanya paket available yang bisa dipilih. */
     var pkgAll = Object.keys(P.packages), pkgOk = pkgAll.filter(function (k) { return P.packages[k].available; });
     checkQuery('package', 'paket', pkgAll);
-    var pkgId = firstValid(pkgOk, QS.get('package'), ts.package, P.defaultPackage);
+    var pkgId = firstValid(pkgOk, ST && ST.package, QS.get('package'), ts.package, P.defaultPackage);
     [['site.package', ts.package]].forEach(function (c) {
       if (c[1] != null && pkgOk.indexOf(c[1]) < 0) console.warn('[main.js] ' + c[0] + ' "' + c[1] + '" ' + (pkgAll.indexOf(c[1]) > -1 ? 'belum tersedia (Gelombang ' + P.packages[c[1]].wave + ')' : 'tidak ada di registri platform') + '; dipakai "' + pkgId + '".');
     });
@@ -222,6 +231,10 @@
   })();
   var url = function (name, slug) {
     var r = D.routes[name];
+    if (ST && name === 'home') return 'index.html';            /* folder statis: beranda template = index.html */
+    if (ST && (name === 'service' || name === 'article')) {      /* folder statis: satu file per layanan / artikel */
+      return slug ? (name === 'service' ? 'layanan-' : 'artikel-') + slug + '.html' : (name === 'service' ? D.routes.services.mockup : D.routes.blog.mockup);
+    }
     return r.mockup + previewQuery + (r.hash && slug ? '#' + slug : '');
   };
 
@@ -647,6 +660,7 @@
   };
 
   function renderAll() {
+    if (BAKED) return;                    /* header, footer, menu, dan tombol global sudah ada di HTML */
     var h = $('[data-component="header"]');
     if (h) h.innerHTML = header();
 
@@ -910,6 +924,7 @@
       try { fn(window.PrintSite); } catch (e) { console.error('[main.js] modul gagal dijalankan:', e); }
     });
     renderAll();
+    if (BAKE) { booted = true; document.documentElement.setAttribute('data-bake-done', ''); return; }   /* berhenti sebelum interaksi: DOM inilah yang disimpan */
     initScroll();
     initMobileMenu();
     initDropdowns();
@@ -923,7 +938,7 @@
 
   /* API kecil untuk halaman lain (services.html, service-detail.html, dll.) */
   window.PrintSite = {
-    data: D, platform: P, site: S, modules: S.modules, theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); }, ready: function (fn) { if (booted) fn(window.PrintSite); else afterBoot.push(fn); },
+    data: D, platform: P, site: S, modules: S.modules, static: ST, baked: BAKED, bake: BAKE, storeKey: (document.body.getAttribute('data-tenant') || 'tenant') + (ST && ST.template ? ':' + ST.template : ''), theme: function () { return document.documentElement.__theme; }, query: QS, use: function (fn) { modules.push(fn); }, ready: function (fn) { if (booted) fn(window.PrintSite); else afterBoot.push(fn); },
     esc: esc, rupiah: rupiah, isNew: isNew, optionPrice: optionPrice, unitPrice: unitPrice, url: url, waLink: waLink, msgService: msgService, msgDefault: msgDefault,
     ico: ico, WA_ICON: WA_ICON, applyWa: applyWa, fmtDate: fmtDate, metaParts: metaParts,
     components: { serviceCard: serviceCard, serviceRow: serviceRow, categoryCard: categoryCard, portfolioCard: portfolioCard, testimonialCard: testimonialCard, articleCard: articleCard, faqItem: faqItem, stars: stars, heroVisual: heroVisual }

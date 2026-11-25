@@ -485,7 +485,7 @@
   R.parts = { infoRows: infoRows, mapFrame: mapFrame };      /* dipakai halaman Kontak */
   PS.use(function () {
     var main = document.getElementById('main');
-    if (!main || document.body.getAttribute('data-page') !== 'home') return;
+    if (!main || document.body.getAttribute('data-page') !== 'home' || PS.baked) return;     /* baked: beranda sudah ada di HTML */
     var band = 0;
     main.innerHTML = PS.site.home.map(function (s) {
       var reg = P.sections[s.id];

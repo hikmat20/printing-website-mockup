@@ -6,6 +6,46 @@ melayani banyak klien, tiap klien memilih template dan menyesuaikan tampilannya.
 
 Tenant contoh (dummy): **Sinar Copy & Printing**, Jakarta Timur.
 
+## Arah baru: demo statis per template (sejak Gelombang J)
+
+Repo ini sekarang **hanya demo untuk calon klien**, bukan platform multi-tenant. Laravel akan dibangun khusus
+per klien dari template tertentu; di sini tidak ada backend.
+
+- `index.html` (root) = **galeri pilihan template** (8 kartu dengan tangkapan layar).
+- Tiap template punya folder sendiri: `classic/ modern/ bold/ katalog/ toko/ grafika/ compro/ etalase/`.
+  Isinya HTML statis siap pakai (beranda, layanan + satu halaman per layanan `layanan-<slug>.html`, harga,
+  portofolio, tentang, blog + `artikel-<slug>.html`, kontak, FAQ; plus keranjang, status pesanan, checkout
+  bila paketnya memerlukan).
+- **Satu template = satu paket fitur (terkunci):** Klasik, Bold = Showcase + WA; Modern, Compro = Company Profile;
+  Katalog B2B = Katalog (daftar tanya); Toko, Grafika = Semi e-commerce (keranjang + checkout WhatsApp);
+  Etalase = Full E-commerce (ongkir, pembayaran, lacak resi).
+- Setiap halaman punya tombol **"Pilih template lain"** (kiri bawah) kembali ke galeri.
+- Keranjang, daftar tanya, dan pesanan disimpan di browser **per template** (`ps-cart:sinar-copy:<template>`, dst.).
+- Halaman bersifat statis: judul, meta, JSON-LD, header, footer, dan isi sudah ada di HTML (bisa dibaca tanpa
+  JS). JS hanya memasang interaksi (menu, slider, filter, keranjang, checkout). Halaman berstatus (keranjang,
+  checkout, status pesanan) dirender saat dibuka karena isinya milik pengunjung.
+- Semua halaman diberi `noindex`.
+
+### Membuat ulang folder template
+
+Folder template **dihasilkan**, jangan diedit tangan. Ubah sumbernya (mesin di `assets/js`, data tenant, CSS),
+lalu:
+
+```
+python3 tools/bake.py            # semua template (atau: python3 tools/bake.py etalase)
+python3 tools/gallery.py         # galeri root + tangkapan layar
+```
+
+Perlu Python 3, Playwright (Chromium), dan Node (untuk membaca `platform.js`). `bake.py` membuka tiap
+cangkang (`home.html`, `services.html`, dst.) dengan `window.PS_STATIC = { template, package, bake: true }`,
+menyimpan DOM hasil render, lalu menulis `<template>/...` dengan path `../assets/` dan hanya CSS template itu.
+Pemetaan template -> paket ada di `TEMPLATES` pada `tools/bake.py` (dan `tools/gallery.py`).
+
+> **Status:** cangkang lama di root (`home.html` = beranda mesin lama, `services.html`, ..., `demo.html`,
+> parameter `?template=` / `?customize`) masih ada sebagai **sumber bake** dan akan dipangkas di gelombang
+> berikutnya. Bagian "Arsitektur: Model C", "Cara menjalankan", dan "Struktur" di bawah menjelaskan mesin lama
+> dan sebagian sudah usang (multi-tenant tidak dipakai lagi).
+
 ## Arsitektur: Model C
 
 **Platform inti bersama + template standar + kustomisasi terkendali.**
@@ -24,18 +64,18 @@ ke bawaan template. Parameter URL pratinjau yang tidak valid juga memberi pering
 
 ## Cara menjalankan
 
-Tanpa backend dan tanpa build. Buka `index.html` di browser. Semua aset (Bootstrap, Lucide, 12 font)
+Tanpa backend dan tanpa build. Buka `index.html` (galeri) di browser, atau `home.html` untuk mesin lama. Semua aset (Bootstrap, Lucide, 12 font)
 ada lokal di `assets/`, jadi tampil benar tanpa internet (kecuali embed Google Maps).
 
 Pratinjau template tanpa mengubah kode: tambahkan parameter URL.
 
 ```
-index.html?customize                       panel pratinjau (pilih template, font, warna, dll.)
-index.html?template=modern                 template: classic | modern | bold | katalog
-index.html?package=profile                 paket: profile | showcase | catalog (shop menyusul)
-index.html?template=bold&font=roboto&hfont=montserrat
-index.html?primary=%230a7d4f&accent=%23e0a100
-index.html?header=topbar&cards=outlined&buttons=pill
+home.html?customize                       panel pratinjau (pilih template, font, warna, dll.)
+home.html?template=modern                 template: classic | modern | bold | katalog
+home.html?package=profile                 paket: profile | showcase | catalog (shop menyusul)
+home.html?template=bold&font=roboto&hfont=montserrat
+home.html?primary=%230a7d4f&accent=%23e0a100
+home.html?header=topbar&cards=outlined&buttons=pill
 ```
 
 Parameter URL hanya untuk pratinjau. Di produksi pengaturan ini disimpan di database tenant.
@@ -43,7 +83,10 @@ Parameter URL hanya untuk pratinjau. Di produksi pengaturan ini disimpan di data
 ## Struktur
 
 ```
-index.html                    Cangkang beranda: <main id="main"> diisi dari data
+index.html                    Galeri pilihan template (dihasilkan tools/gallery.py)
+home.html                     Cangkang beranda mesin lama (sumber bake): <main id="main"> diisi dari data
+tools/bake.py tools/gallery.py  Pembuat folder template statis dan galeri
+classic/ modern/ bold/ katalog/ toko/ grafika/ compro/ etalase/   HTML statis per template (hasil bake)
 services.html service-detail.html pricing.html portfolio.html about.html contact.html blog.html article-detail.html faq.html
                               Cangkang halaman internal (9 halaman)
 demo.html                      Halaman demo/penjualan platform: pilih paket x template x halaman x perangkat (assets/js/demo.js, assets/css/demo.css)

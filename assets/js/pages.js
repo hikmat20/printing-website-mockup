@@ -41,6 +41,8 @@
   var isAnchor = function () { var h = window.location.hash.slice(1); return !!h && !!document.getElementById(h); };
   var list = function (v) { return Array.isArray(v) ? v : []; };   /* data tenant yang salah tipe jangan merusak halaman */
   var hashSlug = function () { try { return decodeURIComponent(window.location.hash.slice(1)); } catch (e) { return ''; } };
+  /* Slug detail layanan/artikel: folder statis -> <body data-slug>; mockup lama -> hash */
+  var detailSlug = function () { return PS.static ? (document.body.getAttribute('data-slug') || (PS.static.slug || '')) : hashSlug(); };
 
   /* layout/breadcrumb: items = [{ label, route?, slug? }]; item terakhir = halaman aktif */
   function crumbs(items) {
@@ -196,7 +198,7 @@
   }
 
   R.service = function () {
-    var x = PT.service || {}, s = byKey(D.services, 'slug', hashSlug());
+    var x = PT.service || {}, s = byKey(D.services, 'slug', detailSlug());
     if (!s) {
       var nf = x.notFound || {};
       return {
@@ -692,7 +694,7 @@
   }
 
   R.article = function () {
-    var x = PT.article || {}, arts = articles(), a = byKey(arts, 'slug', hashSlug());
+    var x = PT.article || {}, arts = articles(), a = byKey(arts, 'slug', detailSlug());
     if (!a) {
       var nf = x.notFound || {};
       return {
@@ -831,19 +833,22 @@
     var main = document.getElementById('main');
     if (!main || !R[pageKey]) return;
     var out = R[pageKey]();
+    /* baked: isi halaman sudah ada di HTML; hanya pasang interaksi. Hash kategori (#kartu-nama) bisa mengubah isi: render ulang. */
+    var keep = PS.baked && !(window.location.hash && !isAnchor());
+    if (keep) { PS.pageMeta = out.meta; PS.pageAfter = out.after || null; if (out.after) out.after(); return; }
     main.innerHTML = out.html;
     PS.pageMeta = out.meta;
     PS.pageAfter = out.after || null;
     if (window.lucide && window.lucide.createIcons && main.querySelector('[data-lucide]') && document.documentElement.classList.contains('js-ready')) window.lucide.createIcons();
     PS.applyWa(main);
-    if (out.after) out.after();
+    if (out.after && !PS.bake) out.after();     /* bake: simpan DOM sebelum interaksi dipasang */
   }
 
   PS.use(function () {
     if (!R[pageKey]) return;
     render();
     /* Detail layanan/artikel memakai hash sebagai slug (di Laravel: /layanan/{slug}, /artikel/{slug}); ganti hash = ganti isi */
-    if (pageKey === 'service' || pageKey === 'article') window.addEventListener('hashchange', function () {
+    if (!PS.static && (pageKey === 'service' || pageKey === 'article')) window.addEventListener('hashchange', function () {
       if (isAnchor()) return;
       render();
       if (PS.seo) PS.seo.applyPage();

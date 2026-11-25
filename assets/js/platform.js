@@ -10,7 +10,7 @@ window.PLATFORM = {
 
   /* ---------- Pemetaan URL: mockup -> Laravel ---------- */
   routes: {
-    home:        { mockup: 'index.html',          laravel: '/' },
+    home:        { mockup: 'home.html',           laravel: '/' },
     services:    { mockup: 'services.html',       laravel: '/layanan' },
     service:     { mockup: 'service-detail.html', laravel: '/layanan/{slug}', hash: true },
     category:    { mockup: 'services.html',       laravel: '/layanan/kategori/{slug}', hash: true },

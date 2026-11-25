@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- SEO (title, meta, Open Graph, JSON-LD) dirender dari data tenant oleh assets/js/seo.js.
+       Di Laravel: @section('title'), <x-seo.meta />, <x-seo.json-ld /> (server-side). -->
+  <title>Memuat…</title>
+
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo/logo-mark.svg">
+  <link rel="stylesheet" href="assets/vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/fonts.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/variants.css">
+  <link rel="stylesheet" href="assets/css/templates/classic.css">
+  <link rel="stylesheet" href="assets/css/templates/modern.css">
+  <link rel="stylesheet" href="assets/css/templates/bold.css">
+  <link rel="stylesheet" href="assets/css/templates/katalog.css">
+  <link rel="stylesheet" href="assets/css/templates/toko.css">
+  <link rel="stylesheet" href="assets/css/templates/grafika.css">
+  <link rel="stylesheet" href="assets/css/templates/compro.css">
+  <link rel="stylesheet" href="assets/css/templates/etalase.css">
+</head>
+
+<body data-page="home" data-tenant="sinar-copy">
+  <a class="skip-link" href="#main">Lewati ke konten utama</a>
+  <noscript><p style="padding:1rem;text-align:center;background:var(--c-accent-tint)">Mockup ini memerlukan JavaScript untuk memuat konten dari data tenant.</p></noscript>
+
+  <!-- 1. Header & navigation (komponen: layout/header) -->
+  <header class="site-header" data-component="header"></header>
+
+  <!-- Isi beranda dirender dari konfigurasi section (template + pengaturan tenant) oleh assets/js/sections.js.
+       Di Laravel: @foreach($sections as $s) <x-dynamic-component :component="'section.'.$s->id" :variant="$s->variant" /> -->
+  <main id="main"></main>
+
+  <!-- 14. Footer (komponen: layout/footer) -->
+  <footer class="site-footer" data-component="footer"></footer>
+
+  <script src="assets/vendor/lucide.min.js" defer></script>
+  <script src="assets/js/platform.js" defer></script>
+  <script src="assets/js/tenants/sinar-copy.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/sections.js" defer></script>
+  <script src="assets/js/inquiry.js" defer></script>
+  <script src="assets/js/shop.js" defer></script>
+  <script src="assets/js/seo.js" defer></script>
+  <script src="assets/js/preview.js" defer></script>
+</body>
+</html>
