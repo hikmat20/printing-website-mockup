@@ -1,0 +1,41 @@
+/* ==========================================================================
+   templates/etalase.css — Template "Etalase" (butik online)
+   Karakter: lembut dan lapang — sudut besar, bingkai tipis, tombol pil, judul bersih, menu huruf kapital kecil di tengah.
+   Kerangka berbeda dari template lain: merek di tengah dengan keranjang yang membuka laci geser (header "boutique"),
+   hero berubin, kategori bulat bergambar, galeri produk + kotak beli, dan checkout fokus tanpa gangguan.
+   Struktur tiap bagian ada di variants.css; berkas ini hanya kulit. Warna & font tetap milik tenant.
+   Susunan beranda bawaan: PLATFORM.templates.etalase
+   ========================================================================== */
+
+[data-template="etalase"] {
+  --r-card: 20px;
+  --r-media: 24px;
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--c-primary) 6%, transparent);
+  --shadow-md: 0 8px 24px -12px color-mix(in srgb, var(--c-primary) 28%, transparent);
+  --section-y: 3rem;
+}
+@media (min-width: 768px)  { [data-template="etalase"] { --section-y: 4rem; } }
+
+[data-template="etalase"] h1, [data-template="etalase"] h2, [data-template="etalase"] h3 { letter-spacing: -.01em; }
+[data-template="etalase"] .section-head h2 { font-weight: 700; }
+[data-template="etalase"] .eyebrow { letter-spacing: .14em; text-transform: uppercase; font-size: .75rem; font-weight: 700; }
+
+/* Header: bersih, menu kapital kecil di tengah */
+[data-template="etalase"] .site-header { background: var(--c-card); }
+[data-template="etalase"] .boutique-nav { border-top: 1px solid var(--c-border); }
+[data-template="etalase"] .boutique-nav .nav-link-item, [data-template="etalase"] .boutique-nav .nav-toggle { text-transform: uppercase; letter-spacing: .08em; font-size: .78125rem; font-weight: 700; border-radius: 999px; padding: .6rem 1rem; }
+[data-template="etalase"] .boutique-nav .nav-link-item.is-active, [data-template="etalase"] .boutique-nav .nav-toggle.is-active { box-shadow: none; background: var(--c-primary-light); border-radius: 999px; }
+[data-template="etalase"] .boutique-inner .brand { font-size: 1.1875rem; }
+[data-template="etalase"] .boutique-inner .brand-text { text-align: left; }
+[data-template="etalase"] .promo-bar { background: var(--c-primary-light); color: var(--c-primary); text-align: center; }
+[data-template="etalase"] .promo-bar .container { justify-content: center; }
+
+/* Kartu: bingkai tipis, sudut besar, naik sedikit saat disorot */
+[data-template="etalase"] :is(.service-card, .portfolio-card, .testi-card, .article-card, .price-card, .why-card, .promo-tile) { border: 1px solid var(--c-border); box-shadow: none; transition: transform .18s, box-shadow .18s, border-color .18s; }
+[data-template="etalase"] :is(.service-card, .article-card, .promo-tile):hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--c-primary); }
+[data-template="etalase"] .hero--tiles h1 { font-weight: 700; line-height: 1.12; }
+[data-template="etalase"] .section--alt, [data-template="etalase"] .section-alt { background: var(--c-primary-tint); }
+
+/* Footer terang di atas bilah gelap tipis */
+[data-template="etalase"] .site-footer { background: var(--c-primary-dark); }
+@media (prefers-reduced-motion: reduce) { [data-template="etalase"] :is(.service-card, .article-card, .promo-tile) { transition: none; transform: none !important; } }

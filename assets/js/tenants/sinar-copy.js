@@ -323,7 +323,8 @@ window.TENANTS['sinar-copy'] = {
         services: { lead: 'Pilih layanan, masukkan keranjang, lalu bayar langsung di website. Ongkos kirim dihitung otomatis.' },
         service: {
           orderTitle: 'Pesan layanan ini', orderHint: 'Pilih kebutuhan dan jumlah, masukkan ke keranjang, lalu checkout dan bayar di website.',
-          orderButton: 'Tambah ke Keranjang', orderAlt: 'Beli Sekarang'
+          orderButton: 'Tambah ke Keranjang', orderAlt: 'Beli Sekarang',
+          shipNote: 'Ongkos kirim dihitung otomatis per kurir di keranjang, tinggal pilih kota tujuan.', payNote: 'Bayar lewat VA bank, QRIS, atau e-wallet langsung di website.'
         },
         cart: {
           lead: 'Periksa pesanan Anda dan cek ongkos kirim ke kota tujuan, lalu lanjut ke checkout untuk membayar.',
@@ -701,6 +702,7 @@ window.TENANTS['sinar-copy'] = {
     {
       slug: 'cetak-banner', name: 'Cetak Banner & Spanduk', category: 'large-format', featured: true,
       image: 'assets/images/services/cetak-banner.svg', imageAlt: 'Banner promosi berwarna dengan mata ayam di sudut',
+      gallery: [{ image: 'assets/images/portfolio/banner-grand-opening.svg', alt: 'Contoh hasil: banner grand opening kafe' }, { image: 'assets/images/portfolio/poster-denah-a0.svg', alt: 'Contoh hasil cetak ukuran besar: denah gedung A0' }],
       short: 'Cetak banner, spanduk, dan backdrop untuk usaha, acara, dan sekolah.',
       description: 'Cetak banner dan spanduk dengan tinta tahan cuaca, siap pasang lengkap dengan mata ayam dan finishing sudut. Tersedia flexi 280 gsm, 340 gsm, dan bahan indoor.',
       priceFrom: 25000, unit: 'm²', eta: '1–2 hari kerja',
@@ -819,6 +821,7 @@ window.TENANTS['sinar-copy'] = {
     {
       slug: 'kartu-nama', tags: ['baru'], name: 'Kartu Nama', category: 'media-promosi', featured: false,
       image: 'assets/images/services/kartu-nama.svg', imageAlt: 'Tiga kartu nama berwarna dengan logo dan teks',
+      gallery: [{ image: 'assets/images/portfolio/kartu-nama-korporat.svg', alt: 'Contoh hasil: kartu nama korporat' }],
       short: 'Kartu nama profesional untuk usaha dan perusahaan, satu atau dua sisi.',
       description: 'Kartu nama dengan pilihan Art Carton 260 gsm, laminasi doff atau glossy, dan sudut tumpul. Satu box berisi 100 kartu.',
       priceFrom: 35000, unit: 'box (100 pcs)', eta: '1–2 hari kerja',
@@ -838,6 +841,7 @@ window.TENANTS['sinar-copy'] = {
     {
       slug: 'cetak-undangan', tags: ['baru'], name: 'Cetak Undangan', category: 'buku-undangan', featured: false,
       image: 'assets/images/services/cetak-undangan.svg', imageAlt: 'Undangan dalam amplop krem dengan segel biru',
+      gallery: [{ image: 'assets/images/portfolio/undangan-pernikahan.svg', alt: 'Contoh hasil: undangan pernikahan linen' }],
       short: 'Undangan pernikahan, ulang tahun, dan acara dengan pilihan kertas dan amplop.',
       description: 'Cetak undangan pernikahan, khitanan, ulang tahun, dan acara kantor. Pilihan kertas mulai dari Art Carton hingga kertas tekstur, lengkap dengan amplop.',
       priceFrom: 2500, unit: 'pcs', eta: '3–5 hari kerja',

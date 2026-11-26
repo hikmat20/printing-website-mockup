@@ -24,7 +24,7 @@
   var D = PS.data, T = D.tenant, esc = PS.esc, ico = PS.ico, WA = PS.WA_ICON;
   var PHONE_RE = /^(\+?62|0)8\d{8,11}$/;      /* ponsel Indonesia: 10-13 digit (sama dengan formulir Kontak) */
   var MAX_ITEMS = 20;
-  var KEY = 'ps-inquiry:' + (document.body.getAttribute('data-tenant') || 'tenant');
+  var KEY = 'ps-inquiry:' + PS.storeKey;
 
   var TXT = Object.assign({
     title: 'Daftar Tanya', empty: 'Belum ada layanan di daftar. Tekan tombol + pada layanan yang Anda butuhkan.', emptyButton: 'Lihat katalog',

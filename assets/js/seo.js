@@ -184,6 +184,7 @@
 
   /* Beranda: JSON-LD FAQ hanya bila section FAQ aktif (data tidak boleh menyatakan yang tidak tampil) */
   PS.use(function () {
+    if (PS.baked) return;                 /* baked: head (judul, meta, JSON-LD) sudah ada di HTML */
     if (document.body.getAttribute('data-page') !== 'home') { applyPage(); return; }
     var faqOn = PS.site.home.some(function (s) { return s.id === 'faq'; });
     apply('home', { faqs: faqOn ? D.faqs.filter(function (f) { return f.featured; }) : [] });

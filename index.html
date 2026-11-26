@@ -3,47 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- SEO (title, meta, Open Graph, JSON-LD) dirender dari data tenant oleh assets/js/seo.js.
-       Di Laravel: @section('title'), <x-seo.meta />, <x-seo.json-ld /> (server-side). -->
-  <title>Memuat…</title>
-
+  <meta name="robots" content="noindex, nofollow">
+  <title>Pilih Template Website Percetakan | Demo</title>
+  <meta name="description" content="Demo template website percetakan dan fotocopy. Pilih satu template, lalu coba semua fiturnya.">
   <link rel="icon" type="image/svg+xml" href="assets/images/logo/logo-mark.svg">
   <link rel="stylesheet" href="assets/vendor/bootstrap.min.css">
   <link rel="stylesheet" href="assets/css/fonts.css">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/variants.css">
-  <link rel="stylesheet" href="assets/css/templates/classic.css">
-  <link rel="stylesheet" href="assets/css/templates/modern.css">
-  <link rel="stylesheet" href="assets/css/templates/bold.css">
-  <link rel="stylesheet" href="assets/css/templates/katalog.css">
-  <link rel="stylesheet" href="assets/css/templates/toko.css">
-  <link rel="stylesheet" href="assets/css/templates/grafika.css">
-  <link rel="stylesheet" href="assets/css/templates/compro.css">
+  <link rel="stylesheet" href="assets/css/gallery.css">
 </head>
-
-<body data-page="home" data-tenant="sinar-copy">
-  <a class="skip-link" href="#main">Lewati ke konten utama</a>
-  <noscript><p style="padding:1rem;text-align:center;background:var(--c-accent-tint)">Mockup ini memerlukan JavaScript untuk memuat konten dari data tenant.</p></noscript>
-
-  <!-- 1. Header & navigation (komponen: layout/header) -->
-  <header class="site-header" data-component="header"></header>
-
-  <!-- Isi beranda dirender dari konfigurasi section (template + pengaturan tenant) oleh assets/js/sections.js.
-       Di Laravel: @foreach($sections as $s) <x-dynamic-component :component="'section.'.$s->id" :variant="$s->variant" /> -->
-  <main id="main"></main>
-
-  <!-- 14. Footer (komponen: layout/footer) -->
-  <footer class="site-footer" data-component="footer"></footer>
-
-  <script src="assets/vendor/lucide.min.js" defer></script>
-  <script src="assets/js/platform.js" defer></script>
-  <script src="assets/js/tenants/sinar-copy.js" defer></script>
-  <script src="assets/js/main.js" defer></script>
-  <script src="assets/js/sections.js" defer></script>
-  <script src="assets/js/inquiry.js" defer></script>
-  <script src="assets/js/shop.js" defer></script>
-  <script src="assets/js/seo.js" defer></script>
-  <script src="assets/js/preview.js" defer></script>
+<body class="gallery">
+  <a class="gal-skip" href="#template">Lewati ke daftar template</a>
+  <header class="gal-head"><div class="container">
+    <div class="gal-brand">Demo template</div>
+    <h1>Pilih template website percetakan</h1>
+    <p>Setiap template punya tampilan dan paket fitur sendiri. Buka salah satu, lalu coba semua halamannya seperti pengunjung sungguhan. Data usaha di demo ini hanya contoh (Sinar Copy &amp; Printing).</p>
+  </div></header>
+  <main id="template"><div class="container">
+    <ul class="gal-grid">
+      <li class="gal-card"><a class="gal-shot" href="classic/index.html" tabindex="-1" aria-hidden="true"><img src="assets/images/gallery/classic.jpg" alt="" loading="lazy" width="640" height="400"></a><div class="gal-body"><h2>Klasik</h2><span class="gal-pkg">Paket: Showcase + WA</span><p>Rapi dan netral: hero dua kolom, kartu berbingkai, susunan yang familiar bagi pelanggan.</p><ul class="gal-feat"><li>Daftar layanan dengan harga dan halaman Harga</li><li>Pesan lewat WhatsApp dari setiap layanan</li></ul><p><small>Cocok untuk: Toko fotocopy dan percetakan lokal yang menerima pesanan lewat WhatsApp.</small></p><div class="gal-actions"><a class="gal-btn" href="classic/index.html">Coba demo Klasik</a></div></div></li>
+      <li class="gal-card"><a class="gal-shot" href="modern/index.html" tabindex="-1" aria-hidden="true"><img src="assets/images/gallery/modern.jpg" alt="" loading="lazy" width="640" height="400"></a><div class="gal-body"><h2>Modern</h2><span class="gal-pkg">Paket: Company Profile</span><p>Lapang dan ringan: hero terpusat, sudut membulat besar, layanan dan testimoni berbentuk slider.</p><ul class="gal-feat"><li>Profil usaha, layanan, portofolio, artikel, FAQ</li><li>Tanpa harga; pengunjung menghubungi lewat halaman Kontak</li></ul><p><small>Cocok untuk: Percetakan yang ingin tampil profesional dan dihubungi lewat halaman Kontak.</small></p><div class="gal-actions"><a class="gal-btn" href="modern/index.html">Coba demo Modern</a></div></div></li>
+      <li class="gal-card"><a class="gal-shot" href="bold/index.html" tabindex="-1" aria-hidden="true"><img src="assets/images/gallery/bold.jpg" alt="" loading="lazy" width="640" height="400"></a><div class="gal-body"><h2>Bold</h2><span class="gal-pkg">Paket: Showcase + WA</span><p>Tegas dan kontras tinggi: hero gelap, bingkai tebal, sudut tajam, cocok untuk kesan percetakan yang kuat.</p><ul class="gal-feat"><li>Daftar layanan dengan harga dan halaman Harga</li><li>Pesan lewat WhatsApp dari setiap layanan</li></ul><div class="gal-actions"><a class="gal-btn" href="bold/index.html">Coba demo Bold</a></div></div></li>
+      <li class="gal-card"><a class="gal-shot" href="katalog/index.html" tabindex="-1" aria-hidden="true"><img src="assets/images/gallery/katalog.jpg" alt="" loading="lazy" width="640" height="400"></a><div class="gal-body"><h2>Katalog B2B</h2><span class="gal-pkg">Paket: Katalog</span><p>Katalog untuk penjualan ke perusahaan, sekolah, dan instansi: menu besar per kategori, filter di samping, klien, solusi, dan daftar tanya.</p><ul class="gal-feat"><li>Katalog dengan filter kategori</li><li>Daftar tanya: pilih beberapa layanan, kirim sekali lewat WhatsApp</li></ul><p><small>Cocok untuk: Percetakan B2B: banyak produk, minta penawaran lewat daftar tanya.</small></p><div class="gal-actions"><a class="gal-btn" href="katalog/index.html">Coba demo Katalog B2B</a></div></div></li>
+      <li class="gal-card"><a class="gal-shot" href="toko/index.html" tabindex="-1" aria-hidden="true"><img src="assets/images/gallery/toko.jpg" alt="" loading="lazy" width="640" height="400"></a><div class="gal-body"><h2>Toko</h2><span class="gal-pkg">Paket: Semi e-commerce</span><p>Etalase toko online: pencarian dan keranjang di header, kotak promo, produk terlaris dengan harga menonjol.</p><ul class="gal-feat"><li>Keranjang dan checkout</li><li>Pesanan dikirim ke WhatsApp; cek status pesanan</li></ul><p><small>Cocok untuk: Digital printing yang ingin pelanggan memilih, memasukkan keranjang, lalu checkout.</small></p><div class="gal-actions"><a class="gal-btn" href="toko/index.html">Coba demo Toko</a></div></div></li>
+      <li class="gal-card"><a class="gal-shot" href="grafika/index.html" tabindex="-1" aria-hidden="true"><img src="assets/images/gallery/grafika.jpg" alt="" loading="lazy" width="640" height="400"></a><div class="gal-body"><h2>Grafika</h2><span class="gal-pkg">Paket: Semi e-commerce</span><p>Marketplace cetak: banner promo bergeser, kategori bergambar, produk bertab, pencarian pil dan total keranjang di header.</p><ul class="gal-feat"><li>Keranjang dan checkout</li><li>Pesanan dikirim ke WhatsApp; cek status pesanan</li></ul><p><small>Cocok untuk: Percetakan dengan banyak produk: banner promo, kategori bergambar, pencarian, dan keranjang.</small></p><div class="gal-actions"><a class="gal-btn" href="grafika/index.html">Coba demo Grafika</a></div></div></li>
+      <li class="gal-card"><a class="gal-shot" href="compro/index.html" tabindex="-1" aria-hidden="true"><img src="assets/images/gallery/compro.jpg" alt="" loading="lazy" width="640" height="400"></a><div class="gal-body"><h2>Compro</h2><span class="gal-pkg">Paket: Company Profile</span><p>Profil perusahaan editorial: menu samping tetap, hero layar penuh, angka besar, layanan sebagai daftar bernomor, tanpa kartu.</p><ul class="gal-feat"><li>Profil usaha, layanan, portofolio, artikel, FAQ</li><li>Tanpa harga; pengunjung menghubungi lewat halaman Kontak</li></ul><p><small>Cocok untuk: Usaha yang ingin tampil seperti perusahaan: menu samping tetap, hero layar penuh, layanan sebagai daftar bernomor.</small></p><div class="gal-actions"><a class="gal-btn" href="compro/index.html">Coba demo Compro</a></div></div></li>
+      <li class="gal-card"><a class="gal-shot" href="etalase/index.html" tabindex="-1" aria-hidden="true"><img src="assets/images/gallery/etalase.jpg" alt="" loading="lazy" width="640" height="400"></a><div class="gal-body"><h2>Etalase</h2><span class="gal-pkg">Paket: Full E-commerce</span><p>Butik online: merek di tengah, laci keranjang geser, hero berubin, kategori bulat bergambar, galeri produk dengan kotak beli menempel, dan checkout fokus.</p><ul class="gal-feat"><li>Keranjang, ongkos kirim otomatis per kurir, metode pembayaran</li><li>Konfirmasi bayar dan lacak pesanan sampai nomor resi</li></ul><p><small>Cocok untuk: Percetakan yang ingin pelanggan membayar langsung di website: laci keranjang, ongkir otomatis, VA, QRIS, e-wallet, dan lacak resi.</small></p><div class="gal-actions"><a class="gal-btn" href="etalase/index.html">Coba demo Etalase</a></div></div></li>
+    </ul>
+  </div></main>
+  <footer class="gal-foot"><div class="container">Halaman demo statis: tanpa server dan tanpa database. Keranjang dan pesanan disimpan di browser ini saja, terpisah untuk tiap template.</div></footer>
 </body>
 </html>
