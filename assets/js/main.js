@@ -191,7 +191,7 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ESC[c]; }); };
   var rupiah = function (n) { return 'Rp ' + new Intl.NumberFormat('id-ID').format(n); };
   var get = function (obj, path) { return path.split('.').reduce(function (o, k) { return o == null ? o : o[k]; }, obj); };
-  var ico = function (name, cls) { return '<i data-lucide="' + name + '" class="i ' + (cls || '') + '" aria-hidden="true"></i>'; };
+  var ico = function (name, cls) { if (!name) return ''; return '<i data-lucide="' + name + '" class="i ' + (cls || '') + '" aria-hidden="true"></i>'; };
   var findBy = function (list, key, val) { return list.filter(function (x) { return x[key] === val; })[0]; };
   /* Harga opsi: service.options[].prices = { "<pilihan>": tambahan per satuan }. Harga satuan = priceFrom + tambahan semua pilihan terpilih.
      Nilai bukan angka / negatif dianggap 0. Keranjang lama tanpa opsi tetap memakai priceFrom. */

@@ -18,6 +18,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
+SHELLS = ROOT / 'tools' / 'shells'      # cangkang halaman mesin (sumber bake); path ../../assets dinormalkan saat menulis
 
 # Satu template = satu paket fitur (terkunci). Sumber: PLATFORM.demos (kombinasi yang direkomendasikan).
 TEMPLATES = {
@@ -61,6 +62,7 @@ def scripts_for(pkg, baked):
 
 def finish(html, tpl, pkg, baked, slug=None, extra_body=''):
     """Pasang path ../assets, hanya CSS template ini, skrip interaksi, tombol kembali, dan noindex."""
+    html = html.replace('../../assets/', 'assets/')          # cangkang berada di tools/shells
     html = SCRIPT_RE.sub('', html).replace(' data-bake-done=""', '')
     html = TPL_LINK_RE.sub(lambda m: m.group(0) if m.group(1) == tpl else '', html)
     html = ASSET_RE.sub('../assets/', html)
@@ -93,7 +95,7 @@ def main(only):
             st = {'template': tpl, 'package': pkg, 'bake': True}
             if slug: st['slug'] = slug
             pg.add_init_script('window.PS_STATIC=' + json.dumps(st) + ';')
-            pg.goto((ROOT / src).as_uri())
+            pg.goto((SHELLS / src).as_uri())
             pg.wait_for_selector('html[data-bake-done]', state='attached', timeout=15000)
             html = '<!DOCTYPE html>\n' + pg.evaluate('document.documentElement.outerHTML')
             pg.close()
@@ -102,7 +104,7 @@ def main(only):
         # daftar slug diambil dari data tenant
         pg = ctx.new_page()
         pg.add_init_script('window.PS_STATIC=' + json.dumps({'template': 'classic', 'package': 'showcase', 'bake': True}) + ';')
-        pg.goto((ROOT / 'home.html').as_uri()); pg.wait_for_selector('html[data-bake-done]', state='attached')
+        pg.goto((SHELLS / 'home.html').as_uri()); pg.wait_for_selector('html[data-bake-done]', state='attached')
         services = pg.evaluate('PrintSite.data.services.map(function(s){return s.slug})')
         articles = pg.evaluate('PrintSite.data.articles.map(function(s){return s.slug})')
         pg.close()
@@ -125,7 +127,7 @@ def main(only):
             if m['order'] == 'cart': live += ['keranjang.html', 'status-pesanan.html']
             if m['checkout']: live += ['checkout.html']
             for f in live:
-                raw = (ROOT / f).read_text(encoding='utf-8')
+                raw = (SHELLS / f).read_text(encoding='utf-8').replace('../../assets/', 'assets/')
                 (out / f).write_text(finish(raw, tpl, pkg, False), encoding='utf-8'); n += 1
             print('%-8s %-10s %d halaman' % (tpl, pkg, n))
         br.close()
