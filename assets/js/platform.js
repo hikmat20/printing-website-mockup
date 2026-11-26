@@ -206,6 +206,7 @@ window.PLATFORM = {
       /* Palet bawaan template (demo): cyan + magenta, warna khas cetak. Menimpa theme tenant saat template ini dipakai.
          Laravel: ini hanya nilai awal; warna yang diisi klien di settings menggantikannya. Kontras sudah dihitung (teks putih di primary 4,7:1,
          di accent 4,9:1; accentDark di atas putih 6,8:1; teks terang di atas primaryDark >= 4,7:1). */
+      imageSet: 'modern',      /* ilustrasi memakai salinan berpalet ini: assets/images-modern/ (tools/recolor.py); tanpa imageSet = assets/images/ */
       palette: {
         primary: '#0877C4', primaryDark: '#065E9C', primaryLight: '#E1F2FC', primaryTint: '#F2F9FE',
         accent: '#DB0076', accentDark: '#B3005F', accentTint: '#FFE6F3', onAccent: '#FFFFFF',
