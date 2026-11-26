@@ -32,8 +32,14 @@
      baked = HTML sudah jadi: lewati render, hanya pasang interaksi. Pratinjau lewat URL dimatikan. */
   var ST = window.PS_STATIC || null, BAKE = !!(ST && ST.bake), BAKED = !!(ST && ST.baked);
   /* Halaman di dalam folder template berada satu tingkat di bawah assets/: path gambar dari data diberi ../ (juga yang dirender ulang saat runtime). */
+  /* Template dengan imageSet (mis. Modern) memakai salinan ilustrasi berpalet sendiri: assets/images/ -> assets/images-<set>/. */
+  var IMGSET = ST && P.templates[ST.template] && P.templates[ST.template].imageSet;
   if (ST) (function fix(o) {
-    Object.keys(o).forEach(function (k) { var v = o[k]; if (typeof v === 'string') { if (/^assets\//.test(v)) o[k] = '../' + v; } else if (v && typeof v === 'object') fix(v); });
+    Object.keys(o).forEach(function (k) {
+      var v = o[k];
+      if (typeof v === 'string') { if (/^assets\//.test(v)) o[k] = '../' + (IMGSET ? v.replace(/^assets\/images\//, 'assets/images-' + IMGSET + '/') : v); }
+      else if (v && typeof v === 'object') fix(v);
+    });
   })(TN);
   if (ST) ['customize', 'package', 'template', 'font', 'hfont', 'primary', 'accent', 'header', 'cards', 'buttons'].forEach(function (k) { QS.delete(k); });
   var HEX = /^#?[0-9a-f]{6}$/i;

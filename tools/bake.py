@@ -31,6 +31,7 @@ TEMPLATES = {
     'compro':  'profile',
     'etalase': 'ecommerce',
 }
+IMAGE_SETS = {'modern': 'modern'}     # template dengan ilustrasi berpalet sendiri (sama dengan templates.<id>.imageSet; dibuat tools/recolor.py)
 PACKAGES = {   # salinan modul dari PLATFORM.packages (dipakai memilih halaman & skrip)
     'profile':   dict(pricing=False, order='contact', checkout=False),
     'showcase':  dict(pricing=True,  order='whatsapp', checkout=False),
@@ -66,6 +67,7 @@ def finish(html, tpl, pkg, baked, slug=None, extra_body=''):
     html = SCRIPT_RE.sub('', html).replace(' data-bake-done=""', '')
     html = TPL_LINK_RE.sub(lambda m: m.group(0) if m.group(1) == tpl else '', html)
     html = ASSET_RE.sub('../assets/', html)
+    if tpl in IMAGE_SETS: html = html.replace('../assets/images/', '../assets/images-%s/' % IMAGE_SETS[tpl])   # favicon dari cangkang
     st = {'template': tpl, 'package': pkg, 'baked': baked}
     head = ('\n  <meta name="robots" content="noindex, nofollow">\n  <link rel="stylesheet" href="../assets/css/gallery.css">\n'
             '  <script>window.PS_STATIC=' + json.dumps(st) + ';</script>\n')
