@@ -281,11 +281,12 @@
   function applyTheme() {
     var map = {
       primary: '--c-primary', primaryDark: '--c-primary-dark', primaryLight: '--c-primary-light',
-      accent: '--c-accent', accentDark: '--c-accent-dark', whatsapp: '--c-wa', whatsappDark: '--c-wa-dark',
+      accent: '--c-accent', accentDark: '--c-accent-dark', onAccent: '--c-on-accent', whatsapp: '--c-wa', whatsappDark: '--c-wa-dark',
       surface: '--c-surface', text: '--c-text', muted: '--c-muted',
       primaryTint: '--c-primary-tint', accentTint: '--c-accent-tint', onDarkSoft: '--c-on-dark-soft', onDarkMuted: '--c-on-dark-muted', onDarkFaint: '--c-on-dark-faint', overlay: '--c-overlay'
     };
-    var th = Object.assign({}, D.theme);
+    var tplPalette = (P.templates[S.template] || {}).palette;   /* palet bawaan template (opsional) menimpa theme tenant */
+    var th = Object.assign({}, D.theme, tplPalette || {});
     /* Warna tenant harus #rrggbb. Nilai lain dibuang (peringatan) agar tidak menghasilkan UI tak terlihat. */
     Object.keys(map).forEach(function (k) {
       if (th[k] != null && !/^#[0-9a-f]{6}$/i.test(th[k])) { console.warn('[main.js] theme.' + k + ' "' + th[k] + '" bukan warna #rrggbb; dipakai default platform.'); delete th[k]; }

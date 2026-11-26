@@ -203,6 +203,15 @@ window.PLATFORM = {
       description: 'Lapang dan ringan: hero terpusat, sudut membulat besar, layanan dan testimoni berbentuk slider.',
       header: 'standard', cardStyle: 'elevated', buttonShape: 'pill',
       fonts: { heading: 'poppins', body: 'inter' },
+      /* Palet bawaan template (demo): cyan + magenta, warna khas cetak. Menimpa theme tenant saat template ini dipakai.
+         Laravel: ini hanya nilai awal; warna yang diisi klien di settings menggantikannya. Kontras sudah dihitung (teks putih di primary 4,7:1,
+         di accent 4,9:1; accentDark di atas putih 6,8:1; teks terang di atas primaryDark >= 4,7:1). */
+      palette: {
+        primary: '#0877C4', primaryDark: '#065E9C', primaryLight: '#E1F2FC', primaryTint: '#F2F9FE',
+        accent: '#DB0076', accentDark: '#B3005F', accentTint: '#FFE6F3', onAccent: '#FFFFFF',
+        surface: '#F6FAFD',
+        onDarkSoft: '#EAF5FD', onDarkMuted: '#D3E8F8', onDarkFaint: '#BCDCF2', overlay: '#052E4F'
+      },
       pages: { services: 'grid', blog: 'grid' },
       home: [
         { id: 'hero', variant: 'centered' },
