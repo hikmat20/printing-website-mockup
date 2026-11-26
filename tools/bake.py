@@ -31,7 +31,7 @@ TEMPLATES = {
     'compro':  'profile',
     'etalase': 'ecommerce',
 }
-IMAGE_SETS = {'modern': 'modern'}     # template dengan ilustrasi berpalet sendiri (sama dengan templates.<id>.imageSet; dibuat tools/recolor.py)
+IMAGE_SETS = {'modern': 'modern', 'bold': 'bold'}     # template dengan ilustrasi berpalet sendiri (sama dengan templates.<id>.imageSet; dibuat tools/recolor.py)
 PACKAGES = {   # salinan modul dari PLATFORM.packages (dipakai memilih halaman & skrip)
     'profile':   dict(pricing=False, order='contact', checkout=False),
     'showcase':  dict(pricing=True,  order='whatsapp', checkout=False),

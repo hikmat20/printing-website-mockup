@@ -234,6 +234,16 @@ window.PLATFORM = {
       description: 'Tegas dan kontras tinggi: hero gelap, bingkai tebal, sudut tajam, cocok untuk kesan percetakan yang kuat.',
       header: 'topbar', cardStyle: 'outlined', buttonShape: 'square',
       fonts: { heading: 'montserrat', body: 'open-sans' },
+      imageSet: 'bold',        /* ilustrasi: assets/images-bold/ (tools/recolor.py) */
+      /* Palet bawaan template (demo): biru royal + lime. Laravel: hanya nilai awal; warna klien di settings menggantikannya.
+         Kontras dihitung: putih di primary 7,4:1, teks gelap di accent 14,7:1, accentDark di atas putih 6,1:1, teks terang di atas primaryDark >= 6,0:1.
+         Lime terlalu terang untuk teks/garis kecil di atas putih: dipakai sebagai latar (teks gelap) dan di atas latar gelap. */
+      palette: {
+        primary: '#2243D6', primaryDark: '#16309E', primaryLight: '#E8ECFD', primaryTint: '#F5F7FE',
+        accent: '#C6F432', accentDark: '#4F6B00', accentTint: '#F2FDC9', onAccent: '#14110A',
+        surface: '#F5F7FE',
+        onDarkSoft: '#EEF1FE', onDarkMuted: '#D2D9FA', onDarkFaint: '#B4BFF2', overlay: '#0A1240'
+      },
       pages: { services: 'list', blog: 'list' },
       home: [
         { id: 'hero', variant: 'dark' },

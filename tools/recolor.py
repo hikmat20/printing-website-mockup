@@ -2,7 +2,7 @@
 """
 Recolor: buat salinan ilustrasi SVG dengan palet template, tanpa mengubah aslinya.
 
-Ilustrasi di assets/images/ memakai navy + oranye (palet tenant). Template yang punya palet sendiri
+Ilustrasi di assets/images/ memakai navy + oranye (palet tenant). Template yang punya palet sendiri (Modern, Bold)
 (PLATFORM.templates.<id>.palette) memakai salinan di assets/images-<id>/, dipilih lewat templates.<id>.imageSet.
 Aslinya tidak disentuh; template lain tetap memakai assets/images/.
 
@@ -28,6 +28,17 @@ SETS = {
         'keep': {'#FFF', '#FFFFFF', '#000', '#000000', '#222', '#C9D3DF', '#DBE4EE', '#D7DEE7', '#9AA9BB', '#8FA6C0',
                  '#EAD6BB', '#F6ECDD', '#F4E7D4', '#FFF200', '#EC008C', '#00AEEF'},
         'blue_hue': 203, 'accent_hue': 325,
+    },
+    'bold': {
+        'explicit': {   # palet Bold: biru royal #2243D6 + lime #C6F432
+            '#173B63': '#2243D6', '#0F2B49': '#16309E', '#0B1F38': '#0A1240', '#2F6AA8': '#4D6BE8', '#1F4F82': '#1B38B5',
+            '#9DB6D3': '#A9B6F0', '#9FBDDC': '#A9B6F0', '#A9CDF3': '#B5C2F5', '#B9D3EE': '#C0CBF6', '#BCD0E6': '#C2CCF2',
+            '#CFE0F2': '#D5DCFA', '#C9D9EC': '#D0D8F8', '#D8ECFF': '#DEE4FD', '#D9E2EC': '#DCE2F8', '#E3EFFB': '#E8ECFD', '#EAF1F9': '#E8ECFD',
+            '#F28C28': '#C6F432', '#C8791C': '#7FA000', '#FFE9CF': '#F2FDC9', '#FFC98F': '#E3F99A', '#FFD9A8': '#EBFBB0', '#F6B36A': '#B4E021',
+        },
+        'keep': {'#FFF', '#FFFFFF', '#000', '#000000', '#222', '#C9D3DF', '#DBE4EE', '#D7DEE7', '#9AA9BB', '#8FA6C0',
+                 '#EAD6BB', '#F6ECDD', '#F4E7D4', '#FFF200', '#EC008C', '#00AEEF'},
+        'blue_hue': 228, 'accent_hue': 72,
     },
 }
 HEX = re.compile(r'#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b')
