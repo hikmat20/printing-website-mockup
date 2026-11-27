@@ -17,10 +17,10 @@
   function hex(t) { return '#' + t.map(function (v) { return ('0' + Math.round(v).toString(16)).slice(-2); }).join('').toUpperCase(); }
   function mix(a, pct, b) { var A = rgb(a), B = rgb(b); return hex(A.map(function (v, i) { return v * pct / 100 + B[i] * (100 - pct) / 100; })); }
   window.PS_MIX = mix;
-  window.PS_PALETTE_BUILD = function (id, name, group, c) {
+  window.PS_PALETTE_BUILD = function (id, name, group, c, hint) {
     var W = '#FFFFFF';
     return {
-      id: id, name: name, group: group,
+      id: id, name: name, group: group, hint: hint || '',
       primary: c[0], primaryDark: c[1], accent: c[2], accentDark: c[3],
       primaryLight: mix(c[0], 10, W), primaryTint: mix(c[0], 2, W), surface: mix(c[0], 2, W),
       accentTint: mix(c[2], 18, W), onAccent: '#14110A',
@@ -299,6 +299,20 @@ window.PLATFORM = {
       description: 'Katalog untuk penjualan ke perusahaan, sekolah, dan instansi: menu besar per kategori, filter di samping, klien, solusi, dan daftar tanya.',
       header: 'megamenu', cardStyle: 'outlined', buttonShape: 'square',
       fonts: { heading: 'dm-sans', body: 'inter' },
+      /* Delapan palet untuk segmen calon klien B2B (pengalih palet demo, assets/js/palette.js). Ilustrasi mengikuti palet:
+         assets/images-katalog-<id>/ (tools/recolor.py). Laravel: palet = warna di settings; pengalih ini hanya demo. */
+      imageSet: 'katalog',
+      defaultPalette: 'navy-oranye',
+      palettes: [
+        window.PS_PALETTE_BUILD('navy-oranye',   'Navy & Oranye',       'Korporat & instansi',     ['#173B63', '#0F2B49', '#F28C28', '#A8550C'], 'Perusahaan umum, distributor, kontraktor'),
+        window.PS_PALETTE_BUILD('biru-cyan',     'Biru Royal & Cyan',   'Korporat & instansi',     ['#0B4FA8', '#073A7D', '#22B8E8', '#0B6485'], 'Teknologi, telekomunikasi, startup'),
+        window.PS_PALETTE_BUILD('maroon-emas',   'Maroon & Emas',       'Korporat & instansi',     ['#8A1C2B', '#651320', '#E8B04B', '#7A5206'], 'Kampus, yayasan, instansi, hukum'),
+        window.PS_PALETTE_BUILD('slate-teal',    'Slate & Teal',        'Korporat & instansi',     ['#2C4A5E', '#1D3443', '#2EC4B6', '#0B6B63'], 'Konsultan, perbankan, jasa profesional'),
+        window.PS_PALETTE_BUILD('arang-kuning',  'Arang & Kuning',      'Industri, niaga & jasa',  ['#2B3138', '#1B2025', '#FFC400', '#6B5200'], 'Manufaktur, logistik, pabrik, kemasan'),
+        window.PS_PALETTE_BUILD('hijau-emas',    'Hijau Hutan & Emas',  'Industri, niaga & jasa',  ['#1B5E43', '#124530', '#E3B23C', '#7A5A08'], 'Properti, perkebunan, koperasi'),
+        window.PS_PALETTE_BUILD('teal-koral',    'Teal & Koral',        'Industri, niaga & jasa',  ['#0E6B72', '#094E54', '#FF7A59', '#B33A1C'], 'Rumah sakit, klinik, farmasi'),
+        window.PS_PALETTE_BUILD('indigo-oranye', 'Indigo & Oranye',     'Industri, niaga & jasa',  ['#3F2A7D', '#2D1D5C', '#FF9A3D', '#9A4E00'], 'Event organizer, agensi, sekolah swasta')
+      ],
       pages: { services: 'catalog', blog: 'grid' },
       home: [
         { id: 'hero', variant: 'split' },

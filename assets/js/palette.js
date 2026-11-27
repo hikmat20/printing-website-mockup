@@ -126,7 +126,9 @@
       P.palettes.filter(function (p) { return p.group === g; }).forEach(function (p) {
         var li = el('li'), b = el('button', 'pal-opt', { type: 'button', 'data-id': p.id, 'aria-pressed': 'false' });
         b.appendChild(chip(p));
-        var n = el('span', 'pal-name'); n.textContent = p.name; b.appendChild(n);
+        var n = el('span', 'pal-name'); n.textContent = p.name;
+        if (p.hint) { var hn = el('small', 'pal-hint'); hn.textContent = p.hint; n.appendChild(hn); }
+        b.appendChild(n);
         var ck = el('span', 'pal-ck', { 'aria-hidden': 'true' }); ck.textContent = '✓'; b.appendChild(ck);
         li.appendChild(b); ul.appendChild(li);
       });

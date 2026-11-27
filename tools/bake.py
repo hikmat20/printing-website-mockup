@@ -31,8 +31,8 @@ TEMPLATES = {
     'compro':  'profile',
     'etalase': 'ecommerce',
 }
-IMAGE_SETS = {'modern': 'modern', 'bold': 'bold', 'grafika': 'grafika-biru-langit'}     # template dengan ilustrasi berpalet sendiri (sama dengan templates.<id>.imageSet; dibuat tools/recolor.py)
-PALETTE_TPLS = {'grafika'}      # template dengan pengalih palet (templates.<id>.palettes): platform.js + palette.js dimuat di <head>
+IMAGE_SETS = {'modern': 'modern', 'bold': 'bold', 'grafika': 'grafika-biru-langit', 'katalog': 'katalog-navy-oranye'}     # template dengan ilustrasi berpalet sendiri (sama dengan templates.<id>.imageSet; dibuat tools/recolor.py)
+PALETTE_TPLS = {'grafika', 'katalog'}      # template dengan pengalih palet (templates.<id>.palettes): platform.js + palette.js dimuat di <head>
 PACKAGES = {   # salinan modul dari PLATFORM.packages (dipakai memilih halaman & skrip)
     'profile':   dict(pricing=False, order='contact', checkout=False),
     'showcase':  dict(pricing=True,  order='whatsapp', checkout=False),

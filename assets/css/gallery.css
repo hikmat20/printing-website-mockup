@@ -52,6 +52,7 @@ body.gallery{background:#f5f7fa;color:#1c2330;font-family:"Plus Jakarta Sans",sy
 .pal-opt:hover{background:#f5f7fa;border-color:#c5d0de}
 .pal-opt[aria-pressed="true"]{border-color:#14181f;background:#f5f7fa}
 .pal-name{flex:1}
+.pal-hint{display:block;margin-top:1px;font-weight:500;font-size:.76rem;line-height:1.25;color:#5b6675}
 .pal-ck{visibility:hidden;font-weight:800}
 .pal-opt[aria-pressed="true"] .pal-ck{visibility:visible}
 .pal-chip{display:inline-flex;flex:none;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,.12)}
