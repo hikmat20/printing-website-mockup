@@ -216,6 +216,19 @@ window.PLATFORM = {
       description: 'Rapi dan netral: hero dua kolom, kartu berbingkai, susunan yang familiar bagi pelanggan.',
       header: 'standard', cardStyle: 'elevated', buttonShape: 'rounded',
       fonts: { heading: 'plus-jakarta-sans', body: 'plus-jakarta-sans' },
+      /* Delapan palet menurut segmen klien (pengalih palet demo, assets/js/palette.js). Ilustrasi mengikuti palet: assets/images-classic-<id>/ (tools/recolor.py). */
+      imageSet: 'classic',
+      defaultPalette: 'navy-oranye',
+      palettes: [
+        window.PS_PALETTE_BUILD('navy-oranye', 'Navy & Oranye', 'Cetak umum & kantoran', ['#173B63', '#0F2B49', '#F28C28', '#A8550C'], 'Fotocopy, print, dan jilid serba ada'),
+        window.PS_PALETTE_BUILD('biru-kuning', 'Biru & Kuning', 'Cetak umum & kantoran', ['#1D5FBF', '#14459A', '#FFC21A', '#7D5600'], 'Rental komputer, ATK, fotocopy kampus'),
+        window.PS_PALETTE_BUILD('hijau-oranye', 'Hijau & Oranye', 'Cetak umum & kantoran', ['#17794A', '#0F5A36', '#FF9F1C', '#9A5600'], 'Percetakan buku dan sekolah'),
+        window.PS_PALETTE_BUILD('merah-emas', 'Merah & Emas', 'Cetak umum & kantoran', ['#B3261E', '#8A1B15', '#F2B134', '#7A5200'], 'Spanduk, baliho, advertising'),
+        window.PS_PALETTE_BUILD('ungu-kuning', 'Ungu & Kuning', 'Kreatif & khusus', ['#5B3FB5', '#43298F', '#FFC21A', '#7A5600'], 'Undangan dan wedding'),
+        window.PS_PALETTE_BUILD('teal-koral', 'Teal & Koral', 'Kreatif & khusus', ['#0B7079', '#085960', '#FF7A59', '#B33A1C'], 'Kartu nama dan stationery'),
+        window.PS_PALETTE_BUILD('cokelat-emas', 'Cokelat & Emas', 'Kreatif & khusus', ['#6B3F1D', '#4A2A11', '#E8B04B', '#7A5206'], 'Kemasan dan kertas premium'),
+        window.PS_PALETTE_BUILD('arang-oranye', 'Arang & Oranye', 'Kreatif & khusus', ['#2F353D', '#1E2329', '#FF8A1F', '#9A4A00'], 'Sablon dan merchandise')
+      ],
       pages: { services: 'grid', blog: 'grid' },
       home: [
         { id: 'hero', variant: 'split' },
@@ -337,6 +350,19 @@ window.PLATFORM = {
       description: 'Etalase toko online: pencarian dan keranjang di header, kotak promo, produk terlaris dengan harga menonjol.',
       header: 'store', cardStyle: 'elevated', buttonShape: 'rounded',
       fonts: { heading: 'poppins', body: 'inter' },
+      /* Delapan palet menurut segmen klien (pengalih palet demo, assets/js/palette.js). Ilustrasi mengikuti palet: assets/images-toko-<id>/ (tools/recolor.py). */
+      imageSet: 'toko',
+      defaultPalette: 'navy-oranye',
+      palettes: [
+        window.PS_PALETTE_BUILD('navy-oranye', 'Navy & Oranye', 'Toko umum & kantor', ['#173B63', '#0F2B49', '#F28C28', '#A8550C'], 'Toko cetak serba ada'),
+        window.PS_PALETTE_BUILD('biru-kuning', 'Biru & Kuning', 'Toko umum & kantor', ['#1456C9', '#0F3F96', '#FFC21A', '#7D5600'], 'Cetak online cepat'),
+        window.PS_PALETTE_BUILD('hijau-oranye', 'Hijau & Oranye', 'Toko umum & kantor', ['#0F7A44', '#0C5F37', '#FF8A1F', '#9A4A00'], 'ATK dan perlengkapan kantor'),
+        window.PS_PALETTE_BUILD('merah-kuning', 'Merah & Kuning', 'Toko umum & kantor', ['#C62828', '#9B1C1C', '#FFC21A', '#7D5600'], 'Promo, diskon, cetak kilat'),
+        window.PS_PALETTE_BUILD('magenta-emas', 'Magenta & Emas', 'Kreatif & hadiah', ['#C2185B', '#8E1146', '#FFB300', '#7A5200'], 'Souvenir dan kado'),
+        window.PS_PALETTE_BUILD('ungu-oranye', 'Ungu & Oranye', 'Kreatif & hadiah', ['#5E35B1', '#45258A', '#FF9F1C', '#9A5600'], 'Merchandise dan cetak kustom'),
+        window.PS_PALETTE_BUILD('teal-koral', 'Teal & Koral', 'Kreatif & hadiah', ['#0B7079', '#085960', '#FF7A59', '#B33A1C'], 'Stiker dan label'),
+        window.PS_PALETTE_BUILD('arang-kuning', 'Arang & Kuning', 'Kreatif & hadiah', ['#2B3138', '#1B2025', '#FFC400', '#6B5200'], 'Sablon dan kaos')
+      ],
       pages: { services: 'grid', blog: 'grid' },
       home: [
         { id: 'hero', variant: 'split' },
@@ -391,6 +417,19 @@ window.PLATFORM = {
       description: 'Profil perusahaan editorial: menu samping tetap, hero layar penuh, angka besar, layanan sebagai daftar bernomor, tanpa kartu.',
       header: 'rail', cardStyle: 'flat', buttonShape: 'square',
       fonts: { heading: 'raleway', body: 'source-sans-3' },
+      /* Delapan palet menurut segmen klien (pengalih palet demo, assets/js/palette.js). Ilustrasi mengikuti palet: assets/images-compro-<id>/ (tools/recolor.py). */
+      imageSet: 'compro',
+      defaultPalette: 'navy-oranye',
+      palettes: [
+        window.PS_PALETTE_BUILD('navy-oranye', 'Navy & Oranye', 'Perusahaan & jasa', ['#173B63', '#0F2B49', '#F28C28', '#A8550C'], 'Perusahaan umum dan kontraktor'),
+        window.PS_PALETTE_BUILD('biru-cyan', 'Biru Royal & Cyan', 'Perusahaan & jasa', ['#0B4FA8', '#073A7D', '#22B8E8', '#0B6485'], 'Teknologi dan telekomunikasi'),
+        window.PS_PALETTE_BUILD('slate-teal', 'Slate & Teal', 'Perusahaan & jasa', ['#2C4A5E', '#1D3443', '#2EC4B6', '#0B6B63'], 'Konsultan dan jasa profesional'),
+        window.PS_PALETTE_BUILD('indigo-oranye', 'Indigo & Oranye', 'Perusahaan & jasa', ['#3F2A7D', '#2D1D5C', '#FF9A3D', '#9A4E00'], 'Agensi dan media'),
+        window.PS_PALETTE_BUILD('hijau-emas', 'Hijau Hutan & Emas', 'Industri & institusi', ['#1B5E43', '#124530', '#E3B23C', '#7A5A08'], 'Agribisnis, properti, lingkungan'),
+        window.PS_PALETTE_BUILD('maroon-emas', 'Maroon & Emas', 'Industri & institusi', ['#8A1C2B', '#651320', '#E8B04B', '#7A5206'], 'Yayasan, kampus, hukum'),
+        window.PS_PALETTE_BUILD('arang-kuning', 'Arang & Kuning', 'Industri & institusi', ['#2B3138', '#1B2025', '#FFC400', '#6B5200'], 'Manufaktur dan konstruksi'),
+        window.PS_PALETTE_BUILD('cokelat-emas', 'Cokelat & Emas', 'Industri & institusi', ['#6B3F1D', '#4A2A11', '#E8B04B', '#7A5206'], 'Perhotelan, furnitur, kriya')
+      ],
       pages: { services: 'rows' },
       home: [
         { id: 'hero', variant: 'fullbleed' },
@@ -411,6 +450,19 @@ window.PLATFORM = {
       description: 'Butik online: merek di tengah, laci keranjang geser, hero berubin, kategori bulat bergambar, galeri produk dengan kotak beli menempel, dan checkout fokus.',
       header: 'boutique', cardStyle: 'outlined', buttonShape: 'pill',
       fonts: { heading: 'work-sans', body: 'nunito' },
+      /* Delapan palet menurut segmen klien (pengalih palet demo, assets/js/palette.js). Ilustrasi mengikuti palet: assets/images-etalase-<id>/ (tools/recolor.py). */
+      imageSet: 'etalase',
+      defaultPalette: 'navy-oranye',
+      palettes: [
+        window.PS_PALETTE_BUILD('navy-oranye', 'Navy & Oranye', 'Butik umum', ['#173B63', '#0F2B49', '#F28C28', '#A8550C'], 'Butik cetak serba ada'),
+        window.PS_PALETTE_BUILD('mawar-peach', 'Mawar & Peach', 'Butik umum', ['#9B2C4A', '#741F37', '#F2B6A0', '#8A3B1F'], 'Undangan, wedding, hadiah'),
+        window.PS_PALETTE_BUILD('sage-emas', 'Sage & Emas', 'Butik umum', ['#2F6B57', '#1F4D3E', '#E9C46A', '#7A5A08'], 'Kemasan ramah lingkungan'),
+        window.PS_PALETTE_BUILD('terakota-emas', 'Terakota & Emas', 'Butik umum', ['#B5482A', '#8C3418', '#F4C95D', '#7A5206'], 'Kerajinan, kopi, UMKM lokal'),
+        window.PS_PALETTE_BUILD('lilac-pink', 'Lilac & Pink', 'Gaya khusus', ['#6A3FB5', '#4E2A8C', '#F5A3C7', '#A3185F'], 'Fashion, kado, merchandise'),
+        window.PS_PALETTE_BUILD('biru-koral', 'Biru Es & Koral', 'Gaya khusus', ['#1F6FB5', '#16508A', '#FF8A7A', '#B33A2B'], 'Stationery modern'),
+        window.PS_PALETTE_BUILD('hitam-emas', 'Hitam & Emas', 'Gaya khusus', ['#1F2328', '#12151A', '#D4A93A', '#7A5A08'], 'Premium dan eksklusif'),
+        window.PS_PALETTE_BUILD('teal-mint', 'Teal & Mint', 'Gaya khusus', ['#0F766E', '#0A5650', '#7EE0C3', '#0A6B50'], 'Kesehatan dan organik')
+      ],
       pages: { services: 'market', service: 'gallery', checkout: 'focus', blog: 'grid' },
       home: [
         { id: 'hero', variant: 'tiles' },
