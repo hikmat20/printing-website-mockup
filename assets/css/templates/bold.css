@@ -134,5 +134,24 @@ html[data-template="bold"][data-card="outlined"] .pf-card { box-shadow: 4px 4px 
 [data-template="bold"] :focus-visible,
 [data-template="bold"] .btn:focus-visible,
 [data-template="bold"] .pager button:focus-visible { outline-color: var(--c-primary); }
-[data-template="bold"] :is(.hero--dark, .page-head, .article-head, .site-footer, .topbar, .cta-wa--gradient) :focus-visible { outline-color: var(--c-accent); }
-[data-template="bold"] .hero--dark .hero-points .i { color: var(--c-accent); }   /* ikon centang hijau tua hampir hilang di atas hero biru */
+
+/* Palet berganti-ganti (pengalih palet demo, 10 palet): teks harus terbaca di SEMUA palet.
+   - Teks warna utama di atas latar muda (--c-primary-light) memakai varian gelap.
+   - Aksen di atas permukaan gelap (footer, topbar, hero gelap) dicampur putih 60% (--c-accent-lt): aksen gelap seperti magenta,
+     koral, dan oranye tua jadi terbaca, aksen terang (kuning, lime, mint) tetap terang.
+   - Ikon aksen di atas putih memakai varian gelap (--c-accent-dark): aksen kuning/lime hampir hilang di atas putih. */
+[data-template="bold"] { --c-accent-lt: color-mix(in srgb, var(--c-accent) 40%, #fff); }
+[data-template="bold"] .tag,
+[data-template="bold"] .client-mark,
+[data-template="bold"] .nav-link-item:hover, [data-template="bold"] .nav-toggle:hover, [data-template="bold"] .has-dropdown.is-open > .nav-toggle,
+[data-template="bold"] .nav-link-item.is-active, [data-template="bold"] .nav-toggle.is-active { color: var(--c-primary-dark); }
+[data-template="bold"] .topbar .i,
+[data-template="bold"] .promo-bar .i,
+[data-template="bold"] .footer-contact .i,
+[data-template="bold"] .footer-trust .i,
+[data-template="bold"] .hero--dark h1 em,
+[data-template="bold"] .hero--dark .hero-badge .i,
+[data-template="bold"] .hero--dark .hero-points .i { color: var(--c-accent-lt); }
+[data-template="bold"] :is(.hero--dark, .page-head, .article-head, .site-footer, .topbar, .cta-wa--gradient) :focus-visible { outline-color: var(--c-accent-lt); }
+[data-template="bold"] .hero:not(.hero--dark) .hero-badge .i { color: var(--c-accent-dark); }
+[data-template="bold"] .cta-wa .btn-light-ghost { background: rgba(0, 0, 0, .18); }   /* teks putih di atas warna utama + lapisan putih 12% turun di bawah 4,5:1 pada beberapa palet */
