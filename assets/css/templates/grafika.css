@@ -51,3 +51,13 @@
 [data-template="grafika"] .faq-topic .ico { background: var(--c-accent-tint); color: var(--c-accent-dark); }
 [data-template="grafika"] .mag-feature { border-radius: 20px; }
 [data-template="grafika"] .pager button { border-radius: 999px; }
+
+/* Palet berganti-ganti (pengalih palet demo, 10 palet): teks harus terbaca di SEMUA palet.
+   - Teks warna utama di atas latar muda (--c-primary-light) memakai varian gelap; ikon dekoratif tetap warna utama.
+   - Banner "tone-1" (turunan warna aksen) diganti gradasi gelap dari warna utama: aksen kuning/mint/oranye terlalu terang untuk teks putih,
+     dan aksen gelapnya menjadi cokelat keruh. */
+[data-template="grafika"] .tag,
+[data-template="grafika"] .client-mark,
+[data-template="grafika"] .nav-link-item:hover, [data-template="grafika"] .nav-toggle:hover, [data-template="grafika"] .has-dropdown.is-open > .nav-toggle,
+[data-template="grafika"] .market-nav .nav-link-item.is-active, [data-template="grafika"] .market-nav .nav-toggle.is-active { color: var(--c-primary-dark); }
+[data-template="grafika"] .banner-tone-1 { background: linear-gradient(120deg, var(--c-overlay), var(--c-primary-dark)); }

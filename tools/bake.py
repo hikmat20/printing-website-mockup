@@ -31,7 +31,8 @@ TEMPLATES = {
     'compro':  'profile',
     'etalase': 'ecommerce',
 }
-IMAGE_SETS = {'modern': 'modern', 'bold': 'bold'}     # template dengan ilustrasi berpalet sendiri (sama dengan templates.<id>.imageSet; dibuat tools/recolor.py)
+IMAGE_SETS = {'modern': 'modern', 'bold': 'bold', 'grafika': 'grafika-biru-langit'}     # template dengan ilustrasi berpalet sendiri (sama dengan templates.<id>.imageSet; dibuat tools/recolor.py)
+PALETTE_TPLS = {'grafika'}      # template dengan pengalih palet (templates.<id>.palettes): platform.js + palette.js dimuat di <head>
 PACKAGES = {   # salinan modul dari PLATFORM.packages (dipakai memilih halaman & skrip)
     'profile':   dict(pricing=False, order='contact', checkout=False),
     'showcase':  dict(pricing=True,  order='whatsapp', checkout=False),
@@ -49,9 +50,9 @@ TPL_LINK_RE = re.compile(r'\s*<link rel="stylesheet" href="assets/css/templates/
 ASSET_RE = re.compile(r'(?<![\w./-])assets/')
 
 
-def scripts_for(pkg, baked):
+def scripts_for(pkg, baked, tpl=None):
     m = PACKAGES[pkg]
-    js = ['assets/vendor/lucide.min.js', 'assets/js/platform.js']
+    js = ['assets/vendor/lucide.min.js'] + ([] if tpl in PALETTE_TPLS else ['assets/js/platform.js'])
     if m['checkout'] and not baked: js.append('assets/js/regions.js')
     js += ['assets/js/tenants/sinar-copy.js', 'assets/js/main.js', 'assets/js/sections.js', 'assets/js/pages.js']
     if m['order'] == 'inquiry': js.append('assets/js/inquiry.js')
@@ -71,11 +72,13 @@ def finish(html, tpl, pkg, baked, slug=None, extra_body=''):
     st = {'template': tpl, 'package': pkg, 'baked': baked}
     head = ('\n  <meta name="robots" content="noindex, nofollow">\n  <link rel="stylesheet" href="../assets/css/gallery.css">\n'
             '  <script>window.PS_STATIC=' + json.dumps(st) + ';</script>\n')
+    if tpl in PALETTE_TPLS:     # pengalih palet demo: palet tersimpan dipasang sebelum halaman digambar (tanpa kedip)
+        head += '  <script src="../assets/js/platform.js"></script>\n  <script src="../assets/js/palette.js"></script>\n'
     html = html.replace('</head>', head + '</head>', 1)
     if slug:
         html = re.sub(r'<body\b', '<body data-slug="%s"' % slug, html, count=1)
     back = ('<a class="demo-back" href="../index.html"><span aria-hidden="true">&larr;</span> Pilih template lain</a>\n')
-    tags = ''.join('  <script src="../%s" defer></script>\n' % s for s in scripts_for(pkg, baked))
+    tags = ''.join('  <script src="../%s" defer></script>\n' % s for s in scripts_for(pkg, baked, tpl))
     html = html.replace('</body>', back + tags + '</body>', 1)
     return html
 

@@ -6,6 +6,40 @@
  * Pemetaan ke Laravel:
  *   routes -> routes/web.php        nav -> config/navigation.php
  */
+/*
+ * Palet template: empat warna dasar per palet (primary, primaryDark, accent, accentDark); sisanya diturunkan di sini.
+ * Rumus yang sama dipakai tools/recolor.py (lewat node) dan tes kontras, jadi satu sumber kebenaran.
+ * Kontras yang dijaga: putih di atas primary dan primaryDark, teks gelap (#14110A) di atas accent, accentDark di atas putih dan accentTint,
+ * teks terang (onDark*) di atas primaryDark.
+ */
+(function () {
+  function rgb(h) { return [1, 3, 5].map(function (i) { return parseInt(h.slice(i, i + 2), 16); }); }
+  function hex(t) { return '#' + t.map(function (v) { return ('0' + Math.round(v).toString(16)).slice(-2); }).join('').toUpperCase(); }
+  function mix(a, pct, b) { var A = rgb(a), B = rgb(b); return hex(A.map(function (v, i) { return v * pct / 100 + B[i] * (100 - pct) / 100; })); }
+  window.PS_MIX = mix;
+  window.PS_PALETTE_BUILD = function (id, name, group, c) {
+    var W = '#FFFFFF';
+    return {
+      id: id, name: name, group: group,
+      primary: c[0], primaryDark: c[1], accent: c[2], accentDark: c[3],
+      primaryLight: mix(c[0], 10, W), primaryTint: mix(c[0], 2, W), surface: mix(c[0], 2, W),
+      accentTint: mix(c[2], 18, W), onAccent: '#14110A',
+      onDarkSoft: mix(c[0], 6, W), onDarkMuted: mix(c[0], 16, W), onDarkFaint: mix(c[0], 26, W),
+      overlay: mix(c[1], 55, '#000000')
+    };
+  };
+  /* Palet aktif template: tersimpan di perangkat (demo) atau bawaan. Bake selalu memakai bawaan agar hasilnya deterministik. */
+  window.PS_PALETTE_FOR = function (tplId) {
+    var t = window.PLATFORM && window.PLATFORM.templates[tplId];
+    if (!t || !t.palettes) return null;
+    var id = t.defaultPalette, st = window.PS_STATIC;
+    if (st && !st.bake) { try { var v = localStorage.getItem('ps-palette:' + tplId); if (v) id = v; } catch (e) {} }
+    var found = null;
+    t.palettes.forEach(function (p) { if (p.id === id) found = p; });
+    return found || t.palettes.filter(function (p) { return p.id === t.defaultPalette; })[0];
+  };
+})();
+
 window.PLATFORM = {
 
   /* ---------- Pemetaan URL: mockup -> Laravel ---------- */
@@ -308,6 +342,22 @@ window.PLATFORM = {
       description: 'Marketplace cetak: banner promo bergeser, kategori bergambar, produk bertab, pencarian pil dan total keranjang di header.',
       header: 'market', cardStyle: 'elevated', buttonShape: 'pill',
       fonts: { heading: 'montserrat', body: 'inter' },
+      /* Sepuluh palet yang bisa dicoba di demo lewat pengalih palet (assets/js/palette.js). Ilustrasi mengikuti palet:
+         assets/images-grafika-<id>/ (tools/recolor.py). Laravel: palet = warna di settings; pengalih ini hanya demo. */
+      imageSet: 'grafika',
+      defaultPalette: 'biru-langit',
+      palettes: [
+        window.PS_PALETTE_BUILD('biru-langit',   'Biru Langit & Kuning',    'Biru cerah', ['#1A6FEB', '#1252B3', '#FFC21A', '#7D5600']),
+        window.PS_PALETTE_BUILD('biru-elektrik', 'Biru Elektrik & Oranye',  'Biru cerah', ['#0B5FFF', '#0840B8', '#FF8A1F', '#9A4A00']),
+        window.PS_PALETTE_BUILD('biru-koral',    'Biru Cerah & Koral',      'Biru cerah', ['#1B74D8', '#1357A6', '#FF6F59', '#B8341F']),
+        window.PS_PALETTE_BUILD('biru-mint',     'Biru Es & Mint',          'Biru cerah', ['#0F6FDE', '#0B52A8', '#2EE6A6', '#066B4A']),
+        window.PS_PALETTE_BUILD('biru-pink',     'Biru Cerah & Pink',       'Biru cerah', ['#1D6BF0', '#1450B6', '#FF5C9E', '#B3125C']),
+        window.PS_PALETTE_BUILD('jingga-kuning', 'Jingga Pasar & Kuning',   'Warna lain', ['#D5351B', '#A82813', '#FFC21A', '#7D5600']),
+        window.PS_PALETTE_BUILD('hijau-kuning',  'Hijau Segar & Kuning',    'Warna lain', ['#09843F', '#066633', '#FFB300', '#7A5200']),
+        window.PS_PALETTE_BUILD('tosca-koral',   'Tosca & Koral',           'Warna lain', ['#087F7F', '#056060', '#FF6F59', '#B8341F']),
+        window.PS_PALETTE_BUILD('violet-oranye', 'Violet & Oranye',         'Warna lain', ['#7A3FE4', '#5A27B5', '#FF9F1C', '#9A5600']),
+        window.PS_PALETTE_BUILD('raspberry-tosca', 'Raspberry & Tosca',     'Warna lain', ['#D01B5E', '#A01048', '#14C8B0', '#07705F'])
+      ],
       pages: { services: 'market', service: 'configurator', blog: 'magazine', faq: 'help' },
       home: [
         { id: 'hero', variant: 'banner' },

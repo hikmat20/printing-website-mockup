@@ -31,3 +31,32 @@ body.gallery{background:#f5f7fa;color:#1c2330;font-family:"Plus Jakarta Sans",sy
 .gal-skip{position:absolute;left:-999px}.gal-skip:focus{left:8px;top:8px;background:#fff;padding:8px 12px;z-index:10}
 /* Template dengan menu samping (rail): tombol berada di sebelah kanan menu agar tidak tertutup */
 @media (min-width: 992px) { html[data-header="rail"] .demo-back { left: calc(var(--rail-w, 272px) + 12px); } }
+
+/* ---- Pengalih palet (khusus demo; assets/js/palette.js). Tab mengambang di sisi kanan; netral supaya tidak ikut berubah warna ---- */
+.pal-fab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:1015;display:flex;flex-direction:column;align-items:center;gap:4px;width:56px;min-height:64px;padding:9px 0 8px;
+  border:0;border-radius:14px 0 0 14px;background:#14181f;color:#fff;font:700 11px/1.1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;box-shadow:-3px 4px 16px rgba(0,0,0,.28);opacity:.94}
+.pal-fab:hover,.pal-fab[aria-expanded="true"]{opacity:1;width:60px}
+.pal-fab:focus-visible{outline:3px solid #ffc83d;outline-offset:-3px}
+.pal-dot{width:26px;height:26px;border-radius:50%;border:2px solid #fff;display:block}
+.pal-panel{position:fixed;right:68px;top:50%;transform:translateY(-50%);z-index:1090;width:min(340px,calc(100vw - 84px));max-height:min(88vh,740px);overflow:auto;padding:14px 14px 12px;
+  background:#fff;color:#1c2330;border-radius:16px;box-shadow:0 10px 36px rgba(20,24,31,.32);border:1px solid #dfe5ee;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.pal-panel[hidden]{display:none}
+.pal-head{display:flex;align-items:center;justify-content:space-between}
+.pal-title{margin:0;font-weight:800;font-size:1rem}
+.pal-x{border:0;background:transparent;font-size:1.6rem;line-height:1;width:40px;height:40px;border-radius:10px;color:#4a5566;cursor:pointer}
+.pal-x:hover{background:#eef2f7}
+.pal-sub{margin:0 0 6px;color:#4a5566;font-size:.85rem}
+.pal-group{margin:12px 0 6px;font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#5b6675}
+.pal-ul{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.pal-opt{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:4px 10px;border:2px solid #e3e8ef;border-radius:12px;background:#fff;color:#1c2330;text-align:left;font:inherit;font-weight:600;cursor:pointer}
+.pal-opt:hover{background:#f5f7fa;border-color:#c5d0de}
+.pal-opt[aria-pressed="true"]{border-color:#14181f;background:#f5f7fa}
+.pal-name{flex:1}
+.pal-ck{visibility:hidden;font-weight:800}
+.pal-opt[aria-pressed="true"] .pal-ck{visibility:visible}
+.pal-chip{display:inline-flex;flex:none;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,.12)}
+.pal-chip i{display:block;width:16px;height:28px}
+.pal-opt:focus-visible,.pal-x:focus-visible{outline:3px solid #14181f;outline-offset:2px}
+.pal-note{margin:10px 0 0;color:#5b6675;font-size:.78rem}
+@media (max-width:575.98px){.pal-fab{width:48px}.pal-fab:hover,.pal-fab[aria-expanded="true"]{width:50px}.pal-panel{right:58px;width:calc(100vw - 70px)}}
+@media print{.pal-fab,.pal-panel{display:none}}

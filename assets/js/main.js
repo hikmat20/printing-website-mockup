@@ -34,6 +34,7 @@
   /* Halaman di dalam folder template berada satu tingkat di bawah assets/: path gambar dari data diberi ../ (juga yang dirender ulang saat runtime). */
   /* Template dengan imageSet (mis. Modern) memakai salinan ilustrasi berpalet sendiri: assets/images/ -> assets/images-<set>/. */
   var IMGSET = ST && P.templates[ST.template] && P.templates[ST.template].imageSet;
+  if (IMGSET && P.templates[ST.template].palettes && window.PS_PALETTE_FOR) IMGSET += '-' + window.PS_PALETTE_FOR(ST.template).id;   /* satu set ilustrasi per palet */
   if (ST) (function fix(o) {
     Object.keys(o).forEach(function (k) {
       var v = o[k];
@@ -291,7 +292,7 @@
       surface: '--c-surface', text: '--c-text', muted: '--c-muted',
       primaryTint: '--c-primary-tint', accentTint: '--c-accent-tint', onDarkSoft: '--c-on-dark-soft', onDarkMuted: '--c-on-dark-muted', onDarkFaint: '--c-on-dark-faint', overlay: '--c-overlay'
     };
-    var tplPalette = (P.templates[S.template] || {}).palette;   /* palet bawaan template (opsional) menimpa theme tenant */
+    var tplPalette = (window.PS_PALETTE_FOR && window.PS_PALETTE_FOR(S.template)) || (P.templates[S.template] || {}).palette;   /* palet template (satu, atau pilihan pengalih palet) menimpa theme tenant */
     var th = Object.assign({}, D.theme, tplPalette || {});
     /* Warna tenant harus #rrggbb. Nilai lain dibuang (peringatan) agar tidak menghasilkan UI tak terlihat. */
     Object.keys(map).forEach(function (k) {
