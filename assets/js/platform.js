@@ -17,13 +17,13 @@
   function hex(t) { return '#' + t.map(function (v) { return ('0' + Math.round(v).toString(16)).slice(-2); }).join('').toUpperCase(); }
   function mix(a, pct, b) { var A = rgb(a), B = rgb(b); return hex(A.map(function (v, i) { return v * pct / 100 + B[i] * (100 - pct) / 100; })); }
   window.PS_MIX = mix;
-  window.PS_PALETTE_BUILD = function (id, name, group, c, hint) {
+  window.PS_PALETTE_BUILD = function (id, name, group, c, hint, onAccent) {
     var W = '#FFFFFF';
     return {
       id: id, name: name, group: group, hint: hint || '',
       primary: c[0], primaryDark: c[1], accent: c[2], accentDark: c[3],
       primaryLight: mix(c[0], 10, W), primaryTint: mix(c[0], 2, W), surface: mix(c[0], 2, W),
-      accentTint: mix(c[2], 18, W), onAccent: '#14110A',
+      accentTint: mix(c[2], 18, W), onAccent: onAccent || '#14110A',
       onDarkSoft: mix(c[0], 6, W), onDarkMuted: mix(c[0], 16, W), onDarkFaint: mix(c[0], 26, W),
       overlay: mix(c[1], 55, '#000000')
     };
@@ -250,16 +250,23 @@ window.PLATFORM = {
       description: 'Lapang dan ringan: hero terpusat, sudut membulat besar, layanan dan testimoni berbentuk slider.',
       header: 'standard', cardStyle: 'elevated', buttonShape: 'pill',
       fonts: { heading: 'poppins', body: 'inter' },
-      /* Palet bawaan template (demo): cyan + magenta, warna khas cetak. Menimpa theme tenant saat template ini dipakai.
-         Laravel: ini hanya nilai awal; warna yang diisi klien di settings menggantikannya. Kontras sudah dihitung (teks putih di primary 4,7:1,
-         di accent 4,9:1; accentDark di atas putih 6,8:1; teks terang di atas primaryDark >= 4,7:1). */
-      imageSet: 'modern',      /* ilustrasi memakai salinan berpalet ini: assets/images-modern/ (tools/recolor.py); tanpa imageSet = assets/images/ */
-      palette: {
-        primary: '#0877C4', primaryDark: '#065E9C', primaryLight: '#E1F2FC', primaryTint: '#F2F9FE',
-        accent: '#DB0076', accentDark: '#B3005F', accentTint: '#FFE6F3', onAccent: '#FFFFFF',
-        surface: '#F6FAFD',
-        onDarkSoft: '#EAF5FD', onDarkMuted: '#D3E8F8', onDarkFaint: '#BCDCF2', overlay: '#052E4F'
-      },
+      /* Palet bawaan: Cyan & Magenta (cyan + magenta, warna khas cetak; teks putih di atas accent). Kontras tiap palet dihitung. */
+      /* Sepuluh palet (pengalih palet demo, assets/js/palette.js). Palet bawaan = pilihan awal template; ilustrasi mengikuti palet: assets/images-modern-<id>/ (tools/recolor.py).
+         Laravel: palet = warna di settings; pengalih ini hanya demo. */
+      imageSet: 'modern',
+      defaultPalette: 'cyan-magenta',
+      palettes: [
+        window.PS_PALETTE_BUILD('cyan-magenta', 'Cyan & Magenta', 'Cerah & segar', ['#0877C4', '#065E9C', '#DB0076', '#B3005F'], 'Perusahaan kreatif dan ramah', '#FFFFFF'),
+        window.PS_PALETTE_BUILD('biru-oranye', 'Biru & Oranye', 'Cerah & segar', ['#0877C4', '#065E9C', '#FF8A1F', '#9A4A00'], 'Jasa umum, hangat dan terpercaya'),
+        window.PS_PALETTE_BUILD('tosca-pink', 'Tosca & Pink', 'Cerah & segar', ['#088084', '#066266', '#FF5C9E', '#B3125C'], 'Studio, kafe, gaya hidup'),
+        window.PS_PALETTE_BUILD('ungu-kuning', 'Ungu & Kuning', 'Cerah & segar', ['#6D3BE0', '#5226B8', '#FFC21A', '#7D5600'], 'Agensi, event, kreatif'),
+        window.PS_PALETTE_BUILD('hijau-koral', 'Hijau & Koral', 'Cerah & segar', ['#0B7F45', '#07602F', '#FF6F59', '#B8341F'], 'Organik, makanan, ramah lingkungan'),
+        window.PS_PALETTE_BUILD('indigo-mint', 'Indigo & Mint', 'Cerah & segar', ['#3B4FE0', '#2A39B3', '#2EE6A6', '#066B4A'], 'Teknologi dan startup'),
+        window.PS_PALETTE_BUILD('koral-teal', 'Koral & Teal', 'Lembut & elegan', ['#D13A23', '#A32A18', '#14C8B0', '#07705F'], 'Kuliner dan perhotelan'),
+        window.PS_PALETTE_BUILD('magenta-cyan', 'Magenta & Cyan', 'Lembut & elegan', ['#C2185B', '#8E1146', '#22B8E8', '#0B6485'], 'Fashion dan kecantikan'),
+        window.PS_PALETTE_BUILD('biru-lime', 'Biru Langit & Lime', 'Lembut & elegan', ['#0A74C9', '#075A9C', '#B8E62E', '#4F6B00'], 'Olahraga dan komunitas'),
+        window.PS_PALETTE_BUILD('teal-oranye', 'Teal & Oranye', 'Lembut & elegan', ['#0C7C86', '#085C64', '#FF9F1C', '#9A5600'], 'Kesehatan dan pendidikan')
+      ],
       pages: { services: 'grid', blog: 'grid' },
       home: [
         { id: 'hero', variant: 'centered' },
@@ -281,16 +288,22 @@ window.PLATFORM = {
       description: 'Tegas dan kontras tinggi: hero gelap, bingkai tebal, sudut tajam, cocok untuk kesan percetakan yang kuat.',
       header: 'topbar', cardStyle: 'outlined', buttonShape: 'square',
       fonts: { heading: 'montserrat', body: 'open-sans' },
-      imageSet: 'bold',        /* ilustrasi: assets/images-bold/ (tools/recolor.py) */
-      /* Palet bawaan template (demo): biru royal + lime. Laravel: hanya nilai awal; warna klien di settings menggantikannya.
-         Kontras dihitung: putih di primary 7,4:1, teks gelap di accent 14,7:1, accentDark di atas putih 6,1:1, teks terang di atas primaryDark >= 6,0:1.
-         Lime terlalu terang untuk teks/garis kecil di atas putih: dipakai sebagai latar (teks gelap) dan di atas latar gelap. */
-      palette: {
-        primary: '#2243D6', primaryDark: '#16309E', primaryLight: '#E8ECFD', primaryTint: '#F5F7FE',
-        accent: '#C6F432', accentDark: '#4F6B00', accentTint: '#F2FDC9', onAccent: '#14110A',
-        surface: '#F5F7FE',
-        onDarkSoft: '#EEF1FE', onDarkMuted: '#D2D9FA', onDarkFaint: '#B4BFF2', overlay: '#0A1240'
-      },
+      /* Sepuluh palet (pengalih palet demo, assets/js/palette.js). Palet bawaan = pilihan awal template; ilustrasi mengikuti palet: assets/images-bold-<id>/ (tools/recolor.py).
+         Laravel: palet = warna di settings; pengalih ini hanya demo. */
+      imageSet: 'bold',
+      defaultPalette: 'biru-lime',
+      palettes: [
+        window.PS_PALETTE_BUILD('biru-lime', 'Biru Royal & Lime', 'Tegas & klasik', ['#2243D6', '#16309E', '#C6F432', '#4F6B00'], 'Percetakan yang kuat dan modern'),
+        window.PS_PALETTE_BUILD('hitam-kuning', 'Hitam & Kuning', 'Tegas & klasik', ['#1F2328', '#101317', '#FFD60A', '#6B5600'], 'Industri, konstruksi, otomotif'),
+        window.PS_PALETTE_BUILD('merah-kuning', 'Merah & Kuning', 'Tegas & klasik', ['#D00F2B', '#9E0A20', '#FFD23F', '#7A5A00'], 'Promo, spanduk, advertising'),
+        window.PS_PALETTE_BUILD('oranye-kuning', 'Oranye Tua & Kuning', 'Tegas & klasik', ['#BA4A08', '#933A05', '#FFD23F', '#7A5A00'], 'Sablon, kaos, merchandise'),
+        window.PS_PALETTE_BUILD('hijau-neon', 'Hijau & Neon', 'Tegas & klasik', ['#0B7A3E', '#07592D', '#B6FF3B', '#3F6B00'], 'Olahraga dan energi'),
+        window.PS_PALETTE_BUILD('ungu-pink', 'Ungu & Pink Neon', 'Neon & energik', ['#5B21B6', '#3F1580', '#FF3DA1', '#B30C66'], 'Musik, event, anak muda'),
+        window.PS_PALETTE_BUILD('navy-cyan', 'Navy & Cyan', 'Neon & energik', ['#0B3D91', '#072A66', '#22E0F0', '#006B78'], 'Teknologi dan digital'),
+        window.PS_PALETTE_BUILD('magenta-kuning', 'Magenta & Kuning', 'Neon & energik', ['#B0136B', '#850C50', '#FFE14D', '#7A6200'], 'Fashion dan hiburan'),
+        window.PS_PALETTE_BUILD('teal-oranye', 'Teal & Oranye', 'Neon & energik', ['#0A7F7A', '#065A56', '#FF7A1A', '#9A4000'], 'Kuliner dan wisata'),
+        window.PS_PALETTE_BUILD('abu-merah', 'Abu Arang & Merah', 'Neon & energik', ['#2B2F36', '#171A1F', '#FF3B3B', '#B3121A'], 'Otomotif dan gaming')
+      ],
       pages: { services: 'list', blog: 'list' },
       home: [
         { id: 'hero', variant: 'dark' },

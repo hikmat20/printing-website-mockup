@@ -85,3 +85,26 @@
 [data-template="modern"] .article-head { text-align: center; }
 [data-template="modern"] .article-head .meta-row { justify-content: center; }
 [data-template="modern"] .faq-page { margin-inline: auto; }
+
+/* Palet berganti-ganti (pengalih palet demo, 10 palet): teks harus terbaca di SEMUA palet.
+   - Teks warna utama di atas latar muda (--c-primary-light) memakai varian gelap.
+   - Aksen di atas permukaan gelap (footer, topbar, hero gelap) dicampur putih 60% (--c-accent-lt): aksen gelap seperti magenta,
+     koral, dan oranye tua jadi terbaca, aksen terang (kuning, lime, mint) tetap terang.
+   - Ikon aksen di atas putih memakai varian gelap (--c-accent-dark): aksen kuning/lime hampir hilang di atas putih. */
+[data-template="modern"] { --c-accent-lt: color-mix(in srgb, var(--c-accent) 40%, #fff); }
+[data-template="modern"] .tag,
+[data-template="modern"] .client-mark,
+[data-template="modern"] .nav-link-item:hover, [data-template="modern"] .nav-toggle:hover, [data-template="modern"] .has-dropdown.is-open > .nav-toggle,
+[data-template="modern"] .nav-link-item.is-active, [data-template="modern"] .nav-toggle.is-active { color: var(--c-primary-dark); }
+[data-template="modern"] .topbar .i,
+[data-template="modern"] .promo-bar .i,
+[data-template="modern"] .footer-contact .i,
+[data-template="modern"] .footer-trust .i,
+[data-template="modern"] .trust--bar .trust-item .ico,
+[data-template="modern"] .hero--dark h1 em,
+[data-template="modern"] .hero--dark .hero-badge .i,
+[data-template="modern"] .hero--dark .hero-points .i { color: var(--c-accent-lt); }
+[data-template="modern"] :is(.hero--dark, .page-head, .article-head, .site-footer, .topbar, .cta-wa--gradient) :focus-visible { outline-color: var(--c-accent-lt); }
+[data-template="modern"] .hero:not(.hero--dark) .hero-badge .i { color: var(--c-accent-dark); }
+[data-template="modern"] .cta-wa .btn-light-ghost { background: rgba(0, 0, 0, .18); }   /* teks putih di atas warna utama + lapisan putih 12% turun di bawah 4,5:1 pada beberapa palet */
+[data-template="modern"] .cta-wa--solid p { color: var(--c-on-accent); }   /* putih 82% di atas aksen magenta hanya 3,6:1 */
