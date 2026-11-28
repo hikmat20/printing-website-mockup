@@ -227,7 +227,9 @@ window.PLATFORM = {
         window.PS_PALETTE_BUILD('ungu-kuning', 'Ungu & Kuning', 'Kreatif & khusus', ['#5B3FB5', '#43298F', '#FFC21A', '#7A5600'], 'Undangan dan wedding'),
         window.PS_PALETTE_BUILD('teal-koral', 'Teal & Koral', 'Kreatif & khusus', ['#0B7079', '#085960', '#FF7A59', '#B33A1C'], 'Kartu nama dan stationery'),
         window.PS_PALETTE_BUILD('cokelat-emas', 'Cokelat & Emas', 'Kreatif & khusus', ['#6B3F1D', '#4A2A11', '#E8B04B', '#7A5206'], 'Kemasan dan kertas premium'),
-        window.PS_PALETTE_BUILD('arang-oranye', 'Arang & Oranye', 'Kreatif & khusus', ['#2F353D', '#1E2329', '#FF8A1F', '#9A4A00'], 'Sablon dan merchandise')
+        window.PS_PALETTE_BUILD('arang-oranye', 'Arang & Oranye', 'Kreatif & khusus', ['#2F353D', '#1E2329', '#FF8A1F', '#9A4A00'], 'Sablon dan merchandise'),
+        window.PS_PALETTE_BUILD('navy-pink', 'Navy & Pink', 'Kreatif & khusus', ['#173B63', '#0F2B49', '#FF6FA5', '#B3124F'], 'Cetak foto, album, dan hadiah'),
+        window.PS_PALETTE_BUILD('hijau-kuning', 'Hijau & Kuning', 'Cetak umum & kantoran', ['#0F6E3A', '#0A5028', '#FFD23F', '#6B5200'], 'Koperasi, sekolah, dan kampus')
       ],
       pages: { services: 'grid', blog: 'grid' },
       home: [
@@ -337,7 +339,9 @@ window.PLATFORM = {
         window.PS_PALETTE_BUILD('arang-kuning',  'Arang & Kuning',      'Industri, niaga & jasa',  ['#2B3138', '#1B2025', '#FFC400', '#6B5200'], 'Manufaktur, logistik, pabrik, kemasan'),
         window.PS_PALETTE_BUILD('hijau-emas',    'Hijau Hutan & Emas',  'Industri, niaga & jasa',  ['#1B5E43', '#124530', '#E3B23C', '#7A5A08'], 'Properti, perkebunan, koperasi'),
         window.PS_PALETTE_BUILD('teal-koral',    'Teal & Koral',        'Industri, niaga & jasa',  ['#0E6B72', '#094E54', '#FF7A59', '#B33A1C'], 'Rumah sakit, klinik, farmasi'),
-        window.PS_PALETTE_BUILD('indigo-oranye', 'Indigo & Oranye',     'Industri, niaga & jasa',  ['#3F2A7D', '#2D1D5C', '#FF9A3D', '#9A4E00'], 'Event organizer, agensi, sekolah swasta')
+        window.PS_PALETTE_BUILD('indigo-oranye', 'Indigo & Oranye',     'Industri, niaga & jasa',  ['#3F2A7D', '#2D1D5C', '#FF9A3D', '#9A4E00'], 'Event organizer, agensi, sekolah swasta'),
+        window.PS_PALETTE_BUILD('biru-kuning', 'Biru Korporat & Kuning', 'Korporat & instansi', ['#1B4F9C', '#123A75', '#FFC21A', '#7D5600'], 'Asuransi, leasing, pembiayaan'),
+        window.PS_PALETTE_BUILD('merah-abu', 'Merah & Abu', 'Industri, niaga & jasa', ['#B3202A', '#861820', '#C9D0D8', '#4A5560'], 'Otomotif, alat berat, energi')
       ],
       pages: { services: 'catalog', blog: 'grid' },
       home: [
@@ -374,7 +378,9 @@ window.PLATFORM = {
         window.PS_PALETTE_BUILD('magenta-emas', 'Magenta & Emas', 'Kreatif & hadiah', ['#C2185B', '#8E1146', '#FFB300', '#7A5200'], 'Souvenir dan kado'),
         window.PS_PALETTE_BUILD('ungu-oranye', 'Ungu & Oranye', 'Kreatif & hadiah', ['#5E35B1', '#45258A', '#FF9F1C', '#9A5600'], 'Merchandise dan cetak kustom'),
         window.PS_PALETTE_BUILD('teal-koral', 'Teal & Koral', 'Kreatif & hadiah', ['#0B7079', '#085960', '#FF7A59', '#B33A1C'], 'Stiker dan label'),
-        window.PS_PALETTE_BUILD('arang-kuning', 'Arang & Kuning', 'Kreatif & hadiah', ['#2B3138', '#1B2025', '#FFC400', '#6B5200'], 'Sablon dan kaos')
+        window.PS_PALETTE_BUILD('arang-kuning', 'Arang & Kuning', 'Kreatif & hadiah', ['#2B3138', '#1B2025', '#FFC400', '#6B5200'], 'Sablon dan kaos'),
+        window.PS_PALETTE_BUILD('navy-lime', 'Navy & Lime', 'Toko umum & kantor', ['#173B63', '#0F2B49', '#B8E62E', '#4F6B00'], 'Cetak online yang segar dan modern'),
+        window.PS_PALETTE_BUILD('rose-tosca', 'Rose & Tosca', 'Kreatif & hadiah', ['#B0215F', '#861748', '#2EC4B6', '#0B6B63'], 'Kado, ulang tahun, dan undangan')
       ],
       pages: { services: 'grid', blog: 'grid' },
       home: [
@@ -441,7 +447,9 @@ window.PLATFORM = {
         window.PS_PALETTE_BUILD('hijau-emas', 'Hijau Hutan & Emas', 'Industri & institusi', ['#1B5E43', '#124530', '#E3B23C', '#7A5A08'], 'Agribisnis, properti, lingkungan'),
         window.PS_PALETTE_BUILD('maroon-emas', 'Maroon & Emas', 'Industri & institusi', ['#8A1C2B', '#651320', '#E8B04B', '#7A5206'], 'Yayasan, kampus, hukum'),
         window.PS_PALETTE_BUILD('arang-kuning', 'Arang & Kuning', 'Industri & institusi', ['#2B3138', '#1B2025', '#FFC400', '#6B5200'], 'Manufaktur dan konstruksi'),
-        window.PS_PALETTE_BUILD('cokelat-emas', 'Cokelat & Emas', 'Industri & institusi', ['#6B3F1D', '#4A2A11', '#E8B04B', '#7A5206'], 'Perhotelan, furnitur, kriya')
+        window.PS_PALETTE_BUILD('cokelat-emas', 'Cokelat & Emas', 'Industri & institusi', ['#6B3F1D', '#4A2A11', '#E8B04B', '#7A5206'], 'Perhotelan, furnitur, kriya'),
+        window.PS_PALETTE_BUILD('teal-kuning', 'Teal & Kuning', 'Perusahaan & jasa', ['#0B6E6E', '#074F4F', '#FFD23F', '#6B5200'], 'Logistik dan transportasi'),
+        window.PS_PALETTE_BUILD('laut-hijau', 'Biru Laut & Hijau', 'Industri & institusi', ['#0C5A8A', '#08425F', '#7BD389', '#2F6B24'], 'Kesehatan, farmasi, pendidikan')
       ],
       pages: { services: 'rows' },
       home: [
@@ -474,7 +482,9 @@ window.PLATFORM = {
         window.PS_PALETTE_BUILD('lilac-pink', 'Lilac & Pink', 'Gaya khusus', ['#6A3FB5', '#4E2A8C', '#F5A3C7', '#A3185F'], 'Fashion, kado, merchandise'),
         window.PS_PALETTE_BUILD('biru-koral', 'Biru Es & Koral', 'Gaya khusus', ['#1F6FB5', '#16508A', '#FF8A7A', '#B33A2B'], 'Stationery modern'),
         window.PS_PALETTE_BUILD('hitam-emas', 'Hitam & Emas', 'Gaya khusus', ['#1F2328', '#12151A', '#D4A93A', '#7A5A08'], 'Premium dan eksklusif'),
-        window.PS_PALETTE_BUILD('teal-mint', 'Teal & Mint', 'Gaya khusus', ['#0F766E', '#0A5650', '#7EE0C3', '#0A6B50'], 'Kesehatan dan organik')
+        window.PS_PALETTE_BUILD('teal-mint', 'Teal & Mint', 'Gaya khusus', ['#0F766E', '#0A5650', '#7EE0C3', '#0A6B50'], 'Kesehatan dan organik'),
+        window.PS_PALETTE_BUILD('anggur-rose', 'Anggur & Rose', 'Butik umum', ['#6B1F4D', '#4C1236', '#E8A598', '#8A3A2B'], 'Perhiasan dan hadiah premium'),
+        window.PS_PALETTE_BUILD('ungu-lime', 'Ungu & Lime', 'Gaya khusus', ['#5A2BB0', '#421E85', '#C6F432', '#4F6B00'], 'Streetwear, gaming, komunitas')
       ],
       pages: { services: 'market', service: 'gallery', checkout: 'focus', blog: 'grid' },
       home: [
